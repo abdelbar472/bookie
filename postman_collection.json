@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "Microservices Auth + User",
+    "description": "Auth Service (HTTP :8001) + User Service (HTTP :8002)\n\nFlow:\n1. Register  → POST /api/v1/register  (Auth)\n2. Login     → POST /api/v1/login     (Auth)  – saves tokens automatically\n3. Me        → GET  /api/v1/me        (User)  – token auto-attached\n4. Refresh   → POST /api/v1/refresh   (Auth or User → gRPC)\n5. Logout    → POST /api/v1/logout    (Auth)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "auth_url",      "value": "http://localhost:8001/api/v1" },
+    { "key": "user_url",      "value": "http://localhost:8002/api/v1" },
+    { "key": "access_token",  "value": "" },
+    { "key": "refresh_token", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// ================================================================",
+          "// Collection Pre-request Script – runs before EVERY request.",
+          "// Skips public endpoints. Attaches Bearer token automatically.",
+          "// Auto-refreshes via Auth service /refresh when token is missing.",
+          "// ================================================================",
+          "",
+          "const PUBLIC = ['/login', '/register', '/health', '/refresh'];",
+          "const url = pm.request.url.toString();",
+          "if (PUBLIC.some(p => url.includes(p))) return;",
+          "",
+          "const accessToken  = pm.collectionVariables.get('access_token');",
+          "const refreshToken = pm.collectionVariables.get('refresh_token');",
+          "const authUrl      = pm.collectionVariables.get('auth_url');",
+          "",
+          "if (accessToken) {",
+          "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + accessToken });",
+          "    return;",
+          "}",
+          "",
+          "if (!refreshToken) {",
+          "    console.log('❌ No tokens – run Login first!');",
+          "    return;",
+          "}",
+          "",
+          "console.log('🔄 No access_token – auto-refreshing via Auth service…');",
+          "pm.sendRequest({",
+          "    url: authUrl + '/refresh',",
+          "    method: 'POST',",
+          "    header: { 'Content-Type': 'application/json' },",
+          "    body: { mode: 'raw', raw: JSON.stringify({ refresh_token: refreshToken }) }",
+          "}, (err, res) => {",
+          "    if (err || res.code !== 200) {",
+          "        console.log('❌ Refresh failed – run Login again.', err || res.json());",
+          "        pm.collectionVariables.set('access_token', '');",
+          "        pm.collectionVariables.set('refresh_token', '');",
+          "        return;",
+          "    }",
+          "    const j = res.json();",
+          "    pm.collectionVariables.set('access_token',  j.access_token);",
+          "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
+          "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + j.access_token });",
+          "    console.log('✅ Token refreshed automatically!');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth Service (:8001)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{auth_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{auth_url}}/register",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"alice@example.com\",\n  \"username\": \"alice\",\n  \"full_name\": \"Alice Smith\",\n  \"password\": \"secret123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) console.log('✅ Registered:', pm.response.json().username);"
+          ] } }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{auth_url}}/login",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"secret123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    pm.collectionVariables.set('access_token',  j.access_token);",
+            "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
+            "    console.log('✅ Logged in – tokens saved to collection variables');",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{auth_url}}/refresh",
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    pm.collectionVariables.set('access_token',  j.access_token);",
+            "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
+            "    console.log('✅ Tokens rotated');",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{auth_url}}/verify"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Token valid for:', pm.response.json().username);"
+          ] } }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{auth_url}}/logout",
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    pm.collectionVariables.set('access_token', '');",
+            "    pm.collectionVariables.set('refresh_token', '');",
+            "    console.log('✅ Logged out – tokens cleared');",
+            "}"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "User Service (:8002)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{user_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Get My Profile",
+          "request": { "method": "GET", "url": "{{user_url}}/me" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    ['id','username','email','is_active'].forEach(f =>",
+            "        pm.test('Has ' + f, () => pm.expect(j).to.have.property(f)));",
+            "    console.log('✅ Profile:', j.username, '| bio:', j.bio);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{user_url}}/me",
+            "body": { "mode": "raw", "raw": "{\n  \"bio\": \"Hello, I am Alice!\",\n  \"avatar_url\": \"https://example.com/alice.png\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Profile updated:', pm.response.json().bio);"
+          ] } }]
+        },
+        {
+          "name": "Refresh Token (User→Auth gRPC)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{user_url}}/refresh",
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    pm.collectionVariables.set('access_token',  j.access_token);",
+            "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
+            "    console.log('✅ Tokens rotated via User→Auth gRPC');",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Get User by ID",
+          "request": { "method": "GET", "url": "{{user_url}}/users/1" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    }
+  ]
+}

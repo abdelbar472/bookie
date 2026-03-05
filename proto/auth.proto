@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package auth;
+
+// ──────────────────────────────────────────────
+//  AuthService  –  exposed by the Auth service
+//  consumed by any downstream micro-service
+// ──────────────────────────────────────────────
+service AuthService {
+  // Validate an access-token; returns the user payload
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+
+  // Issue a fresh access-token given a valid refresh-token
+  rpc RefreshToken  (RefreshTokenRequest)  returns (RefreshTokenResponse);
+
+  // Get a user by id (for downstream services that need profile data)
+  rpc GetUser       (GetUserRequest)       returns (UserPayload);
+}
+
+// ── request / response messages ───────────────
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  bool        valid      = 1;
+  string      error      = 2;   // empty on success
+  UserPayload user       = 3;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token  = 1;
+  string refresh_token = 2;   // rotated
+  string error         = 3;
+}
+
+message GetUserRequest {
+  int32 user_id = 1;
+}
+
+message UserPayload {
+  int32  id           = 1;
+  string username     = 2;
+  string email        = 3;
+  string full_name    = 4;
+  bool   is_active    = 5;
+  bool   is_superuser = 6;
+}
+
