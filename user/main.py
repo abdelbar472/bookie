@@ -8,6 +8,7 @@ from .config import settings
 from .database import create_db_and_tables
 from .routers import router
 from .grpc_client import close_grpc_channel
+from .follow_grpc_client import close_follow_channel
 
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
@@ -26,9 +27,16 @@ async def lifespan(app: FastAPI):
         settings.AUTH_GRPC_HOST,
         settings.AUTH_GRPC_PORT,
     )
+    logger.info(
+        "🔌 Will connect to Follow gRPC at %s:%s",
+        settings.FOLLOW_GRPC_HOST,
+        settings.FOLLOW_GRPC_PORT,
+    )
     yield
-    logger.info("🛑 Closing gRPC channel…")
+    logger.info("🛑 Closing Auth gRPC channel…")
     await close_grpc_channel()
+    logger.info("🛑 Closing Follow gRPC channel…")
+    await close_follow_channel()
     logger.info("🛑 User service shutdown complete")
 
 

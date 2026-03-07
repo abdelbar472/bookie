@@ -1,11 +1,24 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_session
-from .grpc_client import validate_token, refresh_token as grpc_refresh, get_user
-from .schemas import ProfileResponse, ProfileUpdate, TokenRefreshRequest, TokenResponse, UserPayload
+from .grpc_client import (
+    validate_token,
+    refresh_token as grpc_refresh,
+    get_user_by_username as grpc_get_user_by_username,
+)
+from .follow_grpc_client import (
+    get_follow_stats as grpc_follow_stats,
+    get_followers as grpc_get_followers,
+    get_following as grpc_get_following,
+    is_following as grpc_is_following,
+)
+from .schemas import (
+    ProfileResponse, ProfileUpdate, TokenRefreshRequest, TokenResponse,
+    UserPayload, FollowStatsResponse, FollowListResponse,
+)
 from .services import get_or_create_profile, update_profile
 
 router = APIRouter()
@@ -112,23 +125,23 @@ async def refresh(data: TokenRefreshRequest):
     return TokenResponse(access_token=resp.access_token, refresh_token=resp.refresh_token)
 
 
-@router.get("/users/{user_id}", response_model=ProfileResponse)
-async def get_user_by_id(
-    user_id: int,
+@router.get("/users/{username}", response_model=ProfileResponse)
+async def get_user_by_username_route(
+    username: str,
     current_user: UserPayload = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """
-    Fetch any user's profile by id.
+    Fetch any user's profile by username.
     Auth data is fetched from Auth service via gRPC.
     Profile data is from this service's local DB.
     """
     try:
-        auth_user = await get_user(user_id)
+        auth_user = await grpc_get_user_by_username(username)
     except Exception:
         raise HTTPException(status_code=404, detail="User not found")
 
-    profile = await get_or_create_profile(session, user_id)
+    profile = await get_or_create_profile(session, auth_user.id)
     return ProfileResponse(
         id=auth_user.id,
         username=auth_user.username,
@@ -142,3 +155,93 @@ async def get_user_by_id(
         updated_at=profile.updated_at,
     )
 
+
+# ── Follow endpoints (proxied to Follow service via gRPC) ─────────────────────
+
+@router.get("/users/{user_id}/follow-stats", response_model=FollowStatsResponse)
+async def follow_stats(
+    user_id: int,
+    _: UserPayload = Depends(get_current_user),
+):
+    """
+    Get follower / following counts for any user.
+    Calls the Follow service via internal gRPC.
+    """
+    try:
+        resp = await grpc_follow_stats(user_id)
+    except Exception as exc:
+        logger.error("Follow gRPC error (GetFollowStats): %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Follow service unavailable",
+        )
+    return FollowStatsResponse(
+        user_id=resp.user_id,
+        followers_count=resp.followers_count,
+        following_count=resp.following_count,
+    )
+
+
+@router.get("/users/{user_id}/followers", response_model=FollowListResponse)
+async def list_followers(
+    user_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    _: UserPayload = Depends(get_current_user),
+):
+    """
+    Paginated list of follower user_ids.
+    Calls the Follow service via internal gRPC.
+    """
+    try:
+        resp = await grpc_get_followers(user_id, skip=skip, limit=limit)
+    except Exception as exc:
+        logger.error("Follow gRPC error (GetFollowers): %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Follow service unavailable",
+        )
+    return FollowListResponse(user_ids=list(resp.user_ids), total=resp.total)
+
+
+@router.get("/users/{user_id}/following", response_model=FollowListResponse)
+async def list_following(
+    user_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    _: UserPayload = Depends(get_current_user),
+):
+    """
+    Paginated list of user_ids that user_id is following.
+    Calls the Follow service via internal gRPC.
+    """
+    try:
+        resp = await grpc_get_following(user_id, skip=skip, limit=limit)
+    except Exception as exc:
+        logger.error("Follow gRPC error (GetFollowing): %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Follow service unavailable",
+        )
+    return FollowListResponse(user_ids=list(resp.user_ids), total=resp.total)
+
+
+@router.get("/users/{user_id}/is-following/{followee_id}")
+async def check_is_following(
+    user_id: int,
+    followee_id: int,
+    _: UserPayload = Depends(get_current_user),
+):
+    """
+    Check whether user_id follows followee_id.
+    Calls the Follow service via internal gRPC.
+    """
+    try:
+        result = await grpc_is_following(user_id, followee_id)
+    except Exception as exc:
+        logger.error("Follow gRPC error (IsFollowing): %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Follow service unavailable",
+        )
+    return {"follower_id": user_id, "followee_id": followee_id, "following": result}

@@ -21,7 +21,7 @@ from .services import (                             # noqa: E402
     decode_access_token, create_access_token,
     create_refresh_token, get_refresh_token,
     revoke_refresh_token, store_refresh_token,
-    get_user_by_id,
+    get_user_by_id, get_user_by_username,
 )
 from .database import AsyncSessionLocal             # noqa: E402
 
@@ -79,6 +79,23 @@ class AuthServicer(auth_pb2_grpc.AuthServiceServicer):
     async def GetUser(self, request, context):
         async with AsyncSessionLocal() as session:
             user = await get_user_by_id(session, request.user_id)
+
+        if user is None:
+            await context.abort(grpc.StatusCode.NOT_FOUND, "user not found")
+
+        return auth_pb2.UserPayload(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            full_name=user.full_name or "",
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+        )
+
+    # ── GetUserByUsername ──────────────────────────────────────────────────
+    async def GetUserByUsername(self, request, context):
+        async with AsyncSessionLocal() as session:
+            user = await get_user_by_username(session, request.username)
 
         if user is None:
             await context.abort(grpc.StatusCode.NOT_FOUND, "user not found")

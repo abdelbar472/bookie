@@ -59,3 +59,9 @@ async def get_user(user_id: int) -> auth_pb2.UserPayload:
     stub = get_auth_stub()
     return await stub.GetUser(auth_pb2.GetUserRequest(user_id=user_id))
 
+
+async def get_user_by_username(username: str) -> auth_pb2.UserPayload:
+    stub = get_auth_stub()
+    return await stub.GetUserByUsername(auth_pb2.GetUserByUsernameRequest(username=username))
+
+

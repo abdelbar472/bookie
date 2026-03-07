@@ -14,7 +14,10 @@ service AuthService {
   rpc RefreshToken  (RefreshTokenRequest)  returns (RefreshTokenResponse);
 
   // Get a user by id (for downstream services that need profile data)
-  rpc GetUser       (GetUserRequest)       returns (UserPayload);
+  rpc GetUser           (GetUserRequest)           returns (UserPayload);
+
+  // Get a user by username
+  rpc GetUserByUsername (GetUserByUsernameRequest) returns (UserPayload);
 }
 
 // ── request / response messages ───────────────
@@ -41,6 +44,10 @@ message RefreshTokenResponse {
 
 message GetUserRequest {
   int32 user_id = 1;
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
 }
 
 message UserPayload {

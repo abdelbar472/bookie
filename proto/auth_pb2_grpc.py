@@ -3,7 +3,10 @@
 import grpc
 import warnings
 
-from proto import auth_pb2 as auth__pb2
+try:
+    import auth_pb2 as auth__pb2
+except ImportError:
+    from proto import auth_pb2 as auth__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -53,6 +56,11 @@ class AuthServiceStub(object):
                 request_serializer=auth__pb2.GetUserRequest.SerializeToString,
                 response_deserializer=auth__pb2.UserPayload.FromString,
                 _registered_method=True)
+        self.GetUserByUsername = channel.unary_unary(
+                '/auth.AuthService/GetUserByUsername',
+                request_serializer=auth__pb2.GetUserByUsernameRequest.SerializeToString,
+                response_deserializer=auth__pb2.UserPayload.FromString,
+                _registered_method=True)
 
 
 class AuthServiceServicer(object):
@@ -83,6 +91,13 @@ class AuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetUserByUsername(self, request, context):
+        """Get a user by username
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -99,6 +114,11 @@ def add_AuthServiceServicer_to_server(servicer, server):
             'GetUser': grpc.unary_unary_rpc_method_handler(
                     servicer.GetUser,
                     request_deserializer=auth__pb2.GetUserRequest.FromString,
+                    response_serializer=auth__pb2.UserPayload.SerializeToString,
+            ),
+            'GetUserByUsername': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUserByUsername,
+                    request_deserializer=auth__pb2.GetUserByUsernameRequest.FromString,
                     response_serializer=auth__pb2.UserPayload.SerializeToString,
             ),
     }
@@ -186,6 +206,33 @@ class AuthService(object):
             target,
             '/auth.AuthService/GetUser',
             auth__pb2.GetUserRequest.SerializeToString,
+            auth__pb2.UserPayload.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetUserByUsername(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auth.AuthService/GetUserByUsername',
+            auth__pb2.GetUserByUsernameRequest.SerializeToString,
             auth__pb2.UserPayload.FromString,
             options,
             channel_credentials,

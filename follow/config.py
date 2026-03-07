@@ -12,16 +12,19 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///./user_service.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./follow_service.db"
     LOG_LEVEL: str = "INFO"
 
-    # gRPC address of the Auth service
+    # gRPC – Auth service (for token validation)
     AUTH_GRPC_HOST: str = "localhost"
     AUTH_GRPC_PORT: int = 50051
 
-    # gRPC address of the Follow service
+    # gRPC – this service exposes a gRPC server
+    GRPC_HOST: str = "0.0.0.0"       # bind address
+    GRPC_PORT: int = 50052
+
+    # gRPC – address other services use to reach THIS service
     FOLLOW_GRPC_HOST: str = "localhost"
-    FOLLOW_GRPC_PORT: int = 50052
 
 
 settings = Settings()

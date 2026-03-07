@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -42,4 +42,18 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class FollowStatsResponse(BaseModel):
+    """Follower / following counts for a user."""
+    user_id: int
+    followers_count: int
+    following_count: int
+
+
+class FollowListResponse(BaseModel):
+    """Paginated list of user_ids."""
+    user_ids: List[int]
+    total: int
+
 

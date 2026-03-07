@@ -1,14 +1,17 @@
 {
   "info": {
-    "name": "Microservices Auth + User",
-    "description": "Auth Service (HTTP :8001) + User Service (HTTP :8002)\n\nFlow:\n1. Register  → POST /api/v1/register  (Auth)\n2. Login     → POST /api/v1/login     (Auth)  – saves tokens automatically\n3. Me        → GET  /api/v1/me        (User)  – token auto-attached\n4. Refresh   → POST /api/v1/refresh   (Auth or User → gRPC)\n5. Logout    → POST /api/v1/logout    (Auth)",
+    "name": "Microservices – Auth + User + Follow",
+    "description": "Auth Service (HTTP :8001) · User Service (HTTP :8002) · Follow Service (HTTP :8003)\n\nFlow:\n1. Register Alice  → POST /api/v1/register  (Auth)\n2. Register Bob    → POST /api/v1/register  (Auth)\n3. Login Alice     → POST /api/v1/login     (Auth) – tokens saved automatically\n4. Follow Bob      → POST /api/v1/follow/{bob_id}   (Follow) – Bearer auto-attached\n5. Check stats     → GET  /api/v1/follow/users/{id}/stats\n6. User service queries Follow via gRPC → GET /api/v1/users/{id}/follow-stats",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "auth_url",      "value": "http://localhost:8001/api/v1" },
-    { "key": "user_url",      "value": "http://localhost:8002/api/v1" },
+    { "key": "auth_url",      "value": "http://127.0.0.1:8001/api/v1" },
+    { "key": "user_url",      "value": "http://127.0.0.1:8002/api/v1" },
+    { "key": "follow_url",    "value": "http://127.0.0.1:8003/api/v1" },
     { "key": "access_token",  "value": "" },
-    { "key": "refresh_token", "value": "" }
+    { "key": "refresh_token", "value": "" },
+    { "key": "my_user_id",    "value": "" },
+    { "key": "other_user_id", "value": "2" }
   ],
   "event": [
     {
@@ -73,7 +76,7 @@
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
         },
         {
-          "name": "Register",
+          "name": "Register (Alice)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -86,7 +89,24 @@
           ] } }]
         },
         {
-          "name": "Login",
+          "name": "Register (Bob)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{auth_url}}/register",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"bob@example.com\",\n  \"username\": \"bob\",\n  \"full_name\": \"Bob Jones\",\n  \"password\": \"secret123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) {",
+            "    const j = pm.response.json();",
+            "    pm.collectionVariables.set('other_user_id', String(j.id));",
+            "    console.log('✅ Registered Bob id=' + j.id);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Login (Alice)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -99,7 +119,7 @@
             "    const j = pm.response.json();",
             "    pm.collectionVariables.set('access_token',  j.access_token);",
             "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
-            "    console.log('✅ Logged in – tokens saved to collection variables');",
+            "    console.log('✅ Logged in as Alice – tokens saved');",
             "}"
           ] } }]
         },
@@ -170,9 +190,10 @@
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
             "if (pm.response.code === 200) {",
             "    const j = pm.response.json();",
+            "    pm.collectionVariables.set('my_user_id', String(j.id));",
             "    ['id','username','email','is_active'].forEach(f =>",
             "        pm.test('Has ' + f, () => pm.expect(j).to.have.property(f)));",
-            "    console.log('✅ Profile:', j.username, '| bio:', j.bio);",
+            "    console.log('✅ Profile:', j.username, '| id:', j.id, '| bio:', j.bio);",
             "}"
           ] } }]
         },
@@ -208,9 +229,138 @@
           ] } }]
         },
         {
-          "name": "Get User by ID",
-          "request": { "method": "GET", "url": "{{user_url}}/users/1" },
+          "name": "Get User by Username",
+          "request": { "method": "GET", "url": "{{user_url}}/users/bob" },
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Follow Stats (via User→Follow gRPC)",
+          "request": { "method": "GET", "url": "{{user_url}}/users/{{other_user_id}}/follow-stats" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Follow stats – followers:', j.followers_count, '| following:', j.following_count);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "List Followers (via User→Follow gRPC)",
+          "request": { "method": "GET", "url": "{{user_url}}/users/{{other_user_id}}/followers?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Followers:', pm.response.json());"
+          ] } }]
+        },
+        {
+          "name": "List Following (via User→Follow gRPC)",
+          "request": { "method": "GET", "url": "{{user_url}}/users/{{other_user_id}}/following?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Following:', pm.response.json());"
+          ] } }]
+        },
+        {
+          "name": "Is Following? (via User→Follow gRPC)",
+          "request": { "method": "GET", "url": "{{user_url}}/users/{{my_user_id}}/is-following/{{other_user_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Is following:', j.following);",
+            "}"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "Follow Service (:8003)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{follow_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Follow User",
+          "request": {
+            "method": "POST",
+            "url": "{{follow_url}}/follow/{{other_user_id}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Now following user', j.followee_id, '| follower_id:', j.follower_id);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Check Follow",
+          "request": {
+            "method": "GET",
+            "url": "{{follow_url}}/follow/check/{{other_user_id}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Following:', j.following);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "List Followers",
+          "request": {
+            "method": "GET",
+            "url": "{{follow_url}}/follow/users/{{other_user_id}}/followers?skip=0&limit=20"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Followers total:', j.total, '| items:', j.items.length);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "List Following",
+          "request": {
+            "method": "GET",
+            "url": "{{follow_url}}/follow/users/{{my_user_id}}/following?skip=0&limit=20"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Following total:', j.total, '| items:', j.items.length);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Follow Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{follow_url}}/follow/users/{{other_user_id}}/stats"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    console.log('✅ Stats – followers:', j.followers_count, '| following:', j.following_count);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Unfollow User",
+          "request": {
+            "method": "DELETE",
+            "url": "{{follow_url}}/follow/{{other_user_id}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('204 No Content', () => pm.response.to.have.status(204));",
+            "if (pm.response.code === 204) console.log('✅ Unfollowed user', pm.collectionVariables.get('other_user_id'));"
+          ] } }]
         }
       ]
     }

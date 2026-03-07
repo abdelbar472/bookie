@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nauth.proto\x12\x04\x61uth\",\n\x14ValidateTokenRequest\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\"V\n\x15ValidateTokenResponse\x12\r\n\x05valid\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x1f\n\x04user\x18\x03 \x01(\x0b\x32\x11.auth.UserPayload\",\n\x13RefreshTokenRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t\"R\n\x14RefreshTokenResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\r\n\x05\x65rror\x18\x03 \x01(\t\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\"v\n\x0bUserPayload\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x11\n\tfull_name\x18\x04 \x01(\t\x12\x11\n\tis_active\x18\x05 \x01(\x08\x12\x14\n\x0cis_superuser\x18\x06 \x01(\x08\x32\xd2\x01\n\x0b\x41uthService\x12H\n\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponse\x12\x45\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x12\x32\n\x07GetUser\x12\x14.auth.GetUserRequest\x1a\x11.auth.UserPayloadb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nauth.proto\x12\x04\x61uth\",\n\x14ValidateTokenRequest\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\"V\n\x15ValidateTokenResponse\x12\r\n\x05valid\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x1f\n\x04user\x18\x03 \x01(\x0b\x32\x11.auth.UserPayload\",\n\x13RefreshTokenRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t\"R\n\x14RefreshTokenResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\r\n\x05\x65rror\x18\x03 \x01(\t\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\",\n\x18GetUserByUsernameRequest\x12\x10\n\x08username\x18\x01 \x01(\t\"v\n\x0bUserPayload\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x11\n\tfull_name\x18\x04 \x01(\t\x12\x11\n\tis_active\x18\x05 \x01(\x08\x12\x14\n\x0cis_superuser\x18\x06 \x01(\x08\x32\x9a\x02\n\x0b\x41uthService\x12H\n\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponse\x12\x45\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x12\x32\n\x07GetUser\x12\x14.auth.GetUserRequest\x1a\x11.auth.UserPayload\x12\x46\n\x11GetUserByUsername\x12\x1e.auth.GetUserByUsernameRequest\x1a\x11.auth.UserPayloadb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -41,8 +41,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_REFRESHTOKENRESPONSE']._serialized_end=282
   _globals['_GETUSERREQUEST']._serialized_start=284
   _globals['_GETUSERREQUEST']._serialized_end=317
-  _globals['_USERPAYLOAD']._serialized_start=319
-  _globals['_USERPAYLOAD']._serialized_end=437
-  _globals['_AUTHSERVICE']._serialized_start=440
-  _globals['_AUTHSERVICE']._serialized_end=650
+  _globals['_GETUSERBYUSERNAMEREQUEST']._serialized_start=319
+  _globals['_GETUSERBYUSERNAMEREQUEST']._serialized_end=363
+  _globals['_USERPAYLOAD']._serialized_start=365
+  _globals['_USERPAYLOAD']._serialized_end=483
+  _globals['_AUTHSERVICE']._serialized_start=486
+  _globals['_AUTHSERVICE']._serialized_end=768
 # @@protoc_insertion_point(module_scope)
