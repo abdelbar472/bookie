@@ -51,10 +51,10 @@ app = FastAPI(
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     t0 = time.time()
-    print(f"→ {request.method} {request.url.path} from {request.client.host if request.client else '?'}", flush=True)
+    print(f">> {request.method} {request.url.path} from {request.client.host if request.client else '?'}", flush=True)
     response = await call_next(request)
     elapsed = time.time() - t0
-    print(f"← {request.method} {request.url.path} - {response.status_code} ({elapsed:.3f}s)", flush=True)
+    print(f"<< {request.method} {request.url.path} - {response.status_code} ({elapsed:.3f}s)", flush=True)
     return response
 
 

@@ -1,0 +1,5 @@
+book ( esbn,tile,author,year )
+published_by ( esbn, publisher )
+publisher ( name, location , year_founded [authers].[books)
+authers ( name, country, year_born, year_died, books [book] , awards [award] , type_of_writer )
+award ( name, year, category, country )

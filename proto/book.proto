@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package book;
+
+// ──────────────────────────────────────────────────────────
+//  BookService  –  exposed by the Book service
+//  consumed by any downstream micro-service
+// ──────────────────────────────────────────────────────────
+service BookService {
+  // Get a book by ISBN
+  rpc GetBook          (GetBookRequest)         returns (BookPayload);
+
+  // Get all books by an author id
+  rpc GetBooksByAuthor (GetBooksByAuthorRequest) returns (BookListResponse);
+
+  // Search books by title keyword
+  rpc SearchBooks      (SearchBooksRequest)      returns (BookListResponse);
+
+  // Get an author by id
+  rpc GetAuthor        (GetAuthorRequest)        returns (AuthorPayload);
+
+  // Get a publisher by name
+  rpc GetPublisher     (GetPublisherRequest)     returns (PublisherPayload);
+}
+
+// ── messages ───────────────────────────────────────────────
+
+message GetBookRequest {
+  string isbn = 1;
+}
+
+message GetBooksByAuthorRequest {
+  int32 author_id = 1;
+  int32 skip      = 2;
+  int32 limit     = 3;
+}
+
+message SearchBooksRequest {
+  string query = 1;
+  int32  skip  = 2;
+  int32  limit = 3;
+}
+
+message GetAuthorRequest {
+  int32 author_id = 1;
+}
+
+message GetPublisherRequest {
+  string name = 1;
+}
+
+message BookPayload {
+  string isbn          = 1;
+  string title         = 2;
+  int32  year          = 3;
+  int32  author_id     = 4;
+  string author_name   = 5;
+  string publisher     = 6;
+}
+
+message AuthorPayload {
+  int32  id              = 1;
+  string name            = 2;
+  string country         = 3;
+  int32  year_born       = 4;
+  int32  year_died       = 5;
+  string type_of_writer  = 6;
+}
+
+message PublisherPayload {
+  string name         = 1;
+  string location     = 2;
+  int32  year_founded = 3;
+}
+
+message BookListResponse {
+  repeated BookPayload books = 1;
+  int32                total = 2;
+}
+

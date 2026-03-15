@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Follow service startup – creating DB tables…")
+    logger.info("🚀 Book service startup – creating DB tables…")
     await create_db_and_tables()
     logger.info("✅ DB tables ready")
 
@@ -30,26 +30,24 @@ async def lifespan(app: FastAPI):
     )
 
     grpc_server = await serve_grpc(host=settings.GRPC_HOST, port=settings.GRPC_PORT)
-    logger.info(
-        "🎯 Follow service ready  HTTP :8003  gRPC :%s",
-        settings.GRPC_PORT,
-    )
+    logger.info("🎯 Book service ready  HTTP :8004  gRPC :%s", settings.GRPC_PORT)
 
     yield
 
-    logger.info("🛑 Stopping Follow gRPC server…")
+    logger.info("🛑 Stopping Book gRPC server…")
     await grpc_server.stop(grace=5)
     logger.info("🛑 Closing Auth gRPC channel…")
     await close_auth_channel()
-    logger.info("🛑 Follow service shutdown complete")
+    logger.info("🛑 Book service shutdown complete")
 
 
 app = FastAPI(
-    title="Follow Service",
+    title="Book Service",
     description=(
-        "Manages follow relationships between users.\n\n"
-        "- **HTTP** – REST endpoints for follow/unfollow/list (authenticated via gRPC → Auth).\n"
-        "- **gRPC** – internal FollowService for other micro-services."
+        "Manages the book catalogue (books, authors, publishers, awards).\n\n"
+        "- **HTTP** – Public read endpoints + Internal write endpoints (require Bearer token).\n"
+        "- **gRPC** – Internal BookService for other micro-services.\n\n"
+        "Write endpoints are prefixed with `/internal/` and require a valid JWT."
     ),
     version="1.0.0",
     lifespan=lifespan,

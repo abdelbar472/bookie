@@ -74,7 +74,7 @@ class FollowServicer(follow_pb2_grpc.FollowServiceServicer):
         )
 
 
-async def serve_grpc(host: str = "0.0.0.0", port: int = 50052):
+async def serve_grpc(host: str = "127.0.0.1", port: int = 50052):
     server = grpc.aio.server()
     follow_pb2_grpc.add_FollowServiceServicer_to_server(FollowServicer(), server)
     listen_addr = f"{host}:{port}"
