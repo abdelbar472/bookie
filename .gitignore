@@ -5,3 +5,17 @@
 
 # Ignore .env files
 *.env
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Also good to ignore common dev artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.log
