@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Microservices – Auth + User + Follow + Book",
-    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004)\n\nFlow:\n1. Register Alice & Bob  (Auth)\n2. Login Alice           (Auth) – tokens saved automatically\n3. Follow Bob            (Follow)\n4. Add publisher/author/book  (Book /internal/* – requires Bearer)\n5. Browse books          (Book – public read, no auth needed)",
+    "name": "Microservices - Auth + User + Follow + Book + Social",
+    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004) · Social (:8005)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Like + rate + review + shelf (Social)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -9,6 +9,7 @@
     { "key": "user_url",      "value": "http://127.0.0.1:8002/api/v1" },
     { "key": "follow_url",    "value": "http://127.0.0.1:8003/api/v1" },
     { "key": "book_url",      "value": "http://127.0.0.1:8004/api/v1" },
+    { "key": "social_url",    "value": "http://127.0.0.1:8005/api/v1" },
     { "key": "access_token",  "value": "" },
     { "key": "refresh_token", "value": "" },
     { "key": "my_user_id",    "value": "" },
@@ -16,7 +17,10 @@
     { "key": "author_id",     "value": "" },
     { "key": "publisher_id",  "value": "" },
     { "key": "award_id",      "value": "" },
-    { "key": "book_isbn",     "value": "" }
+    { "key": "book_isbn",     "value": "" },
+    { "key": "shelf_id",      "value": "" },
+    { "key": "review_id",     "value": "" },
+    { "key": "reply_id",      "value": "" }
   ],
   "event": [
     {
@@ -524,13 +528,118 @@
               ] } }]
             },
             {
+              "name": "Get Publisher by Name",
+              "request": { "method": "GET", "url": "{{book_url}}/publishers/Penguin%20Books" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ Publisher:', pm.response.json().name);"
+              ] } }]
+            },
+            {
               "name": "List Awards",
               "request": { "method": "GET", "url": "{{book_url}}/awards" },
               "event": [{ "listen": "test", "script": { "exec": [
                 "pm.test('200 OK', () => pm.response.to.have.status(200));"
               ] } }]
+            },
+            {
+              "name": "Get Award by ID",
+              "request": { "method": "GET", "url": "{{book_url}}/awards/{{award_id}}" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ Award:', pm.response.json().name);"
+              ] } }]
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Social Service (:8005)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{social_url}}/social/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Like Book",
+          "request": { "method": "POST", "url": "{{social_url}}/social/likes/{{book_isbn}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Rate Book 4.5",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{social_url}}/social/ratings/{{book_isbn}}",
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 4.5\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{social_url}}/social/reviews",
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"{{book_isbn}}\",\n  \"title\": \"Great read\",\n  \"content\": \"Strong dystopian story with timeless themes.\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) pm.collectionVariables.set('review_id', String(pm.response.json().id));"
+          ] } }]
+        },
+        {
+          "name": "Reply to Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{social_url}}/social/reviews/{{review_id}}/replies",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"I agree\",\n  \"content\": \"Totally agree with this review.\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) pm.collectionVariables.set('reply_id', String(pm.response.json().id));"
+          ] } }]
+        },
+        {
+          "name": "Like Review",
+          "request": { "method": "POST", "url": "{{social_url}}/social/reviews/{{review_id}}/likes" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "List Replies",
+          "request": { "method": "GET", "url": "{{social_url}}/social/reviews/{{review_id}}/replies?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Create Shelf",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{social_url}}/social/shelves",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Favorites\",\n  \"visibility\": \"public\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "if (pm.response.code === 201) pm.collectionVariables.set('shelf_id', String(pm.response.json().id));"
+          ] } }]
+        },
+        {
+          "name": "Add Book to Shelf",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{social_url}}/social/shelves/{{shelf_id}}/items",
+            "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"{{book_isbn}}\",\n  \"position\": 1\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "Book Social Stats",
+          "request": { "method": "GET", "url": "{{social_url}}/social/books/{{book_isbn}}/stats" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
         }
       ]
     }

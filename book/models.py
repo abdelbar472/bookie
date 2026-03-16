@@ -78,4 +78,4 @@ class BookAutherAward(SQLModel, table=True):
     award_id: int = Field(foreign_key="awards.id", primary_key=True)
 
     book: Optional[Book] = Relationship()
-    author_award: Optional[AuthorAward] = Relationship()
+    # Keep this as a plain link table; there is no direct FK to author_awards.

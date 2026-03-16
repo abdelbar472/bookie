@@ -1,8 +1,8 @@
-# FastAPI Microservices — Auth + User
+# FastAPI Microservices — Auth + User + Follow + Book + Social
 
 A production-ready microservice architecture using **FastAPI**, **SQLite (async)**, and **gRPC** for internal service communication.
 
-Three independent services that work together: one owns identity, one owns profiles, one manages follows. They never share a database or a secret key.
+Five independent services work together: identity, profiles, follows, catalog, and social interactions. They never share a database or a secret key.
 
 ---
 
@@ -15,9 +15,9 @@ Most tutorials dump auth and user logic into one monolith. Here they are split i
 - **User Service** — owns profile data (bio, avatar, etc). It never sees the secret key. It cannot forge tokens. It simply asks Auth *"is this token valid?"* and gets a user back.
 - **Follow Service** — manages user follow relationships. It provides endpoints for users to follow/unfollow others, retrieve followers, and get follow statistics.
 
-This means if you add a fourth service tomorrow (orders, payments, etc.) it does the same thing — calls Auth via gRPC to validate — and never needs the secret key distributed to it.
+This means if you add another service tomorrow (orders, payments, etc.) it does the same thing - calls Auth via gRPC to validate - and never needs the secret key distributed to it.
 
-### 2. gRPC for internal communication — not HTTP
+### 2. gRPC for internal communication - not HTTP
 When the User or Follow service needs to validate a token, it does **not** make an HTTP call to Auth. It uses **gRPC**:
 
 | | HTTP (internal) | gRPC |
@@ -50,6 +50,8 @@ Refresh tokens are stored in the database and rotated on every use — the old o
 Auth owns `auth_service.db` (users, refresh tokens).  
 User owns `user_service.db` (profiles).  
 Follow owns `follow_service.db` (follows).
+Book owns `book_service.db` (books/authors/publishers/awards).  
+Social owns `social_service.db` (likes/ratings/reviews/shelves).
 
 They share no tables. If you later move Auth to PostgreSQL, User is unaffected. If User's DB goes down, login still works.
 
@@ -73,18 +75,28 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 │  DB: auth_service.db            │      │  DB: user_service.db             │
 └─────────────────────────────────┘      └─────────────────────────────────┘
 
+┌─────────────────────────────────┐      ┌─────────────────────────────────┐
+│        Follow Service           │      │         Book Service            │
+│  HTTP  http://localhost:8003    │      │  HTTP  http://localhost:8004    │
+│  gRPC  localhost:50052          │      │  gRPC  localhost:50054          │
+│                                 │      │                                  │
+│  POST /api/v1/follow/{id}       │      │  GET    /api/v1/books           │
+│  DELETE /api/v1/follow/{id}     │      │  GET    /api/v1/books/{isbn}    │
+│  GET /api/v1/follow/users/*     │      │  GET    /api/v1/authors         │
+│                                 │      │  POST   /api/v1/internal/*      │
+│  DB: follow_service.db          │      │  DB: book_service.db            │
+└─────────────────────────────────┘      └─────────────────────────────────┘
+
 ┌─────────────────────────────────┐
-│        Follow Service            │
-│  HTTP  http://localhost:8003    │
-│  gRPC  localhost:50052          │
+│        Social Service           │
+│  HTTP  http://localhost:8005    │
 │                                 │
-│  POST /api/v1/follow            │
-│  DELETE /api/v1/follow          │
-│  GET  /api/v1/followers         │
-│  GET  /api/v1/following         │
-│  GET  /api/v1/follow/stats      │
+│  POST   /api/v1/social/likes/{isbn} │
+│  PUT    /api/v1/social/ratings/{isbn} │
+│  POST   /api/v1/social/reviews  │
+│  POST   /api/v1/social/shelves  │
 │                                 │
-│  DB: follow_service.db          │
+│  DB: social_service.db          │
 └─────────────────────────────────┘
 ```
 
@@ -127,17 +139,39 @@ cd D:\codes\fastapi_auth
 # or: python -m uvicorn user.main:app --port 8002 --reload
 ```
 
-**Terminal 3 – Follow service**
+**Terminal 3 - Follow service**
 ```powershell
 cd D:\codes\fastapi_auth
 .\run_follow.ps1
 # or: python -m uvicorn follow.main:app --port 8003 --reload
 ```
 
+**Terminal 4 - Book service**
+```powershell
+cd D:\codes\fastapi_auth
+.\run_book.ps1
+# or: python -m uvicorn book.main:app --port 8004 --reload
+```
+
+**Terminal 5 - Social service**
+```powershell
+cd D:\codes\fastapi_auth
+.\run_social.ps1
+# or: python -m uvicorn social.main:app --port 8005 --reload
+```
+
 Swagger UIs:
 - Auth: http://localhost:8001/docs
 - User: http://localhost:8002/docs
 - Follow: http://localhost:8003/docs
+- Book: http://localhost:8004/docs
+- Social: http://localhost:8005/docs
+
+Sample book data:
+```powershell
+cd D:\codes\fastapi_auth
+python -m book.seed_data
+```
 
 ---
 
@@ -203,7 +237,7 @@ fastapi_auth/
 │   ├── grpc_client.py      # thin wrapper around gRPC stub
 │   └── main.py             # FastAPI app
 │
-├── follow/                   # ── Follow Service ──────────────────────
+├── follow/                 # ── Follow Service ──────────────────────
 │   ├── .env                # DATABASE_URL
 │   ├── config.py
 │   ├── models.py           # FollowRelationship
@@ -214,11 +248,36 @@ fastapi_auth/
 │   ├── grpc_client.py      # thin wrapper around gRPC stub
 │   └── main.py             # FastAPI app
 │
+├── book/                   # ── Book Service ────────────────────────
+│   ├── .env
+│   ├── config.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── services.py
+│   ├── routers.py
+│   ├── grpc_server.py
+│   ├── seed_data.py        # optional local sample data seeder
+│   └── main.py
+│
+├── social/                 # ── Social Service ──────────────────────
+│   ├── .env
+│   ├── config.py
+│   ├── database.py
+│   ├── models.py           # likes, ratings, reviews, shelves
+│   ├── schemas.py
+│   ├── services.py
+│   ├── routers.py
+│   ├── auth.py             # Auth gRPC token validation dependency
+│   ├── book_grpc_client.py # Book gRPC ISBN existence checks
+│   └── main.py
+│
 ├── postman_collection.json # ready-to-import collection with auto-auth script
 ├── e2e_test.py             # full flow test — no manual steps needed
 ├── run_auth.ps1            # one-command start for Auth
 ├── run_user.ps1            # one-command start for User
 ├── run_follow.ps1          # one-command start for Follow
+├── run_book.ps1            # one-command start for Book
+├── run_social.ps1          # one-command start for Social
 └── requirements.txt
 ```
 
