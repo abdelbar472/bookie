@@ -2,7 +2,7 @@
 
 A production-ready microservice architecture using **FastAPI**, **SQLite (async)**, and **gRPC** for internal service communication.
 
-Two independent services that work together: one owns identity, one owns profiles. They never share a database or a secret key.
+Three independent services that work together: one owns identity, one owns profiles, one manages follows. They never share a database or a secret key.
 
 ---
 
@@ -13,11 +13,12 @@ Most tutorials dump auth and user logic into one monolith. Here they are split i
 
 - **Auth Service** — the single source of truth for identity. It is the only service that ever touches `SECRET_KEY`, creates JWTs, or stores passwords.
 - **User Service** — owns profile data (bio, avatar, etc). It never sees the secret key. It cannot forge tokens. It simply asks Auth *"is this token valid?"* and gets a user back.
+- **Follow Service** — manages user follow relationships. It provides endpoints for users to follow/unfollow others, retrieve followers, and get follow statistics.
 
-This means if you add a third service tomorrow (orders, payments, etc.) it does the same thing — calls Auth via gRPC to validate — and never needs the secret key distributed to it.
+This means if you add a fourth service tomorrow (orders, payments, etc.) it does the same thing — calls Auth via gRPC to validate — and never needs the secret key distributed to it.
 
 ### 2. gRPC for internal communication — not HTTP
-When the User service needs to validate a token, it does **not** make an HTTP call to Auth. It uses **gRPC**:
+When the User or Follow service needs to validate a token, it does **not** make an HTTP call to Auth. It uses **gRPC**:
 
 | | HTTP (internal) | gRPC |
 |---|---|---|
@@ -47,7 +48,8 @@ Refresh tokens are stored in the database and rotated on every use — the old o
 
 ### 5. Each service has its own database
 Auth owns `auth_service.db` (users, refresh tokens).  
-User owns `user_service.db` (profiles).
+User owns `user_service.db` (profiles).  
+Follow owns `follow_service.db` (follows).
 
 They share no tables. If you later move Auth to PostgreSQL, User is unaffected. If User's DB goes down, login still works.
 
@@ -70,6 +72,20 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 │                                 │      │  GET    /api/v1/users/{id}       │
 │  DB: auth_service.db            │      │  DB: user_service.db             │
 └─────────────────────────────────┘      └─────────────────────────────────┘
+
+┌─────────────────────────────────┐
+│        Follow Service            │
+│  HTTP  http://localhost:8003    │
+│  gRPC  localhost:50052          │
+│                                 │
+│  POST /api/v1/follow            │
+│  DELETE /api/v1/follow          │
+│  GET  /api/v1/followers         │
+│  GET  /api/v1/following         │
+│  GET  /api/v1/follow/stats      │
+│                                 │
+│  DB: follow_service.db          │
+└─────────────────────────────────┘
 ```
 
 ### gRPC contract (`proto/auth.proto`)
@@ -111,9 +127,17 @@ cd D:\codes\fastapi_auth
 # or: python -m uvicorn user.main:app --port 8002 --reload
 ```
 
+**Terminal 3 – Follow service**
+```powershell
+cd D:\codes\fastapi_auth
+.\run_follow.ps1
+# or: python -m uvicorn follow.main:app --port 8003 --reload
+```
+
 Swagger UIs:
 - Auth: http://localhost:8001/docs
 - User: http://localhost:8002/docs
+- Follow: http://localhost:8003/docs
 
 ---
 
@@ -138,7 +162,7 @@ The **collection-level pre-request script** handles auth automatically for every
 
 ## E2E test
 
-Starts both services as subprocesses, runs the full flow, tears everything down:
+Starts all services as subprocesses, runs the full flow, tears everything down:
 
 ```powershell
 cd D:\codes\fastapi_auth
@@ -179,16 +203,28 @@ fastapi_auth/
 │   ├── grpc_client.py      # thin wrapper around gRPC stub
 │   └── main.py             # FastAPI app
 │
+├── follow/                   # ── Follow Service ──────────────────────
+│   ├── .env                # DATABASE_URL
+│   ├── config.py
+│   ├── models.py           # FollowRelationship
+│   ├── schemas.py
+│   ├── database.py
+│   ├── services.py         # follow/unfollow, get followers/following, stats
+│   ├── routers.py          # HTTP: follow, unfollow, followers, following, stats
+│   ├── grpc_client.py      # thin wrapper around gRPC stub
+│   └── main.py             # FastAPI app
+│
 ├── postman_collection.json # ready-to-import collection with auto-auth script
 ├── e2e_test.py             # full flow test — no manual steps needed
 ├── run_auth.ps1            # one-command start for Auth
 ├── run_user.ps1            # one-command start for User
+├── run_follow.ps1          # one-command start for Follow
 └── requirements.txt
 ```
 
 ---
 
-## Adding a third service
+## Adding a fourth service
 
 This is the whole point of the design. To add e.g. an Orders service:
 
