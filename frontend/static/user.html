@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookbox - User Service</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Bookbox</div>
+    <nav class="navlinks">
+      <a href="/">Home</a><a href="/auth">Auth</a><a href="/user" class="active">User</a><a href="/follow">Follow</a><a href="/book">Book</a><a href="/social">Social</a><a href="/reviews">Reviews</a><a href="/shelves">Shelves</a>
+    </nav>
+  </header>
+
+  <main class="layout single-col">
+    <section class="panel">
+      <h2>User Service</h2>
+      <p id="status" class="muted">Requires token (login from Auth page first)</p>
+    </section>
+
+    <section class="panel service-grid">
+      <article class="panel-inner">
+        <h3>Profile</h3>
+        <div class="stack">
+          <button id="me-btn">Get /me</button>
+          <input id="bio" placeholder="New bio" />
+          <input id="avatar" placeholder="Avatar URL" />
+          <button id="update-me-btn">PATCH /me</button>
+        </div>
+      </article>
+
+      <article class="panel-inner">
+        <h3>Lookup</h3>
+        <div class="stack">
+          <input id="lookup-username" placeholder="Username" />
+          <button id="lookup-btn">Get user by username</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h3>Response</h3>
+      <pre id="output" class="code-box">{}</pre>
+    </section>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/user.js"></script>
+</body>
+</html>
+

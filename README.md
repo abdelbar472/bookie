@@ -125,39 +125,32 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 
 ## Quick start
 
-**Terminal 1 – Auth service**
+**One command (start all services in separate PowerShell windows)**
 ```powershell
 cd D:\codes\fastapi_auth
+.\run_all.ps1
+```
+
+**Stop all services started by the launcher**
+```powershell
+cd D:\codes\fastapi_auth
+.\run_all.ps1 -Action stop
+```
+
+**Check launcher status**
+```powershell
+cd D:\codes\fastapi_auth
+.\run_all.ps1 -Action status
+```
+
+**If you prefer manual startup (one terminal per service):**
+```powershell
 .\run_auth.ps1
-# or: python -m uvicorn auth.main:app --port 8001 --reload
-```
-
-**Terminal 2 – User service**
-```powershell
-cd D:\codes\fastapi_auth
 .\run_user.ps1
-# or: python -m uvicorn user.main:app --port 8002 --reload
-```
-
-**Terminal 3 - Follow service**
-```powershell
-cd D:\codes\fastapi_auth
 .\run_follow.ps1
-# or: python -m uvicorn follow.main:app --port 8003 --reload
-```
-
-**Terminal 4 - Book service**
-```powershell
-cd D:\codes\fastapi_auth
 .\run_book.ps1
-# or: python -m uvicorn book.main:app --port 8004 --reload
-```
-
-**Terminal 5 - Social service**
-```powershell
-cd D:\codes\fastapi_auth
 .\run_social.ps1
-# or: python -m uvicorn social.main:app --port 8005 --reload
+.\run_frontend.ps1
 ```
 
 Swagger UIs:
@@ -167,11 +160,31 @@ Swagger UIs:
 - Book: http://localhost:8004/docs
 - Social: http://localhost:8005/docs
 
+Frontend pages:
+- Home: http://127.0.0.1:8080/
+- Auth: http://127.0.0.1:8080/auth
+- User: http://127.0.0.1:8080/user
+- Follow: http://127.0.0.1:8080/follow
+- Book: http://127.0.0.1:8080/book
+- Social: http://127.0.0.1:8080/social
+- Reviews: http://127.0.0.1:8080/reviews
+- Shelves: http://127.0.0.1:8080/shelves
+
 Sample book data:
 ```powershell
 cd D:\codes\fastapi_auth
 python -m book.seed_data
 ```
+
+RAG recommendation pipeline (Qdrant multi-vector):
+```powershell
+cd D:\codes\fastapi_auth
+python -m RAG.book init
+python -m RAG.book ingest-sample
+python -m RAG.book recommend --isbn 978-0441013593 --top-k 5
+```
+
+See `RAG/README.md` for CSV/JSONL ingest and metadata enrichment options.
 
 ---
 
@@ -292,4 +305,3 @@ This is the whole point of the design. To add e.g. an Orders service:
 3. Done — no secret key needed, no copy-paste of JWT logic
 
 The Auth service becomes the central identity authority for your entire platform.
-

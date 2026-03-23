@@ -42,3 +42,25 @@ async def assert_book_exists(isbn: str) -> None:
         logger.error("Book gRPC check failed: %s", exc)
         raise ValueError("Book service unavailable")
 
+
+async def get_book_details(isbn: str) -> dict:
+    """Fetch a book payload from Book service by ISBN for shelf views."""
+    stub = _get_book_stub()
+    try:
+        resp = await stub.GetBook(book_pb2.GetBookRequest(isbn=isbn))
+    except grpc.aio.AioRpcError as exc:
+        if exc.code() == grpc.StatusCode.NOT_FOUND:
+            raise ValueError("Book not found")
+        logger.error("Book gRPC fetch failed: %s", exc)
+        raise ValueError("Book service unavailable")
+
+    return {
+        "isbn": resp.isbn,
+        "title": resp.title or None,
+        "year": resp.year or None,
+        "author_id": resp.author_id or None,
+        "author_name": resp.author_name or None,
+        "publisher": resp.publisher or None,
+    }
+
+

@@ -82,7 +82,9 @@ async def get_me(
         is_active=current_user.is_active,
         is_superuser=current_user.is_superuser,
         bio=profile.bio,
-        avatar_url=profile.avatar_url,
+        avatar_url=profile.profile_picture,
+        location=profile.location,
+        website=profile.website,
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )
@@ -95,7 +97,14 @@ async def update_me(
     session: AsyncSession = Depends(get_session),
 ):
     """Update the current user's local profile (bio, avatar)."""
-    profile = await update_profile(session, current_user.id, data.bio, data.avatar_url)
+    profile = await update_profile(
+        session,
+        current_user.id,
+        data.bio,
+        data.avatar_url,
+        data.location,
+        data.website,
+    )
     return ProfileResponse(
         id=current_user.id,
         username=current_user.username,
@@ -104,7 +113,9 @@ async def update_me(
         is_active=current_user.is_active,
         is_superuser=current_user.is_superuser,
         bio=profile.bio,
-        avatar_url=profile.avatar_url,
+        avatar_url=profile.profile_picture,
+        location=profile.location,
+        website=profile.website,
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )
@@ -150,7 +161,9 @@ async def get_user_by_username_route(
         is_active=auth_user.is_active,
         is_superuser=auth_user.is_superuser,
         bio=profile.bio,
-        avatar_url=profile.avatar_url,
+        avatar_url=profile.profile_picture,
+        location=profile.location,
+        website=profile.website,
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )

@@ -3,6 +3,7 @@
 # Core Framework
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
+httpx>=0.27.0
 
 # Database
 sqlmodel>=0.0.14
@@ -22,4 +23,11 @@ email-validator>=2.1.0
 # gRPC (internal service-to-service auth)
 grpcio>=1.60.0
 grpcio-tools>=1.60.0
+
+# Recommendation / RAG pipeline
+qdrant-client>=1.9.0
+sentence-transformers>=3.0.0
+pandas>=2.2.0
+numpy>=1.26.0
+requests>=2.32.0
 

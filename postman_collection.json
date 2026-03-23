@@ -627,6 +627,17 @@
           ] } }]
         },
         {
+          "name": "List My Shelves",
+          "request": { "method": "GET", "url": "{{social_url}}/social/shelves/me?skip=0&limit=50" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200 && Array.isArray(pm.response.json()) && pm.response.json().length > 0) {",
+            "    pm.collectionVariables.set('shelf_id', String(pm.response.json()[0].id));",
+            "    console.log('✅ My shelves:', pm.response.json().length);",
+            "}"
+          ] } }]
+        },
+        {
           "name": "Add Book to Shelf",
           "request": {
             "method": "POST",
@@ -635,6 +646,29 @@
             "body": { "mode": "raw", "raw": "{\n  \"isbn\": \"{{book_isbn}}\",\n  \"position\": 1\n}" }
           },
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] } }]
+        },
+        {
+          "name": "List Shelf Items",
+          "request": { "method": "GET", "url": "{{social_url}}/social/shelves/{{shelf_id}}/items?skip=0&limit=50" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Shelf items total:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "List Shelf Books",
+          "request": { "method": "GET", "url": "{{social_url}}/social/shelves/{{shelf_id}}/books?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Shelf books total:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "Remove Book from Shelf",
+          "request": { "method": "DELETE", "url": "{{social_url}}/social/shelves/{{shelf_id}}/items/{{book_isbn}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+          ] } }]
         },
         {
           "name": "Book Social Stats",

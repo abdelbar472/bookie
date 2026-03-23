@@ -23,6 +23,8 @@ class ProfileResponse(BaseModel):
     is_superuser: bool
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -32,6 +34,8 @@ class ProfileResponse(BaseModel):
 class ProfileUpdate(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
 
 
 class TokenRefreshRequest(BaseModel):
@@ -55,5 +59,4 @@ class FollowListResponse(BaseModel):
     """Paginated list of user_ids."""
     user_ids: List[int]
     total: int
-
 

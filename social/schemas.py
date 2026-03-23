@@ -111,6 +111,24 @@ class ShelfItemListResponse(BaseModel):
     total: int
 
 
+class ShelfBookItemResponse(BaseModel):
+    id: int
+    shelf_id: int
+    isbn: str
+    position: int
+    created_at: datetime
+    title: str | None = None
+    year: int | None = None
+    author_id: int | None = None
+    author_name: str | None = None
+    publisher: str | None = None
+
+
+class ShelfBookListResponse(BaseModel):
+    items: list[ShelfBookItemResponse]
+    total: int
+
+
 class BookSocialStatsResponse(BaseModel):
     isbn: str
     likes_count: int

@@ -13,8 +13,12 @@ class UserProfile(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(unique=True, index=True)   # matches auth service user.id
+
+    profile_picture: Optional[str] = Field(default=None, max_length=255)
     bio: Optional[str] = Field(default=None, max_length=500)
-    avatar_url: Optional[str] = Field(default=None, max_length=500)
+    location: Optional[str] = Field(default=None, max_length=255)
+    website: Optional[str] = Field(default=None, max_length=255)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

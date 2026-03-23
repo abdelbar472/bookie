@@ -30,15 +30,21 @@ async def update_profile(
     user_id: int,
     bio: Optional[str],
     avatar_url: Optional[str],
+    location: Optional[str],
+    website: Optional[str],
 ) -> UserProfile:
     profile = await get_or_create_profile(session, user_id)
     if bio is not None:
         profile.bio = bio
     if avatar_url is not None:
-        profile.avatar_url = avatar_url
+        # Keep API contract as avatar_url while storing as profile_picture.
+        profile.profile_picture = avatar_url
+    if location is not None:
+        profile.location = location
+    if website is not None:
+        profile.website = website
     profile.updated_at = datetime.utcnow()
     session.add(profile)
     await session.commit()
     await session.refresh(profile)
     return profile
-

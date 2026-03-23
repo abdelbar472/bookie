@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .auth import get_current_user_id
-from .book_grpc_client import assert_book_exists
+from .book_grpc_client import assert_book_exists, get_book_details
 from .database import get_session
 from .schemas import (
     BookSocialStatsResponse,
@@ -17,6 +17,8 @@ from .schemas import (
     ReviewUpdateRequest,
     ShelfCreateRequest,
     ShelfItemCreateRequest,
+    ShelfBookItemResponse,
+    ShelfBookListResponse,
     ShelfItemListResponse,
     ShelfItemResponse,
     ShelfResponse,
@@ -408,6 +410,54 @@ async def list_shelf_items_route(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
     payload = [ShelfItemResponse.model_validate(item) for item in items]
     return ShelfItemListResponse(items=payload, total=total)
+
+
+@router.get("/shelves/{shelf_id}/books", response_model=ShelfBookListResponse)
+async def list_shelf_books_route(
+    shelf_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    current_user_id: int = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        items, total = await list_shelf_items(session, current_user_id, shelf_id, skip=skip, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    payload: list[ShelfBookItemResponse] = []
+    for item in items:
+        details = {
+            "title": None,
+            "year": None,
+            "author_id": None,
+            "author_name": None,
+            "publisher": None,
+        }
+        try:
+            details = await get_book_details(item.isbn)
+        except ValueError:
+            # Keep shelf listing available even if a book is missing/unreachable.
+            pass
+
+        payload.append(
+            ShelfBookItemResponse(
+                id=item.id,
+                shelf_id=item.shelf_id,
+                isbn=item.isbn,
+                position=item.position,
+                created_at=item.created_at,
+                title=details.get("title"),
+                year=details.get("year"),
+                author_id=details.get("author_id"),
+                author_name=details.get("author_name"),
+                publisher=details.get("publisher"),
+            )
+        )
+
+    return ShelfBookListResponse(items=payload, total=total)
 
 
 @router.delete("/shelves/{shelf_id}/items/{isbn}", status_code=status.HTTP_204_NO_CONTENT)
