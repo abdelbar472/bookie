@@ -22,6 +22,10 @@
     { "key": "shelf_id",      "value": "" },
     { "key": "review_id",     "value": "" },
     { "key": "reply_id",      "value": "" }
+    ,{ "key": "rag_user_id",   "value": "{{my_user_id}}" }
+    ,{ "key": "rag_book_id",   "value": "{{book_isbn}}" }
+    ,{ "key": "rag_qdrant_id", "value": "0" }
+    ,{ "key": "rag_status",    "value": "reading" }
   ],
   "event": [
     {
@@ -735,6 +739,86 @@
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
             "if (pm.response.code === 200) console.log('✅ Writer matches:', (pm.response.json().matches || []).length);"
           ] } }]
+        },
+        {
+          "name": "User Readings & Personalized",
+          "item": [
+            {
+              "name": "Set RAG User ID from My Profile",
+              "request": { "method": "GET", "url": "{{user_url}}/me" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) {",
+                "  const me = pm.response.json();",
+                "  pm.collectionVariables.set('rag_user_id', String(me.id));",
+                "  console.log('✅ rag_user_id =', me.id);",
+                "}"
+              ] } }]
+            },
+            {
+              "name": "Add Reading Entry",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings",
+                "body": { "mode": "raw", "raw": "{\n  \"book_id\": \"{{rag_book_id}}\",\n  \"title\": \"Test Reading Book\",\n  \"authors\": \"Test Author\",\n  \"status\": \"{{rag_status}}\",\n  \"qdrant_id\": {{rag_qdrant_id}}\n}" }
+              },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ reading entry added');"
+              ] } }]
+            },
+            {
+              "name": "List Reading Entries",
+              "request": { "method": "GET", "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ readings:', pm.response.json().length || 0);"
+              ] } }]
+            },
+            {
+              "name": "Patch Reading Entry",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings/{{rag_book_id}}",
+                "body": { "mode": "raw", "raw": "{\n  \"status\": \"read\",\n  \"rating\": 4.0,\n  \"notes\": \"Finished for RAG test\"\n}" }
+              },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ reading entry patched');"
+              ] } }]
+            },
+            {
+              "name": "Personalized Recommend",
+              "request": { "method": "GET", "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/recommend" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ personalized source:', pm.response.json().source);"
+              ] } }]
+            },
+            {
+              "name": "Internal Interaction",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{rag_url}}/api/v1/internal/interactions",
+                "body": { "mode": "raw", "raw": "{\n  \"user_id\": \"{{rag_user_id}}\",\n  \"book_id\": \"{{rag_book_id}}\",\n  \"qdrant_id\": {{rag_qdrant_id}},\n  \"interaction_type\": \"like\",\n  \"value\": 1\n}" }
+              },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ internal interaction tracked');"
+              ] } }]
+            },
+            {
+              "name": "Delete Reading Entry",
+              "request": { "method": "DELETE", "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings/{{rag_book_id}}" },
+              "event": [{ "listen": "test", "script": { "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "if (pm.response.code === 200) console.log('✅ reading entry deleted');"
+              ] } }]
+            }
+          ]
         }
       ]
     }

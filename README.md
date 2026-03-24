@@ -209,6 +209,21 @@ Invoke-RestMethod -Method Post "http://127.0.0.1:8006/api/v1/recommend" -Content
 Invoke-RestMethod -Method Get "http://127.0.0.1:8006/api/v1/writers/search?name=Frank%20Herbert"
 ```
 
+RAG user-scoped examples (requires Bearer token from Auth login):
+```powershell
+$token = "<access_token_from_auth_login>"
+$headers = @{ Authorization = "Bearer $token"; "Content-Type" = "application/json" }
+
+# Add/update reading entry
+Invoke-RestMethod -Method Post "http://127.0.0.1:8006/api/v1/users/1/readings" -Headers $headers -Body '{"book_id":"9780451524935","title":"1984","authors":"George Orwell","status":"reading","qdrant_id":0}'
+
+# List reading entries
+Invoke-RestMethod -Method Get "http://127.0.0.1:8006/api/v1/users/1/readings" -Headers $headers
+
+# Personalized recommendations for same user
+Invoke-RestMethod -Method Get "http://127.0.0.1:8006/api/v1/users/1/recommend" -Headers $headers
+```
+
 See `RAG/README.md` for CSV/JSONL ingest and metadata enrichment options.
 
 ---
@@ -228,7 +243,13 @@ The **collection-level pre-request script** handles auth automatically for every
 3. User → Get My Profile ← token attached automatically
 4. User → Update My Profile
 5. User → Refresh Token (routes through User → Auth gRPC internally)
-6. Auth → Logout
+6. RAG → User Readings & Personalized (uses `my_user_id` + Bearer token)
+7. Auth → Logout
+
+For user-scoped RAG endpoints in Postman, make sure:
+- `User Service -> Get My Profile` ran at least once (fills `my_user_id`)
+- `Login (Alice)` succeeded (fills `access_token`/`refresh_token`)
+- you call `RAG Service (:8006) -> User Readings & Personalized` requests
 
 ---
 

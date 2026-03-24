@@ -8,6 +8,9 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
 
+from .auth import AuthenticatedUser, get_current_user
+from .book_grpc_client import close_book_channel, get_book_details
+from .config import settings
 from .db import close_database, get_database
 from .mongo_models import ReadingEntry
 from .mongo_service import (
@@ -37,6 +40,10 @@ from .v3 import (
 
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class BookView(BaseModel):
@@ -213,6 +220,13 @@ def _interaction_to_updates(interaction_type: str, value: Optional[float]) -> Di
     return {"status": "reading"}
 
 
+def _ensure_user_access(path_user_id: str, current_user: AuthenticatedUser) -> None:
+    if current_user.is_superuser:
+        return
+    if str(current_user.id) != str(path_user_id):
+        raise HTTPException(status_code=403, detail="Forbidden for this user")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     client = await asyncio.to_thread(get_client)
@@ -220,6 +234,7 @@ async def lifespan(app: FastAPI):
     await get_database()
     yield
     await asyncio.to_thread(lambda: close_client(client))
+    await close_book_channel()
     await close_database()
 
 
@@ -457,19 +472,25 @@ async def create_reading_entry(
     payload: ReadingCreateRequest,
     db=Depends(get_db),
     client: QdrantClient = Depends(get_request_client),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> ReadingMutationResponse:
+    _ensure_user_access(user_id, current_user)
+
+    # Pull canonical metadata from Book service over gRPC when available.
+    grpc_book = await get_book_details(payload.book_id)
+
     book_doc = {
-        "book_id": payload.book_id,
+        "book_id": (grpc_book or {}).get("book_id", payload.book_id),
         "qdrant_id": payload.qdrant_id,
-        "title": payload.title,
-        "authors": payload.authors,
+        "title": (grpc_book or {}).get("title") or payload.title,
+        "authors": (grpc_book or {}).get("authors") or payload.authors,
         "description": "",
         "categories": [],
         "language": "unknown",
         "average_rating": None,
         "ratings_count": None,
         "thumbnail": "",
-        "source": "google_books",
+        "source": (grpc_book or {}).get("source", "google_books"),
     }
     cached = await get_book_cache(db, payload.book_id)
     if cached:
@@ -481,8 +502,8 @@ async def create_reading_entry(
         user_id=user_id,
         book_id=payload.book_id,
         qdrant_id=payload.qdrant_id,
-        title=payload.title,
-        authors=payload.authors,
+        title=book_doc["title"],
+        authors=book_doc["authors"],
         status=payload.status,
     )
     await rebuild_taste_profile(db, user_id, client, COLLECTION_NAME)
@@ -494,7 +515,9 @@ async def list_reading_entries(
     user_id: str,
     status: Optional[str] = Query(default=None),
     db=Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> List[ReadingEntry]:
+    _ensure_user_access(user_id, current_user)
     rows = await get_reading_list(db, user_id, status=status)
     return [ReadingEntry.model_validate(row) for row in rows]
 
@@ -506,7 +529,9 @@ async def patch_reading_entry(
     payload: ReadingUpdateRequest,
     db=Depends(get_db),
     client: QdrantClient = Depends(get_request_client),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> ReadingMutationResponse:
+    _ensure_user_access(user_id, current_user)
     updates = payload.model_dump(exclude_unset=True)
     updated = await update_reading_entry(db, user_id, book_id, updates)
     if not updated:
@@ -521,7 +546,9 @@ async def delete_reading_entry(
     book_id: str,
     db=Depends(get_db),
     client: QdrantClient = Depends(get_request_client),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> ReadingMutationResponse:
+    _ensure_user_access(user_id, current_user)
     result = await db["reading_list"].delete_one({"user_id": user_id, "book_id": book_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="reading entry not found")
@@ -534,7 +561,9 @@ async def personalized_recommend(
     user_id: str,
     db=Depends(get_db),
     client: QdrantClient = Depends(get_request_client),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> PersonalizedRecommendationResponse:
+    _ensure_user_access(user_id, current_user)
     profile = await get_taste_profile(db, user_id)
 
     if not profile or not isinstance(profile.get("vector"), list) or profile.get("book_count", 0) <= 0:
@@ -594,8 +623,13 @@ async def ingest_internal_interaction(
     payload: InteractionEventRequest,
     db=Depends(get_db),
     client: QdrantClient = Depends(get_request_client),
+    current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> InteractionEventResponse:
+    if not current_user.is_superuser and str(current_user.id) != str(payload.user_id):
+        raise HTTPException(status_code=403, detail="Forbidden for this user")
+
     updates = _interaction_to_updates(payload.interaction_type, payload.value)
+    grpc_book = await get_book_details(payload.book_id)
 
     updated = await update_reading_entry(db, payload.user_id, payload.book_id, updates)
     if not updated:
@@ -604,8 +638,8 @@ async def ingest_internal_interaction(
             user_id=payload.user_id,
             book_id=payload.book_id,
             qdrant_id=payload.qdrant_id,
-            title=payload.book_id,
-            authors="",
+            title=(grpc_book or {}).get("title") or payload.book_id,
+            authors=(grpc_book or {}).get("authors") or "",
             status=str(updates.get("status", "want_to_read")),
         )
         if "rating" in updates:

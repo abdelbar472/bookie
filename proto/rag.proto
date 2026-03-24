@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package rag;
+
+// RAG service - consumed internally by Social and other services.
+service RagService {
+  rpc TrackInteraction (TrackInteractionRequest) returns (TrackInteractionResponse);
+}
+
+message TrackInteractionRequest {
+  int32 user_id = 1;
+  string book_id = 2;
+  string qdrant_id = 3;
+  string interaction_type = 4;
+  double value = 5;
+}
+
+message TrackInteractionResponse {
+  bool success = 1;
+  string message = 2;
+}
+

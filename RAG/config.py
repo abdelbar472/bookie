@@ -13,17 +13,16 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///./social_service.db"
     LOG_LEVEL: str = "INFO"
 
     AUTH_GRPC_HOST: str = "localhost"
     AUTH_GRPC_PORT: int = 50051
 
+    GRPC_HOST: str = "127.0.0.1"
+    GRPC_PORT: int = 50056
+
     BOOK_GRPC_HOST: str = "localhost"
     BOOK_GRPC_PORT: int = 50054
-
-    RAG_GRPC_HOST: str = "localhost"
-    RAG_GRPC_PORT: int = 50056
 
 
 settings = Settings()

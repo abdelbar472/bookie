@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import get_current_user_id
 from .book_grpc_client import assert_book_exists, get_book_details
 from .database import get_session
+from .rag_grpc_client import track_interaction
 from .schemas import (
     BookSocialStatsResponse,
     LikeResponse,
@@ -91,6 +92,14 @@ async def like_book_route(
         code = status.HTTP_404_NOT_FOUND if "not found" in detail.lower() else status.HTTP_503_SERVICE_UNAVAILABLE
         raise HTTPException(status_code=code, detail=detail)
 
+    await track_interaction(
+        user_id=current_user_id,
+        book_id=isbn,
+        qdrant_id=isbn,
+        interaction_type="like",
+        value=1.0,
+    )
+
     return row
 
 
@@ -119,6 +128,14 @@ async def upsert_rating_route(
         detail = str(exc)
         code = status.HTTP_404_NOT_FOUND if "not found" in detail.lower() else status.HTTP_503_SERVICE_UNAVAILABLE
         raise HTTPException(status_code=code, detail=detail)
+
+    await track_interaction(
+        user_id=current_user_id,
+        book_id=isbn,
+        qdrant_id=isbn,
+        interaction_type="rating",
+        value=float(payload.rating),
+    )
     return row
 
 
@@ -162,6 +179,14 @@ async def create_review_route(
         detail = str(exc)
         code = status.HTTP_404_NOT_FOUND if "not found" in detail.lower() else status.HTTP_503_SERVICE_UNAVAILABLE
         raise HTTPException(status_code=code, detail=detail)
+
+    await track_interaction(
+        user_id=current_user_id,
+        book_id=payload.isbn,
+        qdrant_id=payload.isbn,
+        interaction_type="review",
+        value=1.0,
+    )
 
     return ReviewResponse(
         id=row.id,
@@ -375,7 +400,7 @@ async def add_shelf_item_route(
 ):
     try:
         await assert_book_exists(payload.isbn)
-        return await add_shelf_item(
+        item = await add_shelf_item(
             session,
             current_user_id,
             shelf_id,
@@ -392,6 +417,16 @@ async def add_shelf_item_route(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=detail)
     except PermissionError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
+    await track_interaction(
+        user_id=current_user_id,
+        book_id=payload.isbn,
+        qdrant_id=payload.isbn,
+        interaction_type="shelf_add",
+        value=1.0,
+    )
+
+    return item
 
 
 @router.get("/shelves/{shelf_id}/items", response_model=ShelfItemListResponse)
