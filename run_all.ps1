@@ -13,6 +13,7 @@ $services = @(
     @{ Name = "Follow";   Script = "run_follow.ps1";   Url = "http://127.0.0.1:8003/api/v1/health" },
     @{ Name = "Book";     Script = "run_book.ps1";     Url = "http://127.0.0.1:8004/api/v1/health" },
     @{ Name = "Social";   Script = "run_social.ps1";   Url = "http://127.0.0.1:8005/api/v1/health" },
+    @{ Name = "RAG";      Script = "run_rag.ps1";      Url = "http://127.0.0.1:8006/health" },
     @{ Name = "Frontend"; Script = "run_frontend.ps1"; Url = "http://127.0.0.1:8080/" }
 )
 

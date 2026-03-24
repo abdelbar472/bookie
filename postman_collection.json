@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Microservices - Auth + User + Follow + Book + Social",
-    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004) · Social (:8005)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Like + rate + review + shelf (Social)",
+    "name": "Microservices - Auth + User + Follow + Book + Social + RAG",
+    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004) · Social (:8005) · RAG (:8006)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Like + rate + review + shelf (Social)\n6. Get recommendations (RAG)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -10,6 +10,7 @@
     { "key": "follow_url",    "value": "http://127.0.0.1:8003/api/v1" },
     { "key": "book_url",      "value": "http://127.0.0.1:8004/api/v1" },
     { "key": "social_url",    "value": "http://127.0.0.1:8005/api/v1" },
+    { "key": "rag_url",       "value": "http://127.0.0.1:8006" },
     { "key": "access_token",  "value": "" },
     { "key": "refresh_token", "value": "" },
     { "key": "my_user_id",    "value": "" },
@@ -34,7 +35,7 @@
           "// Auto-refreshes via Auth service /refresh when token is missing.",
           "// ================================================================",
           "",
-          "const PUBLIC = ['/login', '/register', '/health', '/refresh'];",
+          "const PUBLIC = ['/login', '/register', '/health', '/refresh', '/api/v1/recommend', '/api/v1/writers/search'];",
           "const url = pm.request.url.toString();",
           "if (PUBLIC.some(p => url.includes(p))) return;",
           "",
@@ -674,6 +675,66 @@
           "name": "Book Social Stats",
           "request": { "method": "GET", "url": "{{social_url}}/social/books/{{book_isbn}}/stats" },
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "RAG Service (:8006)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{rag_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Recommend by Book Name (GET)",
+          "request": { "method": "GET", "url": "{{rag_url}}/api/v1/books/recommend?name=Animal%20Farm&force_external=false&recommendation_limit=5" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ GET book recommend source:', pm.response.json().source);"
+          ] } }]
+        },
+        {
+          "name": "Recommend by Writer Name (GET)",
+          "request": { "method": "GET", "url": "{{rag_url}}/api/v1/writers/recommend?name=George%20Orwell&limit=20&selected_index=1&recommendation_limit=5" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ GET writer recommend source:', pm.response.json().source);"
+          ] } }]
+        },
+        {
+          "name": "Recommend by Title (DB first)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{rag_url}}/api/v1/recommend",
+            "body": { "mode": "raw", "raw": "{\n  \"query\": \"Animal Farm\",\n  \"force_external\": false,\n  \"recommendation_limit\": 5\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ RAG source:', pm.response.json().source);"
+          ] } }]
+        },
+        {
+          "name": "Recommend New Book (Force External)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{rag_url}}/api/v1/recommend",
+            "body": { "mode": "raw", "raw": "{\n  \"query\": \"Dune Messiah\",\n  \"force_external\": true,\n  \"recommendation_limit\": 5\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Recommendations:', (pm.response.json().recommendations || []).length);"
+          ] } }]
+        },
+        {
+          "name": "Search by Writer",
+          "request": { "method": "GET", "url": "{{rag_url}}/api/v1/writers/search?name=George%20Orwell&limit=20&selected_index=1&recommendation_limit=5" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Writer matches:', (pm.response.json().matches || []).length);"
+          ] } }]
         }
       ]
     }

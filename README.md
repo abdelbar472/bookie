@@ -1,8 +1,8 @@
-# FastAPI Microservices — Auth + User + Follow + Book + Social
+# FastAPI Microservices — Auth + User + Follow + Book + Social + RAG
 
 A production-ready microservice architecture using **FastAPI**, **SQLite (async)**, and **gRPC** for internal service communication.
 
-Five independent services work together: identity, profiles, follows, catalog, and social interactions. They never share a database or a secret key.
+Six independent services work together: identity, profiles, follows, catalog, social interactions, and retrieval-augmented recommendations. They never share a database or a secret key.
 
 ---
 
@@ -150,6 +150,7 @@ cd D:\codes\fastapi_auth
 .\run_follow.ps1
 .\run_book.ps1
 .\run_social.ps1
+.\run_rag.ps1
 .\run_frontend.ps1
 ```
 
@@ -159,6 +160,7 @@ Swagger UIs:
 - Follow: http://localhost:8003/docs
 - Book: http://localhost:8004/docs
 - Social: http://localhost:8005/docs
+- RAG: http://localhost:8006/docs
 
 Frontend pages:
 - Home: http://127.0.0.1:8080/
@@ -179,9 +181,32 @@ python -m book.seed_data
 RAG recommendation pipeline (Qdrant multi-vector):
 ```powershell
 cd D:\codes\fastapi_auth
-python -m RAG.book init
-python -m RAG.book ingest-sample
-python -m RAG.book recommend --isbn 978-0441013593 --top-k 5
+.\run_rag.ps1
+```
+
+RAG API configuration (`RAG/.env`):
+```env
+GOOGLE_API_KEY=your_google_books_api_key
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+# optional
+# QDRANT_API_KEY=
+# QDRANT_LOCAL_PATH=D:/codes/fastapi_auth/RAG/qdrant_local
+```
+
+You can verify config is loaded:
+```powershell
+Invoke-RestMethod -Method Get "http://127.0.0.1:8006/health"
+```
+`external_search_enabled` should be `true` when `GOOGLE_API_KEY` is set.
+
+RAG API quick examples:
+```powershell
+Invoke-RestMethod -Method Get "http://127.0.0.1:8006/health"
+
+Invoke-RestMethod -Method Post "http://127.0.0.1:8006/api/v1/recommend" -ContentType "application/json" -Body '{"query":"Dune"}'
+
+Invoke-RestMethod -Method Get "http://127.0.0.1:8006/api/v1/writers/search?name=Frank%20Herbert"
 ```
 
 See `RAG/README.md` for CSV/JSONL ingest and metadata enrichment options.
