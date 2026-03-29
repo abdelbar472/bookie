@@ -3,10 +3,7 @@
 import grpc
 import warnings
 
-try:
-    import rag_pb2 as rag__pb2
-except ImportError:
-    from proto import rag_pb2 as rag__pb2
+import recommendation_pb2 as recommendation__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -21,16 +18,15 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in rag_pb2_grpc.py depends on'
+        + ' but the generated code in recommendation_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class RagServiceStub(object):
-    """RAG service - consumed internally by Social and other services.
-    """
+class RecommendationServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -38,27 +34,20 @@ class RagServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.TrackInteraction = channel.unary_unary(
-                '/rag.RagService/TrackInteraction',
-                request_serializer=rag__pb2.TrackInteractionRequest.SerializeToString,
-                response_deserializer=rag__pb2.TrackInteractionResponse.FromString,
-                _registered_method=True)
         self.IndexBooks = channel.unary_unary(
-                '/rag.RagService/IndexBooks',
-                request_serializer=rag__pb2.IndexBooksRequest.SerializeToString,
-                response_deserializer=rag__pb2.IndexBooksResponse.FromString,
+                '/recommendation.RecommendationService/IndexBooks',
+                request_serializer=recommendation__pb2.IndexBooksRequest.SerializeToString,
+                response_deserializer=recommendation__pb2.IndexBooksResponse.FromString,
+                _registered_method=True)
+        self.GetRecommendations = channel.unary_unary(
+                '/recommendation.RecommendationService/GetRecommendations',
+                request_serializer=recommendation__pb2.RecommendationRequest.SerializeToString,
+                response_deserializer=recommendation__pb2.RecommendationResponse.FromString,
                 _registered_method=True)
 
 
-class RagServiceServicer(object):
-    """RAG service - consumed internally by Social and other services.
-    """
-
-    def TrackInteraction(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+class RecommendationServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
 
     def IndexBooks(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -66,57 +55,35 @@ class RagServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetRecommendations(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
-def add_RagServiceServicer_to_server(servicer, server):
+
+def add_RecommendationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'TrackInteraction': grpc.unary_unary_rpc_method_handler(
-                    servicer.TrackInteraction,
-                    request_deserializer=rag__pb2.TrackInteractionRequest.FromString,
-                    response_serializer=rag__pb2.TrackInteractionResponse.SerializeToString,
-            ),
             'IndexBooks': grpc.unary_unary_rpc_method_handler(
                     servicer.IndexBooks,
-                    request_deserializer=rag__pb2.IndexBooksRequest.FromString,
-                    response_serializer=rag__pb2.IndexBooksResponse.SerializeToString,
+                    request_deserializer=recommendation__pb2.IndexBooksRequest.FromString,
+                    response_serializer=recommendation__pb2.IndexBooksResponse.SerializeToString,
+            ),
+            'GetRecommendations': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRecommendations,
+                    request_deserializer=recommendation__pb2.RecommendationRequest.FromString,
+                    response_serializer=recommendation__pb2.RecommendationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'rag.RagService', rpc_method_handlers)
+            'recommendation.RecommendationService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('rag.RagService', rpc_method_handlers)
+    server.add_registered_method_handlers('recommendation.RecommendationService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class RagService(object):
-    """RAG service - consumed internally by Social and other services.
-    """
-
-    @staticmethod
-    def TrackInteraction(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/rag.RagService/TrackInteraction',
-            rag__pb2.TrackInteractionRequest.SerializeToString,
-            rag__pb2.TrackInteractionResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
+class RecommendationService(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def IndexBooks(request,
@@ -132,9 +99,36 @@ class RagService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/rag.RagService/IndexBooks',
-            rag__pb2.IndexBooksRequest.SerializeToString,
-            rag__pb2.IndexBooksResponse.FromString,
+            '/recommendation.RecommendationService/IndexBooks',
+            recommendation__pb2.IndexBooksRequest.SerializeToString,
+            recommendation__pb2.IndexBooksResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRecommendations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/recommendation.RecommendationService/GetRecommendations',
+            recommendation__pb2.RecommendationRequest.SerializeToString,
+            recommendation__pb2.RecommendationResponse.FromString,
             options,
             channel_credentials,
             insecure,

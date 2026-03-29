@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package recommendation;
+
+service RecommendationService {
+  rpc IndexBooks(IndexBooksRequest) returns (IndexBooksResponse);
+  rpc GetRecommendations(RecommendationRequest) returns (RecommendationResponse);
+}
+
+message BookPayload {
+  string book_id = 1;
+  string title = 2;
+  repeated string authors = 3;
+  repeated string author_ids = 4;
+  string description = 5;
+  repeated string categories = 6;
+  string thumbnail = 7;
+  string published_date = 8;
+  string language = 9;
+  float average_rating = 10;
+  int32 ratings_count = 11;
+}
+
+message IndexBooksRequest {
+  repeated BookPayload books = 1;
+}
+
+message IndexBooksResponse {
+  int32 indexed = 1;
+}
+
+message RecommendationRequest {
+  string user_id = 1;
+  string query = 2;
+  string current_book_id = 3;
+  int32 limit = 4;
+}
+
+message BookRecommendation {
+  string book_id = 1;
+  string title = 2;
+  repeated string authors = 3;
+  float score = 4;
+  string reason = 5;
+}
+
+message RecommendationResponse {
+  repeated BookRecommendation recommendations = 1;
+}

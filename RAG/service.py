@@ -91,7 +91,7 @@ class ReadingCreateRequest(BaseModel):
     title: str
     authors: str
     status: str = Field(default="want_to_read")
-    qdrant_id: int
+    qdrant_id: str | int
 
 
 class ReadingUpdateRequest(BaseModel):
@@ -116,7 +116,7 @@ class PersonalizedRecommendationResponse(BaseModel):
 class InteractionEventRequest(BaseModel):
     user_id: str
     book_id: str
-    qdrant_id: int
+    qdrant_id: str | int
     interaction_type: str
     value: Optional[float] = None
 
@@ -124,6 +124,31 @@ class InteractionEventRequest(BaseModel):
 class InteractionEventResponse(BaseModel):
     success: bool
     message: Optional[str] = None
+
+
+
+class InternalIndexBook(BaseModel):
+    book_id: str
+    title: str
+    authors: str | list[str] = ""
+    description: str = ""
+    categories: List[str] = Field(default_factory=list)
+    language: Optional[str] = None
+    average_rating: Optional[float] = None
+    ratings_count: Optional[int] = None
+    published_date: Optional[str] = None
+    thumbnail: Optional[str] = None
+    source: Optional[str] = None
+    author_style: Optional[str] = None
+
+
+class InternalIndexRequest(BaseModel):
+    books: List[InternalIndexBook] = Field(default_factory=list)
+
+
+class InternalIndexResponse(BaseModel):
+    indexed: int
+    failed: int
 
 
 def _payload_from_obj(item: Any) -> Dict[str, Any]:
@@ -213,9 +238,11 @@ def _interaction_to_updates(interaction_type: str, value: Optional[float]) -> Di
         if value is not None:
             updates["rating"] = float(value)
         return updates
-    if normalized in {"like", "liked", "shelf_add", "add_to_shelf", "save"}:
+    if normalized in {"like", "liked", "shelf_add", "add_to_shelf", "save", "shelf", "review"}:
         return {"status": "reading"}
     if normalized in {"want_to_read", "wishlist"}:
+        return {"status": "want_to_read"}
+    if normalized in {"dislike", "unlike", "shelf_remove", "remove_from_shelf"}:
         return {"status": "want_to_read"}
     return {"status": "reading"}
 
@@ -481,7 +508,7 @@ async def create_reading_entry(
 
     book_doc = {
         "book_id": (grpc_book or {}).get("book_id", payload.book_id),
-        "qdrant_id": payload.qdrant_id,
+        "qdrant_id": str(payload.qdrant_id),
         "title": (grpc_book or {}).get("title") or payload.title,
         "authors": (grpc_book or {}).get("authors") or payload.authors,
         "description": "",
@@ -615,7 +642,43 @@ async def personalized_recommend(
         user_id=user_id,
         source="personalized",
         recommendations=[_to_book_view(hit) for hit in filtered],
+        message="Personalized using reading history and social interactions (likes/shelves/ratings).",
     )
+
+
+@app.post("/api/v1/internal/index/books", response_model=InternalIndexResponse)
+async def internal_index_books(
+    payload: InternalIndexRequest,
+    client: QdrantClient = Depends(get_request_client),
+) -> InternalIndexResponse:
+    indexed = 0
+    failed = 0
+
+    for item in payload.books:
+        try:
+            authors_value = item.authors
+            authors = ", ".join(authors_value) if isinstance(authors_value, list) else str(authors_value or "")
+            book_payload = {
+                "book_id": item.book_id,
+                "id": item.book_id,
+                "title": item.title,
+                "authors": authors,
+                "description": item.description,
+                "categories": item.categories,
+                "language": item.language,
+                "average_rating": item.average_rating,
+                "ratings_count": item.ratings_count,
+                "published_date": item.published_date,
+                "thumbnail": item.thumbnail,
+                "source": item.source or "bookv2",
+                "author_style": item.author_style or "",
+            }
+            await asyncio.to_thread(add_book_to_database, client, book_payload)
+            indexed += 1
+        except Exception:
+            failed += 1
+
+    return InternalIndexResponse(indexed=indexed, failed=failed)
 
 
 @app.post("/api/v1/internal/interactions", response_model=InteractionEventResponse)

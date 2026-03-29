@@ -1,0 +1,3 @@
+rebuild books and rag service
+books: get books and auther style and  store it to mongodb and pass it to rag to embaded both
+rag :turn into  recomendtion  take book meta data and auther style which is static and  user  to make personlize  also get data from social service (like, shelf , ratings)

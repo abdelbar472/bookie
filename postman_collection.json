@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Microservices - Auth + User + Follow + Book + Social + RAG",
-    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004) · Social (:8005) · RAG (:8006)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Like + rate + review + shelf (Social)\n6. Get recommendations (RAG)",
+    "name": "Microservices - Auth + User + Follow + Book + BookV2 + Social + RAG",
+    "description": "Auth (:8001) · User (:8002) · Follow (:8003) · Book (:8004) · BookV2 (:8007) · Social (:8005) · RAG (:8006)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Import books/authors from APIs (BookV2)\n6. Like + rate + review + shelf (Social)\n7. Get recommendations (RAG)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -9,6 +9,7 @@
     { "key": "user_url",      "value": "http://127.0.0.1:8002/api/v1" },
     { "key": "follow_url",    "value": "http://127.0.0.1:8003/api/v1" },
     { "key": "book_url",      "value": "http://127.0.0.1:8004/api/v1" },
+    { "key": "bookv2_url",    "value": "http://127.0.0.1:8007/api/v2" },
     { "key": "social_url",    "value": "http://127.0.0.1:8005/api/v1" },
     { "key": "rag_url",       "value": "http://127.0.0.1:8006" },
     { "key": "access_token",  "value": "" },
@@ -679,6 +680,74 @@
           "name": "Book Social Stats",
           "request": { "method": "GET", "url": "{{social_url}}/social/books/{{book_isbn}}/stats" },
           "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Book Service V2 (:8007)",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/health" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }]
+        },
+        {
+          "name": "Import Books from Google Books",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{bookv2_url}}/import/books",
+            "body": { "mode": "raw", "raw": "{\n  \"query\": \"science fiction classics\",\n  \"max_results\": 10\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ imported:', pm.response.json().imported, '| updated:', pm.response.json().updated);"
+          ] } }]
+        },
+        {
+          "name": "Import Authors from OpenLibrary",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{bookv2_url}}/import/authors",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"George Orwell\",\n  \"max_results\": 10\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ imported:', pm.response.json().imported, '| updated:', pm.response.json().updated);"
+          ] } }]
+        },
+        {
+          "name": "List Books",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/books?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ BookV2 total books:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "Search Books",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/books?q=animal&skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ BookV2 search total:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "List Authors",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/authors?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ BookV2 total authors:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "Search Authors",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/authors?name=orwell&skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ BookV2 author search total:', pm.response.json().total);"
+          ] } }]
         }
       ]
     },

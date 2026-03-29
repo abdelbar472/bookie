@@ -1,11 +1,12 @@
 import logging
+import asyncio
 
 import grpc
 
 from proto import rag_pb2, rag_pb2_grpc
 
 from .mongo_service import add_to_reading_list, rebuild_taste_profile, update_reading_entry
-from .v3 import COLLECTION_NAME
+from .v3 import COLLECTION_NAME, add_book_to_database
 
 logger = logging.getLogger(__name__)
 
@@ -41,16 +42,11 @@ class RagServicer(rag_pb2_grpc.RagServiceServicer):
 
         updated = await update_reading_entry(self._db, user_id, book_id, updates)
         if not updated:
-            try:
-                qdrant_as_int = int(qdrant_id)
-            except (TypeError, ValueError):
-                qdrant_as_int = 0
-
             await add_to_reading_list(
                 self._db,
                 user_id=user_id,
                 book_id=book_id,
-                qdrant_id=qdrant_as_int,
+                qdrant_id=qdrant_id or book_id,
                 title=book_id,
                 authors="",
                 status=str(updates.get("status", "want_to_read")),
@@ -60,6 +56,39 @@ class RagServicer(rag_pb2_grpc.RagServiceServicer):
 
         await rebuild_taste_profile(self._db, user_id, self._qdrant_client, COLLECTION_NAME)
         return rag_pb2.TrackInteractionResponse(success=True, message="interaction tracked")
+
+    async def IndexBooks(self, request, context):
+        indexed = 0
+        failed = 0
+
+        for item in request.books:
+            try:
+                book_payload = {
+                    "book_id": (item.book_id or "").strip(),
+                    "id": (item.book_id or "").strip(),
+                    "title": item.title,
+                    "authors": item.authors,
+                    "description": item.description,
+                    "categories": list(item.categories or []),
+                    "language": item.language,
+                    "average_rating": item.average_rating if item.average_rating != 0 else None,
+                    "ratings_count": int(item.ratings_count or 0),
+                    "published_date": item.published_date,
+                    "thumbnail": item.thumbnail,
+                    "source": item.source or "bookv2",
+                    "author_style": item.author_style,
+                }
+                await asyncio.to_thread(add_book_to_database, self._qdrant_client, book_payload)
+                indexed += 1
+            except Exception as exc:
+                failed += 1
+                logger.warning("RAG IndexBooks failed for '%s': %s", item.book_id, exc)
+
+        return rag_pb2.IndexBooksResponse(
+            indexed=indexed,
+            failed=failed,
+            message="books indexed via gRPC",
+        )
 
 
 async def serve_grpc(db, qdrant_client, host: str = "127.0.0.1", port: int = 50056):

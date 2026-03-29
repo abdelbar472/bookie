@@ -149,6 +149,7 @@ cd D:\codes\fastapi_auth
 .\run_user.ps1
 .\run_follow.ps1
 .\run_book.ps1
+.\run_bookv2.ps1
 .\run_social.ps1
 .\run_rag.ps1
 .\run_frontend.ps1
@@ -159,8 +160,14 @@ Swagger UIs:
 - User: http://localhost:8002/docs
 - Follow: http://localhost:8003/docs
 - Book: http://localhost:8004/docs
+- Book V2: http://localhost:8007/docs
 - Social: http://localhost:8005/docs
 - RAG: http://localhost:8006/docs
+
+Book V2 (MongoDB + external APIs):
+- Health: `http://127.0.0.1:8007/api/v2/health`
+- Docs: `http://127.0.0.1:8007/docs`
+- Reference: `bookv2/README.md`
 
 Frontend pages:
 - Home: http://127.0.0.1:8080/

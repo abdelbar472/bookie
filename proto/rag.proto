@@ -5,6 +5,7 @@ package rag;
 // RAG service - consumed internally by Social and other services.
 service RagService {
   rpc TrackInteraction (TrackInteractionRequest) returns (TrackInteractionResponse);
+  rpc IndexBooks (IndexBooksRequest) returns (IndexBooksResponse);
 }
 
 message TrackInteractionRequest {
@@ -18,5 +19,30 @@ message TrackInteractionRequest {
 message TrackInteractionResponse {
   bool success = 1;
   string message = 2;
+}
+
+message IndexBookPayload {
+  string book_id = 1;
+  string title = 2;
+  string authors = 3;
+  string description = 4;
+  repeated string categories = 5;
+  string language = 6;
+  double average_rating = 7;
+  int32 ratings_count = 8;
+  string published_date = 9;
+  string thumbnail = 10;
+  string source = 11;
+  string author_style = 12;
+}
+
+message IndexBooksRequest {
+  repeated IndexBookPayload books = 1;
+}
+
+message IndexBooksResponse {
+  int32 indexed = 1;
+  int32 failed = 2;
+  string message = 3;
 }
 

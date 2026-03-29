@@ -8,7 +8,7 @@ class BookCache(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     book_id: str
-    qdrant_id: int
+    qdrant_id: str
     title: str
     authors: str
     description: str
@@ -25,7 +25,7 @@ class ReadingEntry(BaseModel):
 
     user_id: str
     book_id: str
-    qdrant_id: int
+    qdrant_id: str
     title: str
     authors: str
     status: Literal["read", "reading", "want_to_read"]

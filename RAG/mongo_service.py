@@ -42,11 +42,9 @@ def _validate_rating(rating: Any) -> float | None:
     return value
 
 
-def _extract_book_vector(point: Any) -> list[float] | None:
-    """Extract the book_content vector (or fallback vector) from a Qdrant point."""
-    vector_data = getattr(point, "vector", None)
+def _extract_named_vector(vector_data: Any, key: str) -> list[float] | None:
     if isinstance(vector_data, dict):
-        vec = vector_data.get("book_content") or vector_data.get("author_style")
+        vec = vector_data.get(key)
     else:
         vec = vector_data
 
@@ -59,6 +57,20 @@ def _extract_book_vector(point: Any) -> list[float] | None:
         return None
 
     return values if len(values) == 384 else None
+
+
+def _extract_book_vector(point: Any) -> list[float] | None:
+    """Extract the book_content vector (or fallback vector) from a Qdrant point."""
+    vector_data = getattr(point, "vector", None)
+    primary = _extract_named_vector(vector_data, "book_content")
+    if primary:
+        return primary
+    return _extract_named_vector(vector_data, "author_style")
+
+
+def _extract_author_style_vector(point: Any) -> list[float] | None:
+    vector_data = getattr(point, "vector", None)
+    return _extract_named_vector(vector_data, "author_style")
 
 
 async def upsert_book_cache(db, book: dict) -> str:
@@ -96,7 +108,7 @@ async def add_to_reading_list(
     db,
     user_id: str,
     book_id: str,
-    qdrant_id: int,
+    qdrant_id: str | int,
     title: str,
     authors: str,
     status: str = "want_to_read",
@@ -112,7 +124,7 @@ async def add_to_reading_list(
 
     now = _utcnow()
     set_values = {
-        "qdrant_id": int(qdrant_id),
+        "qdrant_id": str(qdrant_id),
         "title": (title or "").strip(),
         "authors": (authors or "").strip(),
         "status": status_value,
@@ -335,9 +347,16 @@ async def rebuild_taste_profile(db, user_id: str, qdrant_client, collection_name
             # qdrant_id may no longer exist; skip safely.
             continue
 
-        vector = _extract_book_vector(point)
-        if not vector:
+        book_vec = _extract_book_vector(point)
+        author_vec = _extract_author_style_vector(point)
+        if not book_vec and not author_vec:
             continue
+
+        # Blend dynamic content signal with static author-style signal.
+        if book_vec and author_vec:
+            vector = [(0.7 * b) + (0.3 * a) for b, a in zip(book_vec, author_vec)]
+        else:
+            vector = book_vec or author_vec
 
         for idx, value in enumerate(vector):
             weighted_sum[idx] += weight * value

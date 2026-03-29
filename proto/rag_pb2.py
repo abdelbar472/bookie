@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\trag.proto\x12\x03rag\"w\n\x17TrackInteractionRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x62ook_id\x18\x02 \x01(\t\x12\x11\n\tqdrant_id\x18\x03 \x01(\t\x12\x18\n\x10interaction_type\x18\x04 \x01(\t\x12\r\n\x05value\x18\x05 \x01(\x01\"<\n\x18TrackInteractionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2]\n\nRagService\x12O\n\x10TrackInteraction\x12\x1c.rag.TrackInteractionRequest\x1a\x1d.rag.TrackInteractionResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\trag.proto\x12\x03rag\"w\n\x17TrackInteractionRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x62ook_id\x18\x02 \x01(\t\x12\x11\n\tqdrant_id\x18\x03 \x01(\t\x12\x18\n\x10interaction_type\x18\x04 \x01(\t\x12\r\n\x05value\x18\x05 \x01(\x01\"<\n\x18TrackInteractionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\xfe\x01\n\x10IndexBookPayload\x12\x0f\n\x07\x62ook_id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0f\n\x07\x61uthors\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x12\n\ncategories\x18\x05 \x03(\t\x12\x10\n\x08language\x18\x06 \x01(\t\x12\x16\n\x0e\x61verage_rating\x18\x07 \x01(\x01\x12\x15\n\rratings_count\x18\x08 \x01(\x05\x12\x16\n\x0epublished_date\x18\t \x01(\t\x12\x11\n\tthumbnail\x18\n \x01(\t\x12\x0e\n\x06source\x18\x0b \x01(\t\x12\x14\n\x0c\x61uthor_style\x18\x0c \x01(\t\"9\n\x11IndexBooksRequest\x12$\n\x05\x62ooks\x18\x01 \x03(\x0b\x32\x15.rag.IndexBookPayload\"F\n\x12IndexBooksResponse\x12\x0f\n\x07indexed\x18\x01 \x01(\x05\x12\x0e\n\x06\x66\x61iled\x18\x02 \x01(\x05\x12\x0f\n\x07message\x18\x03 \x01(\t2\x9c\x01\n\nRagService\x12O\n\x10TrackInteraction\x12\x1c.rag.TrackInteractionRequest\x1a\x1d.rag.TrackInteractionResponse\x12=\n\nIndexBooks\x12\x16.rag.IndexBooksRequest\x1a\x17.rag.IndexBooksResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_TRACKINTERACTIONREQUEST']._serialized_end=137
   _globals['_TRACKINTERACTIONRESPONSE']._serialized_start=139
   _globals['_TRACKINTERACTIONRESPONSE']._serialized_end=199
-  _globals['_RAGSERVICE']._serialized_start=201
-  _globals['_RAGSERVICE']._serialized_end=294
+  _globals['_INDEXBOOKPAYLOAD']._serialized_start=202
+  _globals['_INDEXBOOKPAYLOAD']._serialized_end=456
+  _globals['_INDEXBOOKSREQUEST']._serialized_start=458
+  _globals['_INDEXBOOKSREQUEST']._serialized_end=515
+  _globals['_INDEXBOOKSRESPONSE']._serialized_start=517
+  _globals['_INDEXBOOKSRESPONSE']._serialized_end=587
+  _globals['_RAGSERVICE']._serialized_start=590
+  _globals['_RAGSERVICE']._serialized_end=746
 # @@protoc_insertion_point(module_scope)

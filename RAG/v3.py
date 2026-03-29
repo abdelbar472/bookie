@@ -121,6 +121,9 @@ def _book_embed_text(book: Dict[str, Any]) -> str:
 
 
 def _author_embed_text(book: Dict[str, Any]) -> str:
+    explicit_style = str(book.get("author_style") or book.get("style_text") or "").strip()
+    if explicit_style:
+        return explicit_style
     categories = book.get("categories") or []
     return f"Author: {book.get('authors', '')}. Genres: {', '.join(categories)}."
 
@@ -438,7 +441,8 @@ def search_google_books(query: str, max_results: int = 5) -> List[Dict[str, Any]
 
 def add_book_to_database(client: QdrantClient, book: Dict[str, Any]) -> str:
     """Add new book to database."""
-    new_id = get_next_id()
+    stable_book_id = str(book.get("book_id") or book.get("id") or "").strip()
+    new_id = stable_book_id or get_next_id()
 
     categories = book.get("categories") or []
     if not book.get("embed_text"):
@@ -464,11 +468,13 @@ def add_book_to_database(client: QdrantClient, book: Dict[str, Any]) -> str:
             "author_style": author_vec,
         },
         payload={
+            "book_id": stable_book_id or new_id,
             "title": book.get("title", "Unknown"),
             "authors": book.get("authors", "Unknown"),
             "author_name": book.get("authors", "Unknown").split(",")[0].strip(),
             "description": str(book.get("description", ""))[:500],
             "categories": categories,
+            "author_style": str(book.get("author_style") or book.get("style_text") or "").strip(),
             "published_date": book.get("published_date", "Unknown"),
             "page_count": _safe_int(book.get("page_count", 0)),
             "average_rating": _safe_float(book.get("average_rating", 0)),
