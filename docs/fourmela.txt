@@ -1,0 +1,15 @@
+The Math (Moving Average Update):
+You don't need to retrain a model. You just shift the user's vector toward the book's vector.
+U 
+new
+​
+ =α⋅U 
+old
+​
+ +(1−α)⋅B 
+liked
+​
+ 
+ (Where 
+α
+ is a decay factor, e.g., 0.9. This ensures older interactions slowly fade out, and the vector adapts to recent interests).

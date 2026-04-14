@@ -81,19 +81,45 @@ def normalize_book(raw_item: Dict) -> Optional[Dict]:
 
 
 async def search_wikipedia(author_name: str, lang: str = "en") -> Optional[str]:
-    """Search Wikipedia for author, return page title if found"""
-    url = f"https://{lang}.wikipedia.org/w/api.php"
-    params = {
+    """Search Wikipedia and return first page title if found."""
+    # OpenSearch is typically less strict than the query/search route.
+    opensearch_url = f"https://{lang}.wikipedia.org/w/api.php"
+    opensearch_params = {
+        "action": "opensearch",
+        "search": author_name,
+        "limit": 1,
+        "namespace": 0,
+        "format": "json",
+    }
+
+    open_search_data = None
+    try:
+        async with httpx.AsyncClient(headers=_DEFAULT_HEADERS) as client:
+            resp = await client.get(opensearch_url, params=opensearch_params, timeout=10)
+            resp.raise_for_status()
+            open_search_data = resp.json()
+    except httpx.HTTPError as exc:
+        logger.warning("Wikipedia opensearch failed for '%s' (%s): %s", author_name, lang, exc)
+        open_search_data = None
+
+    if isinstance(open_search_data, list) and len(open_search_data) >= 2:
+        suggestions = open_search_data[1]
+        if isinstance(suggestions, list) and suggestions:
+            return str(suggestions[0])
+
+    # Fallback to regular search API.
+    search_url = f"https://{lang}.wikipedia.org/w/api.php"
+    search_params = {
         "action": "query",
         "list": "search",
         "srsearch": author_name,
         "format": "json",
-        "srlimit": 1
+        "srlimit": 1,
     }
 
     try:
         async with httpx.AsyncClient(headers=_DEFAULT_HEADERS) as client:
-            resp = await client.get(url, params=params, timeout=10)
+            resp = await client.get(search_url, params=search_params, timeout=10)
             resp.raise_for_status()
             data = resp.json()
     except httpx.HTTPError as exc:
@@ -103,6 +129,49 @@ async def search_wikipedia(author_name: str, lang: str = "en") -> Optional[str]:
     results = data.get("query", {}).get("search", [])
     if results:
         return results[0]["title"]
+    return None
+
+
+def _extract_author_from_summary(description: str) -> Optional[str]:
+    if not description:
+        return None
+
+    # Examples: "novel by George Orwell", "book by Yuval Noah Harari"
+    match = re.search(r"\bby\s+([^,.;()]+)", description, flags=re.IGNORECASE)
+    if not match:
+        return None
+    return match.group(1).strip()
+
+
+async def resolve_book_from_wikipedia(title: str) -> Optional[Dict]:
+    """Resolve a book title from Wikipedia and return normalized book-like payload."""
+    for lang in ["en", "ar"]:
+        page_title = await search_wikipedia(title, lang)
+        if not page_title:
+            continue
+
+        summary = await fetch_wikipedia_bio(page_title, lang)
+        if not summary:
+            continue
+
+        inferred_author = _extract_author_from_summary(summary.get("bio") or "")
+        authors = [inferred_author] if inferred_author else []
+
+        return {
+            "book_id": f"wiki:{_slugify(page_title)}",
+            "title": summary.get("title") or title,
+            "authors": authors,
+            "author_ids": [_slugify(a) for a in authors],
+            "description": summary.get("bio") or "",
+            "categories": [],
+            "thumbnail": None,
+            "published_date": None,
+            "language": lang,
+            "average_rating": None,
+            "ratings_count": None,
+            "source": "wikipedia",
+        }
+
     return None
 
 

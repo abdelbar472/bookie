@@ -20,6 +20,8 @@
     { "key": "publisher_id",  "value": "" },
     { "key": "award_id",      "value": "" },
     { "key": "book_isbn",     "value": "" },
+    { "key": "bookv2_book_id", "value": "" },
+    { "key": "bookv2_writer_id", "value": "" },
     { "key": "shelf_id",      "value": "" },
     { "key": "review_id",     "value": "" },
     { "key": "reply_id",      "value": "" }
@@ -701,20 +703,33 @@
           },
           "event": [{ "listen": "test", "script": { "exec": [
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
-            "if (pm.response.code === 200) console.log('✅ imported:', pm.response.json().imported, '| updated:', pm.response.json().updated);"
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    const books = j.books || j.items || [];",
+            "    if (books.length > 0 && books[0].book_id) pm.collectionVariables.set('bookv2_book_id', books[0].book_id);",
+            "    console.log('✅ imported_count:', j.imported_count || j.imported || 0);",
+            "}"
           ] } }]
         },
         {
-          "name": "Import Authors from OpenLibrary",
+          "name": "Resolve Book + Writer (DB first, Wiki fallback)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{bookv2_url}}/import/authors",
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"George Orwell\",\n  \"max_results\": 10\n}" }
+            "url": "{{bookv2_url}}/resolve",
+            "body": { "mode": "raw", "raw": "{\n  \"book_title\": \"Animal Farm\",\n  \"writer_name\": \"George Orwell\"\n}" }
           },
           "event": [{ "listen": "test", "script": { "exec": [
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
-            "if (pm.response.code === 200) console.log('✅ imported:', pm.response.json().imported, '| updated:', pm.response.json().updated);"
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    if (j.book && j.book.book_id) pm.collectionVariables.set('bookv2_book_id', j.book.book_id);",
+            "    if (j.writer && j.writer.author_id) {",
+            "        pm.collectionVariables.set('bookv2_writer_id', j.writer.author_id);",
+            "        pm.collectionVariables.set('author_id', j.writer.author_id);",
+            "    }",
+            "    console.log('✅ new book:', j.book_was_new, '| new writer:', j.writer_was_new, '| top5_added:', j.top5_added);",
+            "}"
           ] } }]
         },
         {
@@ -722,7 +737,12 @@
           "request": { "method": "GET", "url": "{{bookv2_url}}/books?skip=0&limit=20" },
           "event": [{ "listen": "test", "script": { "exec": [
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
-            "if (pm.response.code === 200) console.log('✅ BookV2 total books:', pm.response.json().total);"
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    const first = (j.items || [])[0];",
+            "    if (first && first.book_id) pm.collectionVariables.set('bookv2_book_id', first.book_id);",
+            "    console.log('✅ BookV2 total books:', j.total);",
+            "}"
           ] } }]
         },
         {
@@ -731,6 +751,38 @@
           "event": [{ "listen": "test", "script": { "exec": [
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
             "if (pm.response.code === 200) console.log('✅ BookV2 search total:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "Get Book by ID",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/books/{{bookv2_book_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Book:', pm.response.json().title);"
+          ] } }]
+        },
+        {
+          "name": "List Writers",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/writers?skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) {",
+            "    const j = pm.response.json();",
+            "    const first = (j.items || [])[0];",
+            "    if (first && first.author_id) {",
+            "        pm.collectionVariables.set('bookv2_writer_id', first.author_id);",
+            "        pm.collectionVariables.set('author_id', first.author_id);",
+            "    }",
+            "    console.log('✅ BookV2 total writers:', j.total);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "Search Writers",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/writers?q=orwell&skip=0&limit=20" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ BookV2 writer search total:', pm.response.json().total);"
           ] } }]
         },
         {
@@ -743,10 +795,26 @@
         },
         {
           "name": "Search Authors",
-          "request": { "method": "GET", "url": "{{bookv2_url}}/authors?name=orwell&skip=0&limit=20" },
+          "request": { "method": "GET", "url": "{{bookv2_url}}/authors?q=orwell&skip=0&limit=20" },
           "event": [{ "listen": "test", "script": { "exec": [
             "pm.test('200 OK', () => pm.response.to.have.status(200));",
             "if (pm.response.code === 200) console.log('✅ BookV2 author search total:', pm.response.json().total);"
+          ] } }]
+        },
+        {
+          "name": "Get Author by ID",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/authors/{{bookv2_writer_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Author:', pm.response.json().name);"
+          ] } }]
+        },
+        {
+          "name": "Get Writer by ID",
+          "request": { "method": "GET", "url": "{{bookv2_url}}/writers/{{bookv2_writer_id}}" },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "if (pm.response.code === 200) console.log('✅ Writer:', pm.response.json().name);"
           ] } }]
         }
       ]

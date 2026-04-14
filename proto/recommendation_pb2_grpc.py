@@ -3,7 +3,10 @@
 import grpc
 import warnings
 
-import recommendation_pb2 as recommendation__pb2
+try:
+    import recommendation_pb2 as recommendation__pb2
+except ImportError:
+    from proto import recommendation_pb2 as recommendation__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__

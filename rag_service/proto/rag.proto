@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package rag;
+
+option go_package = "github.com/bookie/rag/proto";
+
+service RAGService {
+  rpc IndexBook(IndexBookRequest) returns (IndexResponse);
+  rpc IndexBatch(BatchIndexRequest) returns (BatchIndexResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc GetRecommendations(RecommendRequest) returns (RecommendResponse);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+message Book {
+  string work_id = 1;
+  string title = 2;
+  string primary_author = 3;
+  string rag_document = 4;
+  string description = 5;
+  repeated string genres = 6;
+  repeated string themes = 7;
+  optional string series_name = 8;
+  optional float series_position = 9;
+}
+
+message IndexBookRequest {
+  Book book = 1;
+}
+
+message BatchIndexRequest {
+  repeated Book books = 1;
+}
+
+message IndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message BatchIndexResponse {
+  bool success = 1;
+  int32 indexed_count = 2;
+  int32 failed_count = 3;
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 top_k = 2;
+  optional string entity_type = 3;
+  optional string genre = 4;
+}
+
+message SearchResult {
+  string work_id = 1;
+  string title = 2;
+  string author = 3;
+  float score = 4;
+  string text = 5;
+  string entity_type = 6;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+  int32 total_count = 2;
+}
+
+message RecommendRequest {
+  repeated string work_ids = 1;
+  int32 top_k = 2;
+  bool diversify = 3;
+}
+
+message RecommendResponse {
+  repeated string work_ids = 1;
+  repeated SearchResult details = 2;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  int32 indexed_documents = 2;
+  string version = 3;
+}
+

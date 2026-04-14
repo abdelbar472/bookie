@@ -33,14 +33,17 @@ Swagger:
 ## Main endpoints
 - `GET /api/v2/health`
 - `POST /api/v2/import/books`
-- `POST /api/v2/import/authors`
 - `GET /api/v2/books`
 - `GET /api/v2/books/{book_id}`
+- `GET /api/v2/writers`
+- `GET /api/v2/writers/{author_id}`
 - `GET /api/v2/authors`
 - `GET /api/v2/authors/{author_id}`
+- `POST /api/v2/resolve`
 
 ## Notes
 - Each newly discovered author is enriched from Wikipedia and expanded with up to 5 additional books via Google Books (`inauthor:"<name>"`).
+- `POST /api/v2/resolve` checks MongoDB first; if a book/writer is missing it tries Wikipedia, stores the result, and forwards newly created books to recommendation.
 - Imported books include `author_style` text used by RAG named vectors (`book_content` + `author_style`).
 - BookV2 pushes imported books to RAG via gRPC `RagService.IndexBooks` (no internal HTTP hop).
 

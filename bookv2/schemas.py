@@ -13,6 +13,11 @@ class ImportAuthorsRequest(BaseModel):
     max_results: int = Field(default=10, ge=1, le=50)
 
 
+class ResolveBookWriterRequest(BaseModel):
+    book_title: str | None = Field(default=None, min_length=1)
+    writer_name: str | None = Field(default=None, min_length=1)
+
+
 class BookResponse(BaseModel):
     book_id: str
     title: str
