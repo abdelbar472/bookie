@@ -1,0 +1,2 @@
+"""Recommendation microservice package."""
+

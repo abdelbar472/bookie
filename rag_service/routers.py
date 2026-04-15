@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from .services import IndexingService, RecommendationService, SearchService
+from .services import IndexingService, SearchService
 
 logger = logging.getLogger(__name__)
 
@@ -55,22 +55,6 @@ async def thematic_search(themes: List[str], top_k: int = Query(10, ge=1, le=50)
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/recommend")
-async def get_recommendations(
-    history: List[str],
-    top_k: int = Query(10, ge=1, le=50),
-    diversify: bool = Query(True),
-):
-    try:
-        return await RecommendationService.get_recommendations(
-            user_history=history,
-            top_k=top_k,
-            diversify=diversify,
-        )
-    except Exception as exc:
-        logger.error("Recommendation failed: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
-
 
 @router.get("/stats")
 async def get_stats():
@@ -106,7 +90,7 @@ async def sync_book_by_work_id(request: BookSyncRequest):
 
 @router.get("/health")
 async def health_check():
-    from .vector_store import vector_store
+    from rag_service import vector_store
 
     try:
         count = await vector_store.count()

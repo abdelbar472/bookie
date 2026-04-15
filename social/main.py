@@ -8,7 +8,7 @@ from .auth import close_auth_channel
 from .book_grpc_client import close_book_channel
 from .config import settings
 from .database import create_db_and_tables
-from .rag_grpc_client import close_rag_channel
+from .recommendation_grpc_client import close_recommendation_channel
 from .routers import router
 
 logging.basicConfig(
@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     logger.info("Social service shutdown - closing gRPC channels")
     await close_auth_channel()
     await close_book_channel()
-    await close_rag_channel()
+    await close_recommendation_channel()
 
 
 app = FastAPI(

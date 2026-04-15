@@ -1,21 +1,18 @@
-"""
-Vector store operations for RAG.
-"""
+"""Vector store operations for retrieval."""
+
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from qdrant_client.models import FieldCondition, Filter, MatchValue, PointStruct
 
-from .config import settings
-from .database import get_qdrant
+from rag_service.config import settings
+from .qdrant_client import get_qdrant
 
 logger = logging.getLogger(__name__)
 
 
 class VectorStore:
-    """Qdrant vector store operations."""
-
     def __init__(self):
         self.collection_name = settings.QDRANT_COLLECTION_NAME
         self.qdrant = None
@@ -25,15 +22,10 @@ class VectorStore:
             self.qdrant = get_qdrant()
         return self.qdrant
 
-    async def upsert_documents(
-        self,
-        documents: List[Dict[str, Any]],
-        embeddings: List[List[float]],
-    ) -> bool:
+    async def upsert_documents(self, documents: List[Dict[str, Any]], embeddings: List[List[float]]) -> bool:
         try:
             client = self._get_client()
             points: List[PointStruct] = []
-
             for doc, embedding in zip(documents, embeddings):
                 points.append(
                     PointStruct(
@@ -53,20 +45,14 @@ class VectorStore:
                         },
                     )
                 )
-
             client.upsert(collection_name=self.collection_name, points=points)
-            logger.info("Upserted %s documents to vector store", len(points))
+            logger.info("Upserted %s documents", len(points))
             return True
         except Exception as exc:
             logger.error("Failed to upsert documents: %s", exc)
             return False
 
-    async def search(
-        self,
-        query_embedding: List[float],
-        top_k: int = 5,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+    async def search(self, query_embedding: List[float], top_k: int = 5, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         try:
             client = self._get_client()
             qdrant_filter = self._build_filter(filters) if filters else None
@@ -78,7 +64,6 @@ class VectorStore:
                 with_payload=True,
                 with_vectors=False,
             )
-
             return [
                 {
                     "id": r.id,
@@ -99,44 +84,24 @@ class VectorStore:
             logger.error("Search failed: %s", exc)
             return []
 
-    async def hybrid_search(
-        self,
-        query_embedding: List[float],
-        query_text: str,
-        top_k: int = 5,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
-        vector_results = await self.search(query_embedding, top_k * 2, filters)
-
-        query_terms = query_text.lower().split()
-        for result in vector_results:
+    async def hybrid_search(self, query_embedding: List[float], query_text: str, top_k: int = 5, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        results = await self.search(query_embedding, top_k * 2, filters)
+        terms = query_text.lower().split()
+        for result in results:
             text = (result.get("text") or "").lower()
-            keyword_matches = sum(1 for term in query_terms if term in text)
-            boost = min(0.2, keyword_matches * 0.05)
-            result["score"] = result["score"] * (1 + boost)
-            result["keyword_matches"] = keyword_matches
-
-        vector_results.sort(key=lambda item: item["score"], reverse=True)
-        return vector_results[:top_k]
+            matches = sum(1 for term in terms if term in text)
+            result["score"] = result["score"] * (1 + min(0.2, matches * 0.05))
+        results.sort(key=lambda item: item["score"], reverse=True)
+        return results[:top_k]
 
     async def get_by_id(self, doc_id: str) -> Optional[Dict[str, Any]]:
         try:
             client = self._get_client()
-            result = client.retrieve(
-                collection_name=self.collection_name,
-                ids=[doc_id],
-                with_payload=True,
-            )
+            result = client.retrieve(collection_name=self.collection_name, ids=[doc_id], with_payload=True)
             if not result:
                 return None
-
             first = result[0]
-            return {
-                "id": first.id,
-                "text": first.payload.get("text"),
-                "work_id": first.payload.get("work_id"),
-                "metadata": first.payload,
-            }
+            return {"id": first.id, "text": first.payload.get("text"), "work_id": first.payload.get("work_id"), "metadata": first.payload}
         except Exception as exc:
             logger.error("Retrieve failed: %s", exc)
             return None
@@ -146,31 +111,16 @@ class VectorStore:
             client = self._get_client()
             info = client.get_collection(self.collection_name)
             return int(info.points_count or 0)
-        except Exception as exc:
-            logger.error("Count failed: %s", exc)
+        except Exception:
             return 0
 
     def _build_filter(self, filters: Dict[str, Any]) -> Optional[Filter]:
         conditions = []
-
         if "entity_type" in filters:
-            conditions.append(
-                FieldCondition(
-                    key="entity_type",
-                    match=MatchValue(value=filters["entity_type"]),
-                )
-            )
+            conditions.append(FieldCondition(key="entity_type", match=MatchValue(value=filters["entity_type"])))
         if "work_id" in filters:
-            conditions.append(
-                FieldCondition(
-                    key="work_id",
-                    match=MatchValue(value=filters["work_id"]),
-                )
-            )
-
-        if not conditions:
-            return None
-        return Filter(must=conditions)
+            conditions.append(FieldCondition(key="work_id", match=MatchValue(value=filters["work_id"])))
+        return Filter(must=conditions) if conditions else None
 
 
 vector_store = VectorStore()

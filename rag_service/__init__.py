@@ -1,9 +1,18 @@
-"""RAG Service package."""
+"""Retrieval module: embeddings, vector search, and Qdrant client management."""
 
-__version__ = "1.0.0"
+from .embedding import EmbeddingGenerator, embedding_generator
+from .engine import RAGEngine, rag_engine
+from .qdrant_client import DatabaseManager, get_qdrant
+from .vector_store import VectorStore, vector_store
 
-from .rag_engine import rag_engine
-from .services import RecommendationService, SearchService
-
-__all__ = ["rag_engine", "SearchService", "RecommendationService"]
+__all__ = [
+    "EmbeddingGenerator",
+    "embedding_generator",
+    "RAGEngine",
+    "rag_engine",
+    "DatabaseManager",
+    "get_qdrant",
+    "VectorStore",
+    "vector_store",
+]
 

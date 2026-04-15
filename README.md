@@ -8,7 +8,8 @@ Six independent services work together: identity, profiles, follows, catalog, so
 
 - `book_service_v3` owns rich book/author metadata retrieval and enrichment.
 - `rag_service` owns embeddings and vector indexing for **books** and **authors**.
-- `rag_service` also builds user taste signals/profile from interaction events.
+- `recommendation` owns user profile shaping + ranking and serves recommendation API.
+- `rag_service` still receives interaction events and can proxy `/api/v1/rag/recommend` to `recommendation`.
 - `social` owns likes/ratings/reviews/shelves and sends interaction events with `book_id` to `rag_service`.
 
 Interaction flow (high level):
@@ -16,7 +17,7 @@ Interaction flow (high level):
 1. Book data enters via Book services (especially `book_service_v3`).
 2. RAG indexes books/authors (embed + store in vector DB).
 3. Social sends user interaction events (`user_id`, `book_id`, `interaction_type`, `value`) to RAG via gRPC.
-4. RAG updates user preference signals and serves recommendations.
+4. Recommendation service ranks results and serves recommendation responses.
 
 ---
 

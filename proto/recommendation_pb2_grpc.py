@@ -3,10 +3,7 @@
 import grpc
 import warnings
 
-try:
-    import recommendation_pb2 as recommendation__pb2
-except ImportError:
-    from proto import recommendation_pb2 as recommendation__pb2
+from proto import recommendation_pb2 as proto_dot_recommendation__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -21,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in recommendation_pb2_grpc.py depends on'
+        + ' but the generated code in proto/recommendation_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -37,28 +34,28 @@ class RecommendationServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.IndexBooks = channel.unary_unary(
-                '/recommendation.RecommendationService/IndexBooks',
-                request_serializer=recommendation__pb2.IndexBooksRequest.SerializeToString,
-                response_deserializer=recommendation__pb2.IndexBooksResponse.FromString,
-                _registered_method=True)
         self.GetRecommendations = channel.unary_unary(
                 '/recommendation.RecommendationService/GetRecommendations',
-                request_serializer=recommendation__pb2.RecommendationRequest.SerializeToString,
-                response_deserializer=recommendation__pb2.RecommendationResponse.FromString,
+                request_serializer=proto_dot_recommendation__pb2.RecommendationRequest.SerializeToString,
+                response_deserializer=proto_dot_recommendation__pb2.RecommendationResponse.FromString,
+                _registered_method=True)
+        self.UpdateUserProfile = channel.unary_unary(
+                '/recommendation.RecommendationService/UpdateUserProfile',
+                request_serializer=proto_dot_recommendation__pb2.UpdateUserProfileRequest.SerializeToString,
+                response_deserializer=proto_dot_recommendation__pb2.UpdateUserProfileResponse.FromString,
                 _registered_method=True)
 
 
 class RecommendationServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def IndexBooks(self, request, context):
+    def GetRecommendations(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetRecommendations(self, request, context):
+    def UpdateUserProfile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -67,15 +64,15 @@ class RecommendationServiceServicer(object):
 
 def add_RecommendationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'IndexBooks': grpc.unary_unary_rpc_method_handler(
-                    servicer.IndexBooks,
-                    request_deserializer=recommendation__pb2.IndexBooksRequest.FromString,
-                    response_serializer=recommendation__pb2.IndexBooksResponse.SerializeToString,
-            ),
             'GetRecommendations': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRecommendations,
-                    request_deserializer=recommendation__pb2.RecommendationRequest.FromString,
-                    response_serializer=recommendation__pb2.RecommendationResponse.SerializeToString,
+                    request_deserializer=proto_dot_recommendation__pb2.RecommendationRequest.FromString,
+                    response_serializer=proto_dot_recommendation__pb2.RecommendationResponse.SerializeToString,
+            ),
+            'UpdateUserProfile': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateUserProfile,
+                    request_deserializer=proto_dot_recommendation__pb2.UpdateUserProfileRequest.FromString,
+                    response_serializer=proto_dot_recommendation__pb2.UpdateUserProfileResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -87,33 +84,6 @@ def add_RecommendationServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class RecommendationService(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def IndexBooks(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/recommendation.RecommendationService/IndexBooks',
-            recommendation__pb2.IndexBooksRequest.SerializeToString,
-            recommendation__pb2.IndexBooksResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def GetRecommendations(request,
@@ -130,8 +100,35 @@ class RecommendationService(object):
             request,
             target,
             '/recommendation.RecommendationService/GetRecommendations',
-            recommendation__pb2.RecommendationRequest.SerializeToString,
-            recommendation__pb2.RecommendationResponse.FromString,
+            proto_dot_recommendation__pb2.RecommendationRequest.SerializeToString,
+            proto_dot_recommendation__pb2.RecommendationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateUserProfile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/recommendation.RecommendationService/UpdateUserProfile',
+            proto_dot_recommendation__pb2.UpdateUserProfileRequest.SerializeToString,
+            proto_dot_recommendation__pb2.UpdateUserProfileResponse.FromString,
             options,
             channel_credentials,
             insecure,

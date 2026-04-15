@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     BOOK_V3_GRPC_HOST: str = "localhost"
     BOOK_V3_GRPC_PORT: int = 50057
 
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

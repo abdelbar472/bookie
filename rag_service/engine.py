@@ -1,16 +1,15 @@
-"""Core RAG engine: retrieval and indexing."""
+"""Core retrieval engine: indexing and vector search orchestration."""
+
 import logging
 from typing import Any, Dict, List, Optional
 
-from .embeddings import embedding_generator
+from .embedding import embedding_generator
 from .vector_store import vector_store
 
 logger = logging.getLogger(__name__)
 
 
 class RAGEngine:
-    """Retrieval-Augmented Generation Engine."""
-
     def __init__(self):
         self.embedding_gen = embedding_generator
         self.vector_store = vector_store
@@ -18,7 +17,6 @@ class RAGEngine:
     async def index_book(self, book: Dict[str, Any]) -> bool:
         try:
             documents: List[Dict[str, Any]] = []
-
             if book.get("rag_document"):
                 documents.append(
                     {
@@ -32,7 +30,6 @@ class RAGEngine:
                         "themes": book.get("content_analysis", {}).get("key_themes", []),
                     }
                 )
-
             if book.get("description"):
                 documents.append(
                     {
@@ -46,17 +43,10 @@ class RAGEngine:
                         "themes": [],
                     }
                 )
-
             if not documents:
                 return False
-
-            texts = [doc["text"] for doc in documents]
-            embeddings = await self.embedding_gen.generate(texts)
-            success = await self.vector_store.upsert_documents(documents, embeddings)
-
-            if success:
-                logger.info("Indexed book: %s", book.get("title"))
-            return success
+            embeddings = await self.embedding_gen.generate([doc["text"] for doc in documents])
+            return await self.vector_store.upsert_documents(documents, embeddings)
         except Exception as exc:
             logger.error("Failed to index book %s: %s", book.get("title"), exc)
             return False
@@ -65,7 +55,6 @@ class RAGEngine:
         try:
             if not author.get("rag_document"):
                 return False
-
             document = {
                 "id": f"author:{author['author_id']}",
                 "text": author["rag_document"],
@@ -76,28 +65,16 @@ class RAGEngine:
                 "genres": author.get("style_profile", {}).get("genres", []),
                 "themes": author.get("style_profile", {}).get("common_themes", []),
             }
-
             embedding = await self.embedding_gen.generate_single(document["text"])
-            success = await self.vector_store.upsert_documents([document], [embedding])
-            if success:
-                logger.info("Indexed author: %s", author.get("name"))
-            return success
-        except Exception as exc:
-            logger.error("Failed to index author %s", exc)
+            return await self.vector_store.upsert_documents([document], [embedding])
+        except Exception:
             return False
 
-    async def search(
-        self,
-        query: str,
-        top_k: int = 5,
-        entity_type: Optional[str] = None,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+    async def search(self, query: str, top_k: int = 5, entity_type: Optional[str] = None, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         query_embedding = await self.embedding_gen.generate_single(query)
         search_filters = dict(filters or {})
         if entity_type:
             search_filters["entity_type"] = entity_type
-
         return await self.vector_store.hybrid_search(
             query_embedding=query_embedding,
             query_text=query,
@@ -108,16 +85,14 @@ class RAGEngine:
     async def recommend_similar(self, work_id: str, top_k: int = 5) -> List[Dict[str, Any]]:
         book_doc = await self.vector_store.get_by_id(f"book:{work_id}")
         if not book_doc:
-            logger.warning("Book not found for similarity: %s", work_id)
             return []
-
         query_embedding = await self.embedding_gen.generate_single(book_doc["text"])
         results = await self.vector_store.search(
             query_embedding=query_embedding,
             top_k=top_k + 1,
             filters={"entity_type": "book"},
         )
-        return [r for r in results if r.get("work_id") != work_id][:top_k]
+        return [item for item in results if item.get("work_id") != work_id][:top_k]
 
 
 rag_engine = RAGEngine()

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import get_current_user_id
 from .book_grpc_client import assert_book_exists, get_book_details
 from .database import get_session
-from .rag_grpc_client import track_interaction
+from .recommendation_grpc_client import track_interaction
 from .schemas import (
     BookSocialStatsResponse,
     LikeResponse,
@@ -95,7 +95,6 @@ async def like_book_route(
     await track_interaction(
         user_id=current_user_id,
         book_id=isbn,
-        qdrant_id=isbn,
         interaction_type="like",
         value=1.0,
     )
@@ -132,7 +131,6 @@ async def upsert_rating_route(
     await track_interaction(
         user_id=current_user_id,
         book_id=isbn,
-        qdrant_id=isbn,
         interaction_type="rating",
         value=float(payload.rating),
     )
@@ -183,7 +181,6 @@ async def create_review_route(
     await track_interaction(
         user_id=current_user_id,
         book_id=payload.isbn,
-        qdrant_id=payload.isbn,
         interaction_type="review",
         value=1.0,
     )
@@ -421,7 +418,6 @@ async def add_shelf_item_route(
     await track_interaction(
         user_id=current_user_id,
         book_id=payload.isbn,
-        qdrant_id=payload.isbn,
         interaction_type="shelf_add",
         value=1.0,
     )

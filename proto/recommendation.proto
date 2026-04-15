@@ -3,37 +3,17 @@ syntax = "proto3";
 package recommendation;
 
 service RecommendationService {
-  rpc IndexBooks(IndexBooksRequest) returns (IndexBooksResponse);
   rpc GetRecommendations(RecommendationRequest) returns (RecommendationResponse);
-}
-
-message BookPayload {
-  string book_id = 1;
-  string title = 2;
-  repeated string authors = 3;
-  repeated string author_ids = 4;
-  string description = 5;
-  repeated string categories = 6;
-  string thumbnail = 7;
-  string published_date = 8;
-  string language = 9;
-  float average_rating = 10;
-  int32 ratings_count = 11;
-}
-
-message IndexBooksRequest {
-  repeated BookPayload books = 1;
-}
-
-message IndexBooksResponse {
-  int32 indexed = 1;
+  rpc UpdateUserProfile(UpdateUserProfileRequest) returns (UpdateUserProfileResponse);
 }
 
 message RecommendationRequest {
   string user_id = 1;
-  string query = 2;
-  string current_book_id = 3;
-  int32 limit = 4;
+  repeated string history_book_ids = 2;
+  int32 limit = 3;
+  bool diversify = 4;
+  string query = 5;
+  string current_book_id = 6;
 }
 
 message BookRecommendation {
@@ -46,4 +26,20 @@ message BookRecommendation {
 
 message RecommendationResponse {
   repeated BookRecommendation recommendations = 1;
+}
+
+message InteractionEvent {
+  string user_id = 1;
+  string book_id = 2;
+  string interaction_type = 3;
+  double value = 4;
+}
+
+message UpdateUserProfileRequest {
+  InteractionEvent event = 1;
+}
+
+message UpdateUserProfileResponse {
+  bool success = 1;
+  string message = 2;
 }

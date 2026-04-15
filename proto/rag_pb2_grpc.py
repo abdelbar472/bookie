@@ -3,10 +3,7 @@
 import grpc
 import warnings
 
-try:
-    import rag_pb2 as rag__pb2
-except ImportError:
-    from proto import rag_pb2 as rag__pb2
+from proto import rag_pb2 as proto_dot_rag__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -21,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in rag_pb2_grpc.py depends on'
+        + ' but the generated code in proto/rag_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -29,7 +26,7 @@ if _version_not_supported:
 
 
 class RagServiceStub(object):
-    """RAG service - consumed internally by Social and other services.
+    """Retrieval-focused RAG service.
     """
 
     def __init__(self, channel):
@@ -38,30 +35,56 @@ class RagServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.TrackInteraction = channel.unary_unary(
-                '/rag.RagService/TrackInteraction',
-                request_serializer=rag__pb2.TrackInteractionRequest.SerializeToString,
-                response_deserializer=rag__pb2.TrackInteractionResponse.FromString,
-                _registered_method=True)
         self.IndexBooks = channel.unary_unary(
                 '/rag.RagService/IndexBooks',
-                request_serializer=rag__pb2.IndexBooksRequest.SerializeToString,
-                response_deserializer=rag__pb2.IndexBooksResponse.FromString,
+                request_serializer=proto_dot_rag__pb2.IndexBooksRequest.SerializeToString,
+                response_deserializer=proto_dot_rag__pb2.IndexBooksResponse.FromString,
+                _registered_method=True)
+        self.GetSimilarBooks = channel.unary_unary(
+                '/rag.RagService/GetSimilarBooks',
+                request_serializer=proto_dot_rag__pb2.GetSimilarBooksRequest.SerializeToString,
+                response_deserializer=proto_dot_rag__pb2.GetSimilarBooksResponse.FromString,
+                _registered_method=True)
+        self.SemanticSearch = channel.unary_unary(
+                '/rag.RagService/SemanticSearch',
+                request_serializer=proto_dot_rag__pb2.SemanticSearchRequest.SerializeToString,
+                response_deserializer=proto_dot_rag__pb2.SemanticSearchResponse.FromString,
+                _registered_method=True)
+        self.GetBookEmbedding = channel.unary_unary(
+                '/rag.RagService/GetBookEmbedding',
+                request_serializer=proto_dot_rag__pb2.GetBookEmbeddingRequest.SerializeToString,
+                response_deserializer=proto_dot_rag__pb2.GetBookEmbeddingResponse.FromString,
                 _registered_method=True)
 
 
 class RagServiceServicer(object):
-    """RAG service - consumed internally by Social and other services.
+    """Retrieval-focused RAG service.
     """
 
-    def TrackInteraction(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def IndexBooks(self, request, context):
+        """Index enriched book metadata into the vector store.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def IndexBooks(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def GetSimilarBooks(self, request, context):
+        """Retrieve nearest neighbors for a given book id.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SemanticSearch(self, request, context):
+        """Semantic query against indexed vectors with optional filters.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetBookEmbedding(self, request, context):
+        """Return an embedding vector for a specific indexed book.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -69,15 +92,25 @@ class RagServiceServicer(object):
 
 def add_RagServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'TrackInteraction': grpc.unary_unary_rpc_method_handler(
-                    servicer.TrackInteraction,
-                    request_deserializer=rag__pb2.TrackInteractionRequest.FromString,
-                    response_serializer=rag__pb2.TrackInteractionResponse.SerializeToString,
-            ),
             'IndexBooks': grpc.unary_unary_rpc_method_handler(
                     servicer.IndexBooks,
-                    request_deserializer=rag__pb2.IndexBooksRequest.FromString,
-                    response_serializer=rag__pb2.IndexBooksResponse.SerializeToString,
+                    request_deserializer=proto_dot_rag__pb2.IndexBooksRequest.FromString,
+                    response_serializer=proto_dot_rag__pb2.IndexBooksResponse.SerializeToString,
+            ),
+            'GetSimilarBooks': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSimilarBooks,
+                    request_deserializer=proto_dot_rag__pb2.GetSimilarBooksRequest.FromString,
+                    response_serializer=proto_dot_rag__pb2.GetSimilarBooksResponse.SerializeToString,
+            ),
+            'SemanticSearch': grpc.unary_unary_rpc_method_handler(
+                    servicer.SemanticSearch,
+                    request_deserializer=proto_dot_rag__pb2.SemanticSearchRequest.FromString,
+                    response_serializer=proto_dot_rag__pb2.SemanticSearchResponse.SerializeToString,
+            ),
+            'GetBookEmbedding': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetBookEmbedding,
+                    request_deserializer=proto_dot_rag__pb2.GetBookEmbeddingRequest.FromString,
+                    response_serializer=proto_dot_rag__pb2.GetBookEmbeddingResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -88,35 +121,8 @@ def add_RagServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class RagService(object):
-    """RAG service - consumed internally by Social and other services.
+    """Retrieval-focused RAG service.
     """
-
-    @staticmethod
-    def TrackInteraction(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/rag.RagService/TrackInteraction',
-            rag__pb2.TrackInteractionRequest.SerializeToString,
-            rag__pb2.TrackInteractionResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def IndexBooks(request,
@@ -133,8 +139,89 @@ class RagService(object):
             request,
             target,
             '/rag.RagService/IndexBooks',
-            rag__pb2.IndexBooksRequest.SerializeToString,
-            rag__pb2.IndexBooksResponse.FromString,
+            proto_dot_rag__pb2.IndexBooksRequest.SerializeToString,
+            proto_dot_rag__pb2.IndexBooksResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSimilarBooks(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rag.RagService/GetSimilarBooks',
+            proto_dot_rag__pb2.GetSimilarBooksRequest.SerializeToString,
+            proto_dot_rag__pb2.GetSimilarBooksResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SemanticSearch(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rag.RagService/SemanticSearch',
+            proto_dot_rag__pb2.SemanticSearchRequest.SerializeToString,
+            proto_dot_rag__pb2.SemanticSearchResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetBookEmbedding(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rag.RagService/GetBookEmbedding',
+            proto_dot_rag__pb2.GetBookEmbeddingRequest.SerializeToString,
+            proto_dot_rag__pb2.GetBookEmbeddingResponse.FromString,
             options,
             channel_credentials,
             insecure,

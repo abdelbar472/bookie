@@ -22,8 +22,9 @@ class Settings(BaseSettings):
     BOOK_GRPC_HOST: str = "localhost"
     BOOK_GRPC_PORT: int = 50054
 
-    RAG_GRPC_HOST: str = "localhost"
-    RAG_GRPC_PORT: int = 50056
+
+    RECOMMENDATION_GRPC_HOST: str = "localhost"
+    RECOMMENDATION_GRPC_PORT: int = 50058
 
 
 settings = Settings()

@@ -2,27 +2,19 @@ syntax = "proto3";
 
 package rag;
 
-// RAG service - consumed internally by Social and other services.
-// Owns embedding/indexing for books and authors, and user preference updates from interactions.
+// Retrieval-focused RAG service.
 service RagService {
-  // Track user interaction on a specific book_id so RAG can update user taste/profile signals.
-  rpc TrackInteraction (TrackInteractionRequest) returns (TrackInteractionResponse);
-  // Index enriched book metadata (book + author style context) into the vector store.
-  rpc IndexBooks (IndexBooksRequest) returns (IndexBooksResponse);
-}
+  // Index enriched book metadata into the vector store.
+  rpc IndexBooks(IndexBooksRequest) returns (IndexBooksResponse);
 
-message TrackInteractionRequest {
-  int32 user_id = 1;
-  // Canonical book identifier sent by Social (e.g., ISBN/work_id depending on upstream service).
-  string book_id = 2;
-  string qdrant_id = 3;
-  string interaction_type = 4;
-  double value = 5;
-}
+  // Retrieve nearest neighbors for a given book id.
+  rpc GetSimilarBooks(GetSimilarBooksRequest) returns (GetSimilarBooksResponse);
 
-message TrackInteractionResponse {
-  bool success = 1;
-  string message = 2;
+  // Semantic query against indexed vectors with optional filters.
+  rpc SemanticSearch(SemanticSearchRequest) returns (SemanticSearchResponse);
+
+  // Return an embedding vector for a specific indexed book.
+  rpc GetBookEmbedding(GetBookEmbeddingRequest) returns (GetBookEmbeddingResponse);
 }
 
 message IndexBookPayload {
@@ -50,3 +42,41 @@ message IndexBooksResponse {
   string message = 3;
 }
 
+message RetrievalCandidate {
+  string book_id = 1;
+  string title = 2;
+  repeated string authors = 3;
+  repeated string genres = 4;
+  repeated string themes = 5;
+  float score = 6;
+}
+
+message GetSimilarBooksRequest {
+  string book_id = 1;
+  int32 top_k = 2;
+}
+
+message GetSimilarBooksResponse {
+  repeated RetrievalCandidate candidates = 1;
+}
+
+message SemanticSearchRequest {
+  string query = 1;
+  int32 top_k = 2;
+  string entity_type = 3;
+  string genre = 4;
+  string author = 5;
+}
+
+message SemanticSearchResponse {
+  repeated RetrievalCandidate candidates = 1;
+}
+
+message GetBookEmbeddingRequest {
+  string book_id = 1;
+}
+
+message GetBookEmbeddingResponse {
+  bool found = 1;
+  repeated float vector = 2;
+}
