@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package social;
+
+service SocialService {
+  rpc GetBookStats(GetBookStatsRequest) returns (BookSocialStatsPayload);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message GetBookStatsRequest {
+  string isbn = 1;
+}
+
+message BookSocialStatsPayload {
+  string isbn = 1;
+  int32 likes_count = 2;
+  int32 ratings_count = 3;
+  double avg_rating = 4;
+  bool has_avg_rating = 5;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  string service = 2;
+}
+

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from qdrant_client.models import FieldCondition, Filter, MatchValue, PointStruct
 
-from rag_service.config import settings
+from rag.config import settings
 from .qdrant_client import get_qdrant
 
 logger = logging.getLogger(__name__)

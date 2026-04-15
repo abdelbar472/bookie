@@ -9,6 +9,7 @@ from .book_grpc_client import close_book_channel
 from .config import settings
 from .database import create_db_and_tables
 from .recommendation_grpc_client import close_recommendation_channel
+from .grpc_server import serve_grpc
 from .routers import router
 
 logging.basicConfig(
@@ -23,8 +24,11 @@ async def lifespan(app: FastAPI):
     logger.info("Social service startup - creating DB tables")
     await create_db_and_tables()
     logger.info("Social DB tables ready")
+    grpc_server = await serve_grpc(host=settings.GRPC_HOST, port=settings.GRPC_PORT)
+    logger.info("Social service ready  HTTP :%s  gRPC :%s", settings.HTTP_PORT, settings.GRPC_PORT)
     yield
-    logger.info("Social service shutdown - closing gRPC channels")
+    logger.info("Social service shutdown - stopping gRPC and closing channels")
+    await grpc_server.stop(grace=5)
     await close_auth_channel()
     await close_book_channel()
     await close_recommendation_channel()
@@ -60,4 +64,3 @@ async def log_requests(request: Request, call_next):
 
 
 app.include_router(router, prefix="/api/v1")
-

@@ -1,29 +1,32 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1" pages="2">
   <diagram name="Page-1" id="9f46799a-70d6-7492-0946-bef42562c5a5">
-    <mxGraphModel dx="271" dy="168" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+    <mxGraphModel dx="671" dy="416" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-1" parent="1" style="whiteSpace=wrap;html=1;align=center;" value="follow" vertex="1">
-          <mxGeometry height="40" width="100" x="440" y="370" as="geometry" />
+          <mxGeometry height="40" width="100" x="260" y="265" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-2" parent="1" style="whiteSpace=wrap;html=1;align=center;flipH=0;legacyAnchorPoints=0;flipV=1;" value="book" vertex="1">
-          <mxGeometry height="40" width="100" x="580" y="380" as="geometry" />
+          <mxGeometry height="40" width="100" x="410" y="340" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-3" parent="1" style="whiteSpace=wrap;html=1;align=center;" value="user" vertex="1">
-          <mxGeometry height="40" width="100" x="300" y="425" as="geometry" />
+          <mxGeometry height="40" width="100" x="260" y="340" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-4" parent="1" style="whiteSpace=wrap;html=1;align=center;flipH=0;legacyAnchorPoints=0;flipV=1;" value="social" vertex="1">
-          <mxGeometry height="40" width="100" x="580" y="310" as="geometry" />
+          <mxGeometry height="40" width="100" x="260" y="420" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-5" parent="1" style="whiteSpace=wrap;html=1;align=center;flipH=0;legacyAnchorPoints=0;flipV=1;" value="RAG" vertex="1">
-          <mxGeometry height="40" width="100" x="580" y="450" as="geometry" />
+          <mxGeometry height="40" width="100" x="570" y="310" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-6" parent="1" style="whiteSpace=wrap;html=1;align=center;" value="auth" vertex="1">
-          <mxGeometry height="40" width="100" x="300" y="320" as="geometry" />
+          <mxGeometry height="40" width="130" x="50" y="340" as="geometry" />
         </mxCell>
         <mxCell id="72dbk2Y_PrrKbjIvDOe_-7" parent="1" style="whiteSpace=wrap;html=1;align=center;" value="chat" vertex="1">
-          <mxGeometry height="40" width="100" x="810" y="340" as="geometry" />
+          <mxGeometry height="40" width="100" x="740" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="UkesZQHlxEvgL5NJOqKg-1" parent="1" style="whiteSpace=wrap;html=1;align=center;flipH=0;legacyAnchorPoints=0;flipV=1;" value="&lt;div style=&quot;background-color:#1e1f22;color:#bcbec4&quot;&gt;&lt;pre style=&quot;font-family:&#39;Inter&#39;;font-size:9.8pt;&quot;&gt;recommendation&lt;/pre&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="570" y="400" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

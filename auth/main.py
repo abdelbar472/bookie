@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     logger.info("✅ DB tables ready")
 
     grpc_server = await serve_grpc(host="127.0.0.1", port=settings.GRPC_PORT)
-    logger.info("🎯 Auth service ready  HTTP :8001  gRPC :%s", settings.GRPC_PORT)
+    logger.info("Auth service ready  HTTP :%s  gRPC :%s", settings.HTTP_PORT, settings.GRPC_PORT)
 
     yield
 
@@ -52,4 +52,3 @@ async def log_requests(request: Request, call_next):
 
 
 app.include_router(router, prefix="/api/v1")
-

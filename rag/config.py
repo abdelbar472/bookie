@@ -1,4 +1,3 @@
-
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -9,6 +8,7 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
+    HTTP_PORT: int = 8005
 
     # API Keys
     OPENAI_API_KEY: str | None = None
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 1536
 
     # gRPC
-    GRPC_PORT: int = 50056
+    GRPC_PORT: int = 50055
     GRPC_HOST: str = "0.0.0.0"
 
     # Book Service V3 gRPC
@@ -43,5 +43,4 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-
 

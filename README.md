@@ -4,17 +4,31 @@ A production-ready microservice architecture using **FastAPI**, **SQLite (async)
 
 Six independent services work together: identity, profiles, follows, catalog, social interactions, and retrieval-augmented recommendations. They never share a database or a secret key.
 
+All active services expose both HTTP and gRPC APIs.
+
 ## Clear service ownership
 
-- `book_service_v3` owns rich book/author metadata retrieval and enrichment.
-- `rag_service` owns embeddings and vector indexing for **books** and **authors**.
+- `book` owns book metadata retrieval and enrichment.
+- `rag` owns embeddings and vector indexing for **books** and **authors**.
 - `recommendation` owns user profile shaping + ranking and serves recommendation API.
-- `rag_service` still receives interaction events and can proxy `/api/v1/rag/recommend` to `recommendation`.
-- `social` owns likes/ratings/reviews/shelves and sends interaction events with `book_id` to `rag_service`.
+- `rag` still receives interaction events and can proxy `/api/v1/rag/recommend` to `recommendation`.
+- `social` owns likes/ratings/reviews/shelves and sends interaction events with `book_id` to `rag`.
+
+## Active services and ports
+
+| Service | HTTP | gRPC |
+|---|---:|---:|
+| Auth | 8001 | 50051 |
+| User | 8002 | 50052 |
+| Follow | 8003 | 50053 |
+| Social | 8004 | 50054 |
+| RAG | 8005 | 50055 |
+| Recommendation | 8006 | 50056 |
+| Book | 8007 | 50057 |
 
 Interaction flow (high level):
 
-1. Book data enters via Book services (especially `book_service_v3`).
+1. Book data enters via `book`.
 2. RAG indexes books/authors (embed + store in vector DB).
 3. Social sends user interaction events (`user_id`, `book_id`, `interaction_type`, `value`) to RAG via gRPC.
 4. Recommendation service ranks results and serves recommendation responses.
@@ -74,6 +88,8 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 
 ## Architecture
 
+> Note: The **Active services and ports** table is the source of truth for current runtime services.
+
 ```
 ┌─────────────────────────────────┐      ┌─────────────────────────────────┐
 │        Auth Service             │      │        User Service              │
@@ -115,7 +131,17 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 └─────────────────────────────────┘
 ```
 
-### gRPC contract (`proto/auth.proto`)
+### gRPC contracts
+
+- `proto/auth.proto` (Auth service)
+- `proto/follow.proto` (Follow service)
+- `proto/user.proto` (User service)
+- `proto/social.proto` (Social service)
+- `proto/rag.proto` (RAG service)
+- `proto/recommendation.proto` (Recommendation service)
+- `proto/book_v3.proto` (Book Service V3)
+
+Example (`proto/auth.proto`):
 
 | RPC           | Request               | Response                    | Used by              |
 |---------------|-----------------------|-----------------------------|----------------------|
@@ -140,46 +166,45 @@ They share no tables. If you later move Auth to PostgreSQL, User is unaffected. 
 
 ## Quick start
 
-**One command (start all services in separate PowerShell windows)**
-```powershell
-cd D:\codes\fastapi_auth
-.\run_all.ps1
+**One command (Git Bash / bash)**
+```bash
+cd D:/codes/fastapi_auth
+./run_all.sh
 ```
 
-**Stop all services started by the launcher**
+**One command (PowerShell)**
 ```powershell
 cd D:\codes\fastapi_auth
-.\run_all.ps1 -Action stop
+python -m uvicorn auth.main:app --host 127.0.0.1 --port 8001 --reload
+python -m uvicorn user.main:app --host 127.0.0.1 --port 8002 --reload
+python -m uvicorn follow.main:app --host 127.0.0.1 --port 8003 --reload
+python -m uvicorn social.main:app --host 127.0.0.1 --port 8004 --reload
+python -m uvicorn rag.main:app --host 127.0.0.1 --port 8005 --reload
+python -m uvicorn recommendation.main:app --host 127.0.0.1 --port 8006 --reload
+python -m uvicorn book.main:app --host 127.0.0.1 --port 8007 --reload
 ```
 
-**Check launcher status**
-```powershell
-cd D:\codes\fastapi_auth
-.\run_all.ps1 -Action status
-```
+`run_all.sh` keeps foreground control; stop with `Ctrl+C`.
 
-**If you prefer manual startup (one terminal per service):**
+**If you prefer manual startup (one terminal per active service):**
 ```powershell
 .\run_auth.ps1
 .\run_user.ps1
 .\run_follow.ps1
-.\run_book.ps1
-.\run_bookv2.ps1
 .\run_social.ps1
 .\run_bookv3.ps1
 .\run_rag.ps1
-.\run_frontend.ps1
+.\run_recommendation.ps1
 ```
 
 Swagger UIs:
 - Auth: http://localhost:8001/docs
 - User: http://localhost:8002/docs
 - Follow: http://localhost:8003/docs
-- Book: http://localhost:8004/docs
-- Book V2: http://localhost:8007/docs
-- Book V3: http://localhost:8009/docs
-- Social: http://localhost:8005/docs
-- RAG: http://localhost:8006/docs
+- Book: http://localhost:8007/docs
+- Social: http://localhost:8004/docs
+- RAG: http://localhost:8005/docs
+- Recommendation: http://localhost:8006/docs
 
 Book V2 (MongoDB + external APIs):
 - Health: `http://127.0.0.1:8007/api/v2/health`
@@ -324,7 +349,8 @@ fastapi_auth/
 │   ├── services.py         # profile get/update
 │   ├── routers.py          # HTTP: me, patch me, refresh, users/{id}
 │   ├── grpc_client.py      # thin wrapper around gRPC stub
-│   └── main.py             # FastAPI app
+│   ├── grpc_server.py      # gRPC: GetProfile, Health
+│   └── main.py             # FastAPI app (starts gRPC server)
 │
 ├── follow/                 # ── Follow Service ──────────────────────
 │   ├── .env                # DATABASE_URL
@@ -358,7 +384,8 @@ fastapi_auth/
 │   ├── routers.py
 │   ├── auth.py             # Auth gRPC token validation dependency
 │   ├── book_grpc_client.py # Book gRPC ISBN existence checks
-│   └── main.py
+│   ├── grpc_server.py      # gRPC: GetBookStats, Health
+│   └── main.py             # FastAPI app (starts gRPC server)
 │
 ├── postman_collection.json # ready-to-import collection with auto-auth script
 ├── e2e_test.py             # full flow test — no manual steps needed

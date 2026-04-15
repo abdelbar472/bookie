@@ -1,4 +1,4 @@
-"""gRPC client for rag_service retrieval APIs."""
+"""gRPC client for rag retrieval APIs."""
 
 import logging
 from typing import Optional

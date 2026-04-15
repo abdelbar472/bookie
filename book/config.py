@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "book-service-v3"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
+    HTTP_PORT: int = 8007
     GRPC_HOST: str = "0.0.0.0"
     GRPC_PORT: int = 50057
 
@@ -25,7 +26,7 @@ class Settings(BaseSettings):
     MAX_BOOKS_PER_QUERY: int = 20
     ENABLE_ARABIC_SEARCH: bool = True
 
-    # External Service URLs (for future RAG/Social integration)
+    # External Service URLs
     RAG_SERVICE_URL: str | None = None
     SOCIAL_SERVICE_URL: str | None = None
 

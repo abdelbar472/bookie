@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetProfile(GetProfileRequest) returns (UserProfilePayload);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message GetProfileRequest {
+  int32 user_id = 1;
+}
+
+message UserProfilePayload {
+  int32 user_id = 1;
+  string bio = 2;
+  string avatar_url = 3;
+  string location = 4;
+  string website = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  string service = 2;
+}
+

@@ -1,4 +1,4 @@
-"""Recommendation business logic using rag_service gRPC retrieval."""
+"""Recommendation business logic using rag gRPC retrieval."""
 
 from typing import Any, Dict, List
 

@@ -56,14 +56,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Book Service V3",
     description="""
-    Rich Book Data Enrichment Service for RAG Applications.
+    Book catalog and enrichment service.
 
     Features:
     - Multi-source book aggregation (Google Books, OpenLibrary)
-    - Author profiling with Wikipedia integration
-    - Series detection and reading order
-    - Content analysis (themes, tone, mood)
-    - RAG-optimized document generation
+    - Author metadata enrichment for catalog quality
+    - Series detection and reading order metadata
+    - Cached book/author/series search APIs
     """,
     version="3.0.0",
     docs_url="/docs",
@@ -94,6 +93,7 @@ async def root():
         "docs": "/docs",
         "database": "connected" if db.is_connected else "disconnected",
         "ports": {
+            "http": settings.HTTP_PORT,
             "grpc": settings.GRPC_PORT,
         },
     }
@@ -101,9 +101,9 @@ async def root():
 
 if __name__ == "__main__":
     uvicorn.run(
-        "book_service_v3.main:app",
+        "book.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=settings.HTTP_PORT,
         reload=settings.DEBUG,
         log_level=settings.LOG_LEVEL.lower()
     )

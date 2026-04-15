@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Recommendation Service",
-    description="Standalone ranking and recommendation API backed by rag_service retrieval.",
+    description="Standalone ranking and recommendation API backed by rag retrieval.",
     version=settings.VERSION,
     lifespan=lifespan,
 )
@@ -60,8 +60,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "recommendation.main:app",
         host="127.0.0.1",
-        port=8008,
+        port=settings.HTTP_PORT,
         reload=settings.DEBUG,
         log_level=settings.LOG_LEVEL.lower(),
     )
-

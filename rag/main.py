@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .grpc_client import book_service_client
 from .grpc_server import grpc_server
-from rag_service.qdrant_client import DatabaseManager
+from rag.qdrant_client import DatabaseManager
 from .routers import router
 
 logging.basicConfig(
@@ -45,8 +45,8 @@ app = FastAPI(
     title="RAG Service",
     description=(
         "Retrieval and indexing service for books/authors.\n\n"
-        "HTTP (8006): retrieval/indexing APIs\n"
-        "gRPC (50056): internal communication"
+        "HTTP (8005): retrieval/indexing APIs\n"
+        "gRPC (50055): internal communication"
     ),
     version=settings.VERSION,
     docs_url="/docs",
@@ -71,14 +71,14 @@ async def root():
         "service": settings.SERVICE_NAME,
         "version": settings.VERSION,
         "status": "running",
-        "ports": {"http": 8006, "grpc": settings.GRPC_PORT},
+        "ports": {"http": settings.HTTP_PORT, "grpc": settings.GRPC_PORT},
         "docs": "/docs",
     }
 
 
 @app.get("/health")
 async def health_compat():
-    from rag_service import vector_store
+    from rag import vector_store
 
     try:
         count = await vector_store.count()
@@ -89,10 +89,9 @@ async def health_compat():
 
 if __name__ == "__main__":
     uvicorn.run(
-        "rag_service.main:app",
+        "rag.main:app",
         host="0.0.0.0",
-        port=8006,
+        port=settings.HTTP_PORT,
         reload=settings.DEBUG,
         log_level=settings.LOG_LEVEL.lower(),
     )
-

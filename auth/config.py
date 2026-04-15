@@ -21,9 +21,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # HTTP
+    HTTP_PORT: int = 8001
+
     # gRPC – this service exposes a gRPC server
     GRPC_PORT: int = 50051
 
 
 settings = Settings()
-

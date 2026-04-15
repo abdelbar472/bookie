@@ -9,6 +9,7 @@ from .database import create_db_and_tables
 from .routers import router
 from .grpc_client import close_grpc_channel
 from .follow_grpc_client import close_follow_channel
+from .grpc_server import serve_grpc
 
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
@@ -32,7 +33,11 @@ async def lifespan(app: FastAPI):
         settings.FOLLOW_GRPC_HOST,
         settings.FOLLOW_GRPC_PORT,
     )
+    grpc_server = await serve_grpc(host=settings.GRPC_HOST, port=settings.GRPC_PORT)
+    logger.info("User service ready  HTTP :%s  gRPC :%s", settings.HTTP_PORT, settings.GRPC_PORT)
     yield
+    logger.info("Stopping User gRPC server…")
+    await grpc_server.stop(grace=5)
     logger.info("🛑 Closing Auth gRPC channel…")
     await close_grpc_channel()
     logger.info("🛑 Closing Follow gRPC channel…")
@@ -59,4 +64,3 @@ async def log_requests(request: Request, call_next):
 
 
 app.include_router(router, prefix="/api/v1")
-

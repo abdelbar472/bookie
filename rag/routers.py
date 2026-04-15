@@ -90,7 +90,7 @@ async def sync_book_by_work_id(request: BookSyncRequest):
 
 @router.get("/health")
 async def health_check():
-    from rag_service import vector_store
+    from rag import vector_store
 
     try:
         count = await vector_store.count()

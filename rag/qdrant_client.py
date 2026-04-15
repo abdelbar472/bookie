@@ -6,7 +6,7 @@ from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
-from rag_service.config import settings
+from rag.config import settings
 
 logger = logging.getLogger(__name__)
 

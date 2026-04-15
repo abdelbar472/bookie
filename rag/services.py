@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 
 from .config import settings
 from .grpc_client import book_service_client
-from rag_service.engine import rag_engine
-from rag_service.vector_store import vector_store
+from rag.engine import rag_engine
+from rag.vector_store import vector_store
 
 logger = logging.getLogger(__name__)
 

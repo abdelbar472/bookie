@@ -7,9 +7,9 @@ import grpc
 from proto import rag_pb2, rag_pb2_grpc
 
 from .config import settings
-from rag_service import embedding_generator
-from rag_service.engine import rag_engine
-from rag_service import vector_store
+from rag import embedding_generator
+from rag.engine import rag_engine
+from rag import vector_store
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ try:
 except Exception:  # pragma: no cover
     openai = None
 
-from rag_service.config import settings
+from rag.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class EmbeddingGenerator:
         if not texts:
             return []
         if self.client is None:
-            raise RuntimeError("openai package is not installed. Install dependencies from rag_service/requirements.txt")
+            raise RuntimeError("openai package is not installed. Install dependencies from rag/requirements.txt")
 
         response = await self.client.embeddings.create(model=self.model, input=texts)
         return [item.embedding for item in response.data]

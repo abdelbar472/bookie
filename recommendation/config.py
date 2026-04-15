@@ -8,14 +8,15 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
+    HTTP_PORT: int = 8006
 
     # RAG retrieval gRPC server
     RAG_GRPC_HOST: str = "localhost"
-    RAG_GRPC_PORT: int = 50056
+    RAG_GRPC_PORT: int = 50055
 
-    # gRPC server (consumed by rag_service)
+    # gRPC server (consumed by rag)
     GRPC_HOST: str = "0.0.0.0"
-    GRPC_PORT: int = 50058
+    GRPC_PORT: int = 50056
 
     class Config:
         env_file = ".env"
