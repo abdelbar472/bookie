@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package bookv3;
+
+// Book Service V3 contract for internal consumers (RAG, recommendation, etc.)
+service BookV3Service {
+  rpc GetBookByWorkId(GetBookByWorkIdRequest) returns (BookV3Payload);
+  rpc ListBooks(ListBooksRequest) returns (BookV3ListResponse);
+  rpc SearchBooks(SearchBooksRequest) returns (BookV3ListResponse);
+}
+
+message GetBookByWorkIdRequest {
+  string work_id = 1;
+}
+
+message ListBooksRequest {
+  int32 skip = 1;
+  int32 limit = 2;
+}
+
+message SearchBooksRequest {
+  string query = 1;
+  int32 skip = 2;
+  int32 limit = 3;
+}
+
+message BookV3Payload {
+  string work_id = 1;
+  string title = 2;
+  string primary_author = 3;
+  repeated string authors = 4;
+  string description = 5;
+  repeated string genres = 6;
+  repeated string themes = 7;
+  string rag_document = 8;
+}
+
+message BookV3ListResponse {
+  repeated BookV3Payload books = 1;
+  int32 total = 2;
+}
+

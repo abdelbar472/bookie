@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import DatabaseManager
+from .grpc_client import book_service_client
 from .grpc_server import grpc_server
 from .routers import router
 
@@ -29,12 +30,14 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 50)
 
     await DatabaseManager.connect()
+    await book_service_client.connect()
     await grpc_server.start()
 
     yield
 
     logger.info("Shutting down...")
     await grpc_server.stop()
+    await book_service_client.close()
     await DatabaseManager.close()
 
 
@@ -71,6 +74,17 @@ async def root():
         "ports": {"http": 8001, "grpc": settings.GRPC_PORT},
         "docs": "/docs",
     }
+
+
+@app.get("/health")
+async def health_compat():
+    from .vector_store import vector_store
+
+    try:
+        count = await vector_store.count()
+        return {"status": "healthy", "indexed_documents": count, "version": settings.VERSION}
+    except Exception as exc:
+        return {"status": "unhealthy", "error": str(exc), "version": settings.VERSION}
 
 
 if __name__ == "__main__":

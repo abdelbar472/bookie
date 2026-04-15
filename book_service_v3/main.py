@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import connect_to_mongo, close_mongo_connection, db
+from .grpc_server import grpc_server
 from .routers import router
 from .config import settings
 
@@ -41,10 +42,13 @@ async def lifespan(app: FastAPI):
     if not connected:
         logger.warning("Running in EXTERNAL-ONLY mode (no caching)")
 
+    await grpc_server.start()
+
     yield
 
     # Shutdown
     logger.info("Shutting down...")
+    await grpc_server.stop()
     await close_mongo_connection()
 
 
@@ -88,7 +92,10 @@ async def root():
         "version": "3.0.0",
         "status": "running",
         "docs": "/docs",
-        "database": "connected" if db.is_connected else "disconnected"
+        "database": "connected" if db.is_connected else "disconnected",
+        "ports": {
+            "grpc": settings.GRPC_PORT,
+        },
     }
 
 

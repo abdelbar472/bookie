@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from .config import settings
+from .grpc_client import book_service_client
 from .rag_engine import rag_engine
 from .vector_store import vector_store
 
@@ -140,6 +141,45 @@ class IndexingService:
     @staticmethod
     async def index_book_profile(book: Dict[str, Any]) -> bool:
         return await rag_engine.index_book(book)
+
+    @staticmethod
+    def _map_book_v3_payload(book_msg: Any) -> Dict[str, Any]:
+        return {
+            "work_id": book_msg.work_id,
+            "title": book_msg.title,
+            "primary_author": book_msg.primary_author,
+            "authors": list(book_msg.authors),
+            "description": book_msg.description,
+            "genres": list(book_msg.genres),
+            "rag_document": book_msg.rag_document,
+            "content_analysis": {
+                "key_themes": list(book_msg.themes),
+            },
+        }
+
+    @staticmethod
+    async def sync_book_by_work_id(work_id: str) -> Dict[str, Any]:
+        book = await book_service_client.get_book(work_id)
+        if not book:
+            return {"indexed": False, "work_id": work_id, "reason": "not_found"}
+
+        mapped = IndexingService._map_book_v3_payload(book)
+        indexed = await rag_engine.index_book(mapped)
+        return {"indexed": indexed, "work_id": work_id}
+
+    @staticmethod
+    async def sync_books_from_book_v3(limit: int = 50, skip: int = 0) -> Dict[str, int]:
+        books = await book_service_client.list_books(limit=limit, skip=skip)
+        stats = {"requested": limit, "received": len(books), "indexed": 0, "failed": 0}
+
+        for book in books:
+            mapped = IndexingService._map_book_v3_payload(book)
+            if await rag_engine.index_book(mapped):
+                stats["indexed"] += 1
+            else:
+                stats["failed"] += 1
+
+        return stats
 
     @staticmethod
     async def index_author_profile(author: Dict[str, Any]) -> bool:

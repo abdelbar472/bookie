@@ -1,21 +1,22 @@
 # RAG Service
 
-This service provides:
+This service is responsible for:
 
+- Embedding and indexing **books** and **authors** into Qdrant
+- Building user preference/taste signals from social interaction events
 - HTTP API for semantic search and recommendations (`/api/v1/rag/*`)
-- gRPC API for indexing/search (`RAGService` in `proto/rag.proto`)
-- Qdrant-backed vector search with OpenAI embeddings
+- gRPC API consumed by internal services (`RagService` in shared `proto/rag.proto`)
 
 ## Quick start
 
 ```powershell
 python -m pip install -r rag_service/requirements.txt
-python -m grpc_tools.protoc -I rag_service/proto --python_out=rag_service/proto --grpc_python_out=rag_service/proto rag_service/proto/rag.proto
-python -m uvicorn rag_service.main:app --host 0.0.0.0 --port 8001 --reload
+python -m uvicorn rag_service.main:app --host 127.0.0.1 --port 8006 --reload
 ```
 
 ## Health check
 
-- HTTP: `GET http://127.0.0.1:8001/api/v1/rag/health`
-- gRPC: `HealthCheck` RPC on port `50055`
+- HTTP: `GET http://127.0.0.1:8006/api/v1/rag/health`
+- HTTP alias: `GET http://127.0.0.1:8006/health`
+- gRPC: `RagService` on port `50056`
 

@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "book-service-v3"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
+    GRPC_HOST: str = "0.0.0.0"
+    GRPC_PORT: int = 50057
 
     # Enrichment
     MAX_BOOKS_PER_QUERY: int = 20

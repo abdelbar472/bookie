@@ -13,9 +13,10 @@ $services = @(
     @{ Name = "Follow";   Script = "run_follow.ps1";   Url = "http://127.0.0.1:8003/api/v1/health" },
     @{ Name = "Book";     Script = "run_book.ps1";     Url = "http://127.0.0.1:8004/api/v1/health" },
     @{ Name = "BookV2";   Script = "run_bookv2.ps1";   Url = "http://127.0.0.1:8007/api/v2/health" },
+    @{ Name = "BookV3";   Script = "run_bookv3.ps1";   Url = "http://127.0.0.1:8009/api/v3/health" },
     @{ Name = "Recommendation"; Script = "run_recommendation.ps1"; Url = "http://127.0.0.1:8008/api/v1/health" },
     @{ Name = "Social";   Script = "run_social.ps1";   Url = "http://127.0.0.1:8005/api/v1/health" },
-    @{ Name = "RAG";      Script = "run_rag.ps1";      Url = "http://127.0.0.1:8006/health" },
+    @{ Name = "RAG";      Script = "run_rag.ps1";      Url = "http://127.0.0.1:8006/api/v1/rag/health" },
     @{ Name = "Frontend"; Script = "run_frontend.ps1"; Url = "http://127.0.0.1:8080/" }
 )
 

@@ -1,6 +1,5 @@
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
 from functools import lru_cache
 
 
@@ -25,12 +24,12 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 1536
 
     # gRPC
-    GRPC_PORT: int = 50055
+    GRPC_PORT: int = 50056
     GRPC_HOST: str = "0.0.0.0"
 
-    # Book Service gRPC
-    BOOK_SERVICE_GRPC_HOST: str = "localhost"
-    BOOK_SERVICE_GRPC_PORT: int = 50054
+    # Book Service V3 gRPC
+    BOOK_V3_GRPC_HOST: str = "localhost"
+    BOOK_V3_GRPC_PORT: int = 50057
 
     class Config:
         env_file = ".env"

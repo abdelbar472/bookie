@@ -1,8 +1,22 @@
-# FastAPI Microservices — Auth + User + Follow + Book + Social + RAG
+# FastAPI Microservices — Auth + User + Follow + Book + BookV2 + BookV3 + Social + RAG
 
 A production-ready microservice architecture using **FastAPI**, **SQLite (async)**, and **gRPC** for internal service communication.
 
 Six independent services work together: identity, profiles, follows, catalog, social interactions, and retrieval-augmented recommendations. They never share a database or a secret key.
+
+## Clear service ownership
+
+- `book_service_v3` owns rich book/author metadata retrieval and enrichment.
+- `rag_service` owns embeddings and vector indexing for **books** and **authors**.
+- `rag_service` also builds user taste signals/profile from interaction events.
+- `social` owns likes/ratings/reviews/shelves and sends interaction events with `book_id` to `rag_service`.
+
+Interaction flow (high level):
+
+1. Book data enters via Book services (especially `book_service_v3`).
+2. RAG indexes books/authors (embed + store in vector DB).
+3. Social sends user interaction events (`user_id`, `book_id`, `interaction_type`, `value`) to RAG via gRPC.
+4. RAG updates user preference signals and serves recommendations.
 
 ---
 
@@ -151,6 +165,7 @@ cd D:\codes\fastapi_auth
 .\run_book.ps1
 .\run_bookv2.ps1
 .\run_social.ps1
+.\run_bookv3.ps1
 .\run_rag.ps1
 .\run_frontend.ps1
 ```
@@ -161,6 +176,7 @@ Swagger UIs:
 - Follow: http://localhost:8003/docs
 - Book: http://localhost:8004/docs
 - Book V2: http://localhost:8007/docs
+- Book V3: http://localhost:8009/docs
 - Social: http://localhost:8005/docs
 - RAG: http://localhost:8006/docs
 
@@ -185,10 +201,16 @@ cd D:\codes\fastapi_auth
 python -m book.seed_data
 ```
 
-RAG recommendation pipeline (Qdrant multi-vector):
+RAG service (FastAPI + gRPC + Qdrant):
 ```powershell
 cd D:\codes\fastapi_auth
 .\run_rag.ps1
+```
+
+Book Service V3 (FastAPI + Mongo + gRPC):
+```powershell
+cd D:\codes\fastapi_auth
+.\run_bookv3.ps1
 ```
 
 RAG API configuration (`RAG/.env`):

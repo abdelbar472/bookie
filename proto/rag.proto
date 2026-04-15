@@ -3,13 +3,17 @@ syntax = "proto3";
 package rag;
 
 // RAG service - consumed internally by Social and other services.
+// Owns embedding/indexing for books and authors, and user preference updates from interactions.
 service RagService {
+  // Track user interaction on a specific book_id so RAG can update user taste/profile signals.
   rpc TrackInteraction (TrackInteractionRequest) returns (TrackInteractionResponse);
+  // Index enriched book metadata (book + author style context) into the vector store.
   rpc IndexBooks (IndexBooksRequest) returns (IndexBooksResponse);
 }
 
 message TrackInteractionRequest {
   int32 user_id = 1;
+  // Canonical book identifier sent by Social (e.g., ISBN/work_id depending on upstream service).
   string book_id = 2;
   string qdrant_id = 3;
   string interaction_type = 4;

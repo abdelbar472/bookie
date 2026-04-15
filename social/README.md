@@ -15,6 +15,8 @@ Social interactions for books.
 
 - Uses Auth gRPC for Bearer token validation
 - Uses Book gRPC to ensure an ISBN exists before write operations
+- Sends interaction events (`user_id`, `book_id`, `interaction_type`, `value`) to `rag_service` via gRPC
+- `book_id` is the shared identifier Social sends so RAG can update user taste signals
 
 ## Run
 

@@ -5,5 +5,5 @@ if (-not (Test-Path ".venv\Scripts\python.exe")) {
 	exit 1
 }
 
-& .\.venv\Scripts\python.exe -m uvicorn RAG.main:app --host 127.0.0.1 --port 8006 --reload
+& .\.venv\Scripts\python.exe -m uvicorn rag_service.main:app --host 127.0.0.1 --port 8006 --reload
 
