@@ -5,8 +5,15 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import List
 import logging
 
-from .schemas import BookSearchResponse, HealthResponse, BookProfile
-from .services import BookService, HealthService
+from .schemas import (
+    SearchRequest,
+    AuthorSearchResponse,
+    BookProfile,
+    BookSearchResponse,
+    HealthResponse,
+    SeriesSearchResponse,
+)
+from .services import AuthorService, BookService, HealthService, SeriesService
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +66,121 @@ async def list_books(
     """
     try:
         return await BookService.list_books(limit, skip)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+# ==================== AUTHOR ENDPOINTS ====================
+
+@router.get("/authors/search", response_model=AuthorSearchResponse)
+async def search_authors(
+    name: str = Query(..., min_length=1, max_length=100, description="Author name")
+):
+    """
+    Search for author and their complete bibliography
+    """
+    try:
+        result = await AuthorService.search_author(name)
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Author not found: {name}"
+            )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Author search failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}"
+        )
+
+
+@router.get("/authors/{author_id}")
+async def get_author(author_id: str):
+    """
+    Get author by ID
+    """
+    author = await AuthorService.get_author_by_id(author_id)
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author not found: {author_id}"
+        )
+    return author
+
+
+# ==================== SERIES ENDPOINTS ====================
+
+@router.get("/series/search", response_model=SeriesSearchResponse)
+async def search_series(
+    name: str = Query(..., min_length=1, max_length=100, description="Series name")
+):
+    """
+    Search for book series with reading order
+    """
+    try:
+        result = await SeriesService.search_series(name)
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Series not found: {name}"
+            )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Series search failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}"
+        )
+
+
+@router.get("/series/{series_id}")
+async def get_series(series_id: str):
+    """
+    Get series by ID
+    """
+    series = await SeriesService.get_series_by_id(series_id)
+    if not series:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Series not found: {series_id}"
+        )
+    return series
+
+
+# ==================== UNIFIED SEARCH ====================
+
+@router.post("/search")
+async def unified_search(request: SearchRequest):
+    """
+    Unified search endpoint for books, authors, or series
+    """
+    try:
+        if request.type == "book":
+            return await BookService.search_books(request.query, request.limit, request.skip_cache)
+        if request.type == "author":
+            result = await AuthorService.search_author(request.query)
+            if not result:
+                raise HTTPException(status_code=404, detail="Author not found")
+            return result
+        if request.type == "series":
+            result = await SeriesService.search_series(request.query)
+            if not result:
+                raise HTTPException(status_code=404, detail="Series not found")
+            return result
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Type must be 'book', 'author', or 'series'"
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

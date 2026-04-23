@@ -50,5 +50,17 @@ async def log_requests(request: Request, call_next):
     print(f"<< {request.method} {request.url.path} - {response.status_code} ({elapsed:.3f}s)", flush=True)
     return response
 
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://localhost:8080",  # Edge sometimes uses https for localhost
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(router, prefix="/api/v1")

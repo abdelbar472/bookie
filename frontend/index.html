@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookie</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #0f0f23; color: #e0e0e0; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { color: #fff; font-size: 2rem; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab { padding: 10px 20px; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .tab:hover { background: #252542; }
+        .tab.active { background: #4a9eff; color: #000; border-color: #4a9eff; }
+        .panel { display: none; background: #1a1a2e; border-radius: 12px; padding: 24px; border: 1px solid #333; }
+        .panel.active { display: block; }
+        input, textarea, button, select { padding: 12px; border-radius: 8px; border: 1px solid #444; background: #0f0f23; color: #fff; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #4a9eff; }
+        button { background: #4a9eff; color: #000; border: none; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        button.danger { background: #ff4a4a; color: #fff; }
+        button.secondary { background: #666; color: #fff; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; color: #aaa; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .card { background: #0f0f23; border: 1px solid #333; border-radius: 10px; padding: 16px; transition: border-color 0.2s; }
+        .card:hover { border-color: #4a9eff; }
+        .card h3 { color: #fff; margin-bottom: 8px; font-size: 1.1rem; }
+        .card p { color: #888; font-size: 14px; }
+        .card .meta { display: flex; gap: 12px; margin-top: 12px; font-size: 12px; color: #666; flex-wrap: wrap; }
+        .error { background: #3a1a1a; border: 1px solid #ff4444; color: #ff8888; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+        .success { background: #1a3a1a; border: 1px solid #44ff44; color: #88ff88; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .badge-book { background: #ff9f4a20; color: #ff9f4a; }
+        .badge-auth { background: #4a9eff20; color: #4a9eff; }
+        .badge-social { background: #ff4a9e20; color: #ff4a9e; }
+        .hidden { display: none !important; }
+        #userBar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+        #userBar span { color: #4a9eff; }
+        .flex { display: flex; gap: 12px; align-items: center; }
+        .flex-col { flex-direction: column; align-items: stretch; }
+        pre { background: #0a0a1a; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; color: #aaa; border: 1px solid #333; }
+        .review-item { border-bottom: 1px solid #333; padding: 12px 0; }
+        .review-item:last-child { border-bottom: none; }
+        .stars { color: #ff9f4a; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #333; padding-bottom: 12px; }
+        .nav-tab { padding: 8px 16px; cursor: pointer; border-radius: 6px; font-size: 13px; }
+        .nav-tab:hover { background: #252542; }
+        .nav-tab.active { background: #4a9eff; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Bookie</h1>
+            <p>Social book platform — <span id="connStatus" style="color:#666;">checking services...</span></p>
+        </header>
+
+        <div id="authPanel">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('login')">Login</div>
+                <div class="tab" onclick="switchTab('register')">Register</div>
+            </div>
+            <div id="loginPanel" class="panel active">
+                <div class="form-group"><label>Username</label><input type="text" id="loginUser" value="alice"></div>
+                <div class="form-group"><label>Password</label><input type="password" id="loginPass" value="secret123"></div>
+                <button onclick="login()">Login</button>
+            </div>
+            <div id="registerPanel" class="panel">
+                <div class="form-group"><label>Username</label><input type="text" id="regUser"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="regEmail"></div>
+                <div class="form-group"><label>Password</label><input type="password" id="regPass"></div>
+                <button onclick="register()">Register</button>
+            </div>
+        </div>
+
+        <div id="appPanel" class="hidden">
+            <div id="userBar">
+                <span id="userName"></span>
+                <button onclick="logout()" class="danger">Logout</button>
+            </div>
+            <div class="tabs">
+                <div class="tab active" onclick="switchAppTab('books')">📖 Books</div>
+                <div class="tab" onclick="switchAppTab('search')">🔍 Search</div>
+                <div class="tab" onclick="switchAppTab('reviews')">💬 Reviews</div>
+                <div class="tab" onclick="switchAppTab('shelves')">📚 Shelves</div>
+                <div class="tab" onclick="switchAppTab('social')">❤️ Social</div>
+                <div class="tab" onclick="switchAppTab('profile')">👤 Profile</div>
+                <div class="tab" onclick="switchAppTab('follow')">➕ Follow</div>
+                <div class="tab" onclick="switchAppTab('recs')">⭐ Recs</div>
+            </div>
+
+            <div id="booksPanel" class="panel active">
+                <h2>Books</h2>
+                <div id="booksList" class="grid"></div>
+            </div>
+
+            <div id="searchPanel" class="panel">
+                <div class="form-group flex">
+                    <input type="text" id="searchQuery" placeholder="Search books..." style="flex:1;" onkeypress="if(event.key==='Enter')searchBooks()">
+                    <button onclick="searchBooks()">Search</button>
+                </div>
+                <div id="searchResults" class="grid"></div>
+            </div>
+
+            <div id="reviewsPanel" class="panel">
+                <h2>Book Reviews</h2>
+                <div class="form-group">
+                    <label>Book ISBN</label>
+                    <input type="text" id="reviewIsbn" value="9780451524935">
+                </div>
+                <button onclick="loadBookReviews()">Load Reviews</button>
+                <div id="reviewsList" style="margin-top:16px;"></div>
+            </div>
+
+            <div id="shelvesPanel" class="panel">
+                <h2>My Shelves</h2>
+                <div class="form-group flex">
+                    <input type="text" id="shelfName" placeholder="New shelf name" style="flex:1;">
+                    <button onclick="createShelf()">Create</button>
+                </div>
+                <button onclick="loadShelves()" class="secondary" style="margin-bottom:16px;">Refresh</button>
+                <div id="shelvesList" class="grid"></div>
+            </div>
+
+            <div id="socialPanel" class="panel">
+                <h2>Rate & Review</h2>
+                <div class="form-group">
+                    <label>Book ISBN</label>
+                    <input type="text" id="socialIsbn" value="9780451524935">
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <select id="socialRating">
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="1">⭐</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Review</label>
+                    <textarea id="socialReview" rows="3">Great book!</textarea>
+                </div>
+                <div class="flex">
+                    <button onclick="submitReview()">Submit Review</button>
+                    <button onclick="rateBook()" class="secondary">Rate Only</button>
+                    <button onclick="likeBook()" style="background:#ff4a9e;">❤️ Like</button>
+                </div>
+                <div id="socialMsg"></div>
+            </div>
+
+            <div id="profilePanel" class="panel">
+                <h2>My Profile</h2>
+                <div id="profileData"></div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="profileBio" rows="2"></textarea>
+                </div>
+                <button onclick="updateProfile()">Update</button>
+            </div>
+
+            <div id="followPanel" class="panel">
+                <h2>Follow Users</h2>
+                <div class="form-group flex">
+                    <input type="number" id="followId" placeholder="User ID" value="2">
+                    <button onclick="followUser()">Follow</button>
+                    <button onclick="unfollowUser()" class="danger">Unfollow</button>
+                    <button onclick="checkFollow()" class="secondary">Check</button>
+                </div>
+                <div id="followResult"></div>
+                <h3 style="margin-top:24px;">My Network</h3>
+                <button onclick="loadMyNetwork()" class="secondary">Load</button>
+                <div id="networkData" style="margin-top:12px;"></div>
+            </div>
+
+            <div id="recsPanel" class="panel">
+                <h2>Recommendations</h2>
+                <div class="form-group">
+                    <label>Based on book (optional)</label>
+                    <input type="text" id="recBookId" placeholder="Work ID or ISBN">
+                </div>
+                <button onclick="getRecommendations()">Get Recommendations</button>
+                <div id="recsList" class="grid" style="margin-top:16px;"></div>
+            </div>
+        </div>
+
+        <div id="msg"></div>
+    </div>
+
+<script>
+const API = {
+    auth: 'http://localhost:8001/api/v1',
+    user: 'http://localhost:8002/api/v1',
+    follow: 'http://localhost:8003/api/v1',
+    social: 'http://localhost:8004/api/v1/social',
+    rag: 'http://localhost:8005/api/v1/rag',
+    rec: 'http://localhost:8006/api/v1',
+    book: 'http://localhost:8007/api/v3',
+};
+
+let token = localStorage.getItem('token') || '';
+let userId = localStorage.getItem('userId') || '';
+let username = localStorage.getItem('username') || '';
+
+// Check services on load
+async function checkServices() {
+    const status = document.getElementById('connStatus');
+    const serviceHealthUrls = [
+        API.auth + '/health',
+        API.user + '/health',
+        API.follow + '/follow/health',
+        API.social + '/health',
+        API.rag + '/health',
+        API.rec + '/health',
+        API.book + '/health',
+    ];
+    const checks = await Promise.all(serviceHealthUrls.map((url) =>
+        fetch(url).then(() => true).catch(() => false)
+    ));
+    const up = checks.filter(Boolean).length;
+    status.textContent = `${up}/${serviceHealthUrls.length} services up`;
+    status.style.color = up === serviceHealthUrls.length ? '#44ff44' : '#ff9f4a';
+}
+checkServices();
+
+if (token) { showApp(); loadProfile(); }
+
+function switchTab(tab) {
+    document.querySelectorAll('#authPanel .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#authPanel .panel').forEach(p => p.classList.remove('active'));
+    const targetTab = (typeof event !== 'undefined' && event && event.target)
+        ? event.target
+        : document.querySelectorAll('#authPanel .tab')[tab === 'register' ? 1 : 0];
+    if (targetTab) targetTab.classList.add('active');
+    document.getElementById(tab + 'Panel').classList.add('active');
+}
+
+function switchAppTab(tab) {
+    document.querySelectorAll('#appPanel .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#appPanel .panel').forEach(p => p.classList.remove('active'));
+    const tabOrder = ['books', 'search', 'reviews', 'shelves', 'social', 'profile', 'follow', 'recs'];
+    const idx = tabOrder.indexOf(tab);
+    const targetTab = (typeof event !== 'undefined' && event && event.target)
+        ? event.target
+        : (idx >= 0 ? document.querySelectorAll('#appPanel .tab')[idx] : null);
+    if (targetTab) targetTab.classList.add('active');
+    document.getElementById(tab + 'Panel').classList.add('active');
+    if (tab === 'books') loadBooks();
+    if (tab === 'shelves') loadShelves();
+}
+
+function showMsg(text, isError) {
+    const el = document.getElementById('msg');
+    el.className = isError ? 'error' : 'success';
+    el.textContent = text;
+    setTimeout(() => el.className = '', 4000);
+}
+
+async function api(url, opts = {}) {
+    if (token) opts.headers = { ...opts.headers, 'Authorization': `Bearer ${token}` };
+    opts.headers = { 'Content-Type': 'application/json', ...opts.headers };
+    const res = await fetch(url, opts);
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || `HTTP ${res.status}`);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+}
+
+// Auth
+async function login() {
+    try {
+        const data = await api(API.auth + '/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: document.getElementById('loginUser').value,
+                password: document.getElementById('loginPass').value
+            })
+        });
+        token = data.access_token;
+        username = data.user?.username || document.getElementById('loginUser').value;
+        localStorage.setItem('token', token);
+        localStorage.setItem('refresh', data.refresh_token);
+        localStorage.setItem('username', username);
+        showMsg('Login successful!');
+        showApp();
+        loadProfile();
+    } catch (e) { showMsg(e.message, true); }
+}
+
+async function register() {
+    try {
+        await api(API.auth + '/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: document.getElementById('regUser').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPass').value
+            })
+        });
+        showMsg('Registered! Now login.');
+        switchTab('login');
+    } catch (e) { showMsg(e.message, true); }
+}
+
+function logout() {
+    token = ''; userId = ''; username = '';
+    localStorage.clear();
+    document.getElementById('authPanel').classList.remove('hidden');
+    document.getElementById('appPanel').classList.add('hidden');
+}
+
+function showApp() {
+    document.getElementById('authPanel').classList.add('hidden');
+    document.getElementById('appPanel').classList.remove('hidden');
+    document.getElementById('userName').textContent = `👤 ${username}`;
+}
+
+// Profile
+async function loadProfile() {
+    try {
+        const data = await api(API.user + '/me');
+        userId = data.id;
+        localStorage.setItem('userId', userId);
+        document.getElementById('profileData').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        document.getElementById('profileBio').value = data.bio || '';
+    } catch (e) { showMsg(e.message, true); }
+}
+
+async function updateProfile() {
+    try {
+        await api(API.user + '/me', {
+            method: 'PATCH',
+            body: JSON.stringify({ bio: document.getElementById('profileBio').value })
+        });
+        showMsg('Profile updated!');
+        loadProfile();
+    } catch (e) { showMsg(e.message, true); }
+}
+
+// Books
+async function loadBooks() {
+    const list = document.getElementById('booksList');
+    list.innerHTML = '<p>Loading...</p>';
+    try {
+        const data = await api(API.book + '/books?limit=20');
+        list.innerHTML = (Array.isArray(data) ? data : []).map(b => `
+            <div class="card">
+                <h3>${b.title || 'Untitled'}</h3>
+                <p>${b.authors?.join(', ') || b.author || 'Unknown author'}</p>
+                <p style="font-size:12px;color:#666;margin-top:4px;">${b.description?.substring(0, 100)}...</p>
+                <div class="meta">
+                    <span class="badge badge-book">${b.work_id || b.isbn || ''}</span>
+                    <span>${b.published_date || b.year || ''}</span>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function searchBooks() {
+    const q = document.getElementById('searchQuery').value;
+    const list = document.getElementById('searchResults');
+    list.innerHTML = '<p>Searching...</p>';
+    try {
+        const data = await api(API.book + `/books/search?q=${encodeURIComponent(q)}&limit=10`);
+        const results = data.results || data;
+        list.innerHTML = (Array.isArray(results) ? results : []).map(b => `
+            <div class="card">
+                <h3>${b.title || 'Untitled'}</h3>
+                <p>${b.authors?.join(', ') || b.author || 'Unknown'}</p>
+                <p style="font-size:12px;color:#666;">${b.description?.substring(0, 120)}...</p>
+                <div class="meta">
+                    <span class="badge badge-book">${b.work_id || ''}</span>
+                    <span>Score: ${b.score?.toFixed(2) || 'N/A'}</span>
+                </div>
+            </div>
+        `).join('') || '<p>No results</p>';
+    } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+// Reviews
+async function loadBookReviews() {
+    const isbn = document.getElementById('reviewIsbn').value;
+    const list = document.getElementById('reviewsList');
+    list.innerHTML = '<p>Loading...</p>';
+    try {
+        const [reviewResponse, stats] = await Promise.all([
+            api(API.social + `/books/${isbn}/reviews`),
+            api(API.social + `/books/${isbn}/stats`)
+        ]);
+        const reviews = reviewResponse?.items || [];
+        let html = `<div style="margin-bottom:16px;"><strong>Stats:</strong> ${JSON.stringify(stats)}</div>`;
+        html += reviews.map(r => `
+            <div class="review-item">
+                <p><strong>${r.title || 'Review'}</strong></p>
+                <p>${r.content || ''}</p>
+                <div class="meta">
+                    <span>By user ${r.user_id}</span>
+                    <span>Likes ${r.likes_count || 0}</span>
+                    <span>Replies ${r.replies_count || 0}</span>
+                    <span>${r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}</span>
+                </div>
+            </div>
+        `).join('');
+        list.innerHTML = html || '<p>No reviews</p>';
+    } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+// Shelves
+async function loadShelves() {
+    const list = document.getElementById('shelvesList');
+    list.innerHTML = '<p>Loading...</p>';
+    try {
+        const data = await api(API.social + '/shelves/me');
+        list.innerHTML = (data || []).map(s => `
+            <div class="card">
+                <h3>${s.name || 'Unnamed'}</h3>
+                <div class="meta">
+                    <span>Shelf #${s.id || '-'}</span>
+                    <span class="badge badge-social">${(s.visibility || 'private').toUpperCase()}</span>
+                </div>
+            </div>
+        `).join('') || '<p>No shelves</p>';
+    } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function createShelf() {
+    try {
+        await api(API.social + '/shelves', {
+            method: 'POST',
+            body: JSON.stringify({ name: document.getElementById('shelfName').value })
+        });
+        showMsg('Shelf created!');
+        loadShelves();
+    } catch (e) { showMsg(e.message, true); }
+}
+
+// Social
+async function submitReview() {
+    try {
+        const isbn = document.getElementById('socialIsbn').value;
+        const content = document.getElementById('socialReview').value;
+        const rating = parseFloat(document.getElementById('socialRating').value);
+
+        if (!content || content.trim().length < 10) {
+            throw new Error('Review must be at least 10 characters long.');
+        }
+
+        await api(API.social + '/reviews', {
+            method: 'POST',
+            body: JSON.stringify({
+                isbn,
+                title: 'Review',
+                content
+            })
+        });
+        await api(API.social + '/ratings/' + isbn, {
+            method: 'PUT',
+            body: JSON.stringify({ rating })
+        });
+        document.getElementById('socialMsg').innerHTML = '<p class="success">Review submitted!</p>';
+    } catch (e) { document.getElementById('socialMsg').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function rateBook() {
+    try {
+        await api(API.social + '/ratings/' + document.getElementById('socialIsbn').value, {
+            method: 'PUT',
+            body: JSON.stringify({ rating: parseInt(document.getElementById('socialRating').value) })
+        });
+        document.getElementById('socialMsg').innerHTML = '<p class="success">Rated!</p>';
+    } catch (e) { document.getElementById('socialMsg').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function likeBook() {
+    try {
+        await api(API.social + '/likes/' + document.getElementById('socialIsbn').value, { method: 'POST' });
+        document.getElementById('socialMsg').innerHTML = '<p class="success">Liked!</p>';
+    } catch (e) { document.getElementById('socialMsg').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+// Follow
+async function followUser() {
+    try {
+        const id = document.getElementById('followId').value;
+        await api(API.follow + '/follow/' + id, { method: 'POST' });
+        document.getElementById('followResult').innerHTML = '<p class="success">Followed!</p>';
+    } catch (e) { document.getElementById('followResult').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function unfollowUser() {
+    try {
+        const id = document.getElementById('followId').value;
+        await api(API.follow + '/follow/' + id, { method: 'DELETE' });
+        document.getElementById('followResult').innerHTML = '<p class="success">Unfollowed!</p>';
+    } catch (e) { document.getElementById('followResult').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function checkFollow() {
+    try {
+        const id = document.getElementById('followId').value;
+        const data = await api(API.follow + '/follow/check/' + id);
+        document.getElementById('followResult').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    } catch (e) { document.getElementById('followResult').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+async function loadMyNetwork() {
+    try {
+        const [followers, following] = await Promise.all([
+            api(API.user + `/users/${userId}/followers`),
+            api(API.user + `/users/${userId}/following`)
+        ]);
+        const followerIds = followers?.user_ids || followers?.items || [];
+        const followingIds = following?.user_ids || following?.items || [];
+        document.getElementById('networkData').innerHTML = `
+            <p><strong>Followers:</strong> ${followerIds.length}</p>
+            <p><strong>Following:</strong> ${followingIds.length}</p>
+            <pre>${JSON.stringify({followers: followerIds, following: followingIds}, null, 2)}</pre>
+        `;
+    } catch (e) { document.getElementById('networkData').innerHTML = `<p class="error">${e.message}</p>`; }
+}
+
+// Recommendations
+async function getRecommendations() {
+    const list = document.getElementById('recsList');
+    list.innerHTML = '<p>Loading...</p>';
+    try {
+        const currentBook = document.getElementById('recBookId').value;
+        const data = await api(API.rec + '/recommend?top_k=10&diversify=true', {
+            method: 'POST',
+            body: JSON.stringify({
+                user_id: userId,
+                history_book_ids: currentBook ? [currentBook] : [],
+                current_book_id: currentBook || ''
+            })
+        });
+        list.innerHTML = (data.recommendations || []).map(r => `
+            <div class="card">
+                <h3>${r.title || 'Unknown'}</h3>
+                <p>${r.authors?.join(', ') || ''}</p>
+                <p style="font-size:12px;color:#666;">${r.description?.substring(0, 100)}...</p>
+                <div class="meta">
+                    <span class="badge badge-auth">Score: ${r.score?.toFixed(2) || 'N/A'}</span>
+                    <span>${r.genres?.[0] || ''}</span>
+                </div>
+            </div>
+        `).join('') || '<p>No recommendations yet. Try rating some books first!</p>';
+    } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
+}
+</script>
+</body>
+</html>

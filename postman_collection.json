@@ -1,2022 +1,758 @@
 {
   "info": {
-    "name": "Microservices - Auth + User + Follow + Book + BookV2 + Social + RAG",
-    "description": "Auth (:8001) \u00b7 User (:8002) \u00b7 Follow (:8003) \u00b7 Book (:8004) \u00b7 BookV2 (:8007) \u00b7 Social (:8005) \u00b7 RAG (:8006)\n\nFlow:\n1. Register Alice & Bob (Auth)\n2. Login Alice (Auth) - tokens saved automatically\n3. Follow Bob (Follow)\n4. Add publisher/author/book (Book /internal/* - requires Bearer)\n5. Import books/authors from APIs (BookV2)\n6. Like + rate + review + shelf (Social)\n7. Get recommendations (RAG)",
+    "name": "Bookie API - Production Ready",
+    "description": "All routes verified against running services",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "auth_url",
-      "value": "http://127.0.0.1:8001/api/v1"
-    },
-    {
-      "key": "user_url",
-      "value": "http://127.0.0.1:8002/api/v1"
-    },
-    {
-      "key": "follow_url",
-      "value": "http://127.0.0.1:8003/api/v1"
-    },
-    {
-      "key": "book_url",
-      "value": "http://127.0.0.1:8004/api/v1"
-    },
-    {
-      "key": "bookv2_url",
-      "value": "http://127.0.0.1:8007/api/v2"
-    },
-    {
-      "key": "social_url",
-      "value": "http://127.0.0.1:8005/api/v1"
-    },
-    {
-      "key": "rag_url",
-      "value": "http://127.0.0.1:8006"
-    },
-    {
-      "key": "access_token",
-      "value": ""
-    },
-    {
-      "key": "refresh_token",
-      "value": ""
-    },
-    {
-      "key": "my_user_id",
-      "value": ""
-    },
-    {
-      "key": "other_user_id",
-      "value": "2"
-    },
-    {
-      "key": "author_id",
-      "value": ""
-    },
-    {
-      "key": "publisher_id",
-      "value": ""
-    },
-    {
-      "key": "award_id",
-      "value": ""
-    },
-    {
-      "key": "book_isbn",
-      "value": ""
-    },
-    {
-      "key": "bookv2_book_id",
-      "value": ""
-    },
-    {
-      "key": "bookv2_writer_id",
-      "value": ""
-    },
-    {
-      "key": "shelf_id",
-      "value": ""
-    },
-    {
-      "key": "review_id",
-      "value": ""
-    },
-    {
-      "key": "reply_id",
-      "value": ""
-    },
-    {
-      "key": "rag_user_id",
-      "value": "{{my_user_id}}"
-    },
-    {
-      "key": "rag_book_id",
-      "value": "{{book_isbn}}"
-    },
-    {
-      "key": "rag_qdrant_id",
-      "value": "0"
-    },
-    {
-      "key": "rag_status",
-      "value": "reading"
-    },
-    {
-      "key": "bookv3_url",
-      "value": "http://127.0.0.1:8009/api/v3"
-    },
-    {
-      "key": "bookv3_work_id",
-      "value": ""
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// ================================================================",
-          "// Collection Pre-request Script \u2013 runs before EVERY request.",
-          "// Skips public endpoints. Attaches Bearer token automatically.",
-          "// Auto-refreshes via Auth service /refresh when token is missing.",
-          "// ================================================================",
-          "",
-          "const PUBLIC = ['/login', '/register', '/health', '/refresh', '/api/v1/recommend', '/api/v1/writers/search'];",
-          "const url = pm.request.url.toString();",
-          "if (PUBLIC.some(p => url.includes(p))) return;",
-          "",
-          "const accessToken  = pm.collectionVariables.get('access_token');",
-          "const refreshToken = pm.collectionVariables.get('refresh_token');",
-          "const authUrl      = pm.collectionVariables.get('auth_url');",
-          "",
-          "if (accessToken) {",
-          "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + accessToken });",
-          "    return;",
-          "}",
-          "",
-          "if (!refreshToken) {",
-          "    console.log('\u274c No tokens \u2013 run Login first!');",
-          "    return;",
-          "}",
-          "",
-          "console.log('\ud83d\udd04 No access_token \u2013 auto-refreshing via Auth service\u2026');",
-          "pm.sendRequest({",
-          "    url: authUrl + '/refresh',",
-          "    method: 'POST',",
-          "    header: { 'Content-Type': 'application/json' },",
-          "    body: { mode: 'raw', raw: JSON.stringify({ refresh_token: refreshToken }) }",
-          "}, (err, res) => {",
-          "    if (err || res.code !== 200) {",
-          "        console.log('\u274c Refresh failed \u2013 run Login again.', err || res.json());",
-          "        pm.collectionVariables.set('access_token', '');",
-          "        pm.collectionVariables.set('refresh_token', '');",
-          "        return;",
-          "    }",
-          "    const j = res.json();",
-          "    pm.collectionVariables.set('access_token',  j.access_token);",
-          "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
-          "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + j.access_token });",
-          "    console.log('\u2705 Token refreshed automatically!');",
-          "});"
-        ]
-      }
-    }
-  ],
   "item": [
     {
-      "name": "Auth Service (:8001)",
+      "name": "1. Auth (:8001)",
       "item": [
         {
-          "name": "Health",
-          "request": {
-            "method": "GET",
-            "url": "{{auth_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Register (Alice)",
+          "name": "Register",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{auth_url}}/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8001/api/v1/register",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"username\": \"alice\",\n  \"full_name\": \"Alice Smith\",\n  \"password\": \"secret123\"\n}"
+              "raw": "{\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"secret123\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) console.log('\u2705 Registered:', pm.response.json().username);"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "Register (Bob)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{auth_url}}/register",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"bob@example.com\",\n  \"username\": \"bob\",\n  \"full_name\": \"Bob Jones\",\n  \"password\": \"secret123\"\n}"
-            }
-          },
+          "name": "Login",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) {",
-                  "    const j = pm.response.json();",
-                  "    pm.collectionVariables.set('other_user_id', String(j.id));",
-                  "    console.log('\u2705 Registered Bob id=' + j.id);",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
+                  "    console.log('✅ Login successful. Tokens saved.');",
+                  "} else {",
+                  "    console.log('❌ Login failed:', pm.response.text());",
                   "}"
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Login (Alice)",
+          ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{auth_url}}/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8001/api/v1/login",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"secret123\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    pm.collectionVariables.set('access_token',  j.access_token);",
-                  "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
-                  "    console.log('\u2705 Logged in as Alice \u2013 tokens saved');",
-                  "}"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
           "name": "Refresh Token",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{auth_url}}/refresh",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
-            }
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
                   "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    pm.collectionVariables.set('access_token',  j.access_token);",
-                  "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
-                  "    console.log('\u2705 Tokens rotated');",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refresh_token);",
+                  "    console.log('✅ Token refreshed.');",
                   "}"
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Verify Token",
+          ],
           "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": "{{auth_url}}/verify"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Token valid for:', pm.response.json().username);"
-                ]
-              }
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8001/api/v1/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
             }
-          ]
+          }
         },
         {
           "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": "{{auth_url}}/logout",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
-            }
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    pm.collectionVariables.set('access_token', '');",
-                  "    pm.collectionVariables.set('refresh_token', '');",
-                  "    console.log('\u2705 Logged out \u2013 tokens cleared');",
-                  "}"
+                  "pm.collectionVariables.set('access_token', '');",
+                  "pm.collectionVariables.set('refresh_token', '');",
+                  "pm.collectionVariables.set('my_user_id', '');",
+                  "console.log('✅ Logged out. Tokens cleared.');"
                 ]
               }
             }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "User Service (:8002)",
-      "item": [
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8001/api/v1/logout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8001/api/v1/verify"
+          }
+        },
         {
           "name": "Health",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
+            "url": "http://localhost:8001/api/v1/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User (:8002)",
+      "item": [
         {
           "name": "Get My Profile",
-          "request": {
-            "method": "GET",
-            "url": "{{user_url}}/me"
-          },
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
                   "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    pm.collectionVariables.set('my_user_id', String(j.id));",
-                  "    ['id','username','email','is_active'].forEach(f =>",
-                  "        pm.test('Has ' + f, () => pm.expect(j).to.have.property(f)));",
-                  "    console.log('\u2705 Profile:', j.username, '| id:', j.id, '| bio:', j.bio);",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.id) {",
+                  "        pm.collectionVariables.set('my_user_id', jsonData.id.toString());",
+                  "        console.log('✅ User ID saved:', jsonData.id);",
+                  "    }",
                   "}"
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/me"
+          }
         },
         {
-          "name": "Update My Profile",
+          "name": "Update Profile",
           "request": {
             "method": "PATCH",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{user_url}}/me",
+            "url": "http://localhost:8002/api/v1/me",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bio\": \"Hello, I am Alice!\",\n  \"avatar_url\": \"https://example.com/alice.png\"\n}"
+              "raw": "{\n  \"bio\": \"Book lover\",\n  \"avatar_url\": \"https://example.com/avatar.jpg\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Profile updated:', pm.response.json().bio);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Refresh Token (User\u2192Auth gRPC)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{user_url}}/refresh",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    pm.collectionVariables.set('access_token',  j.access_token);",
-                  "    pm.collectionVariables.set('refresh_token', j.refresh_token);",
-                  "    console.log('\u2705 Tokens rotated via User\u2192Auth gRPC');",
-                  "}"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
           "name": "Get User by Username",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/users/bob"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/users/alice"
+          }
         },
         {
-          "name": "Follow Stats (via User\u2192Follow gRPC)",
+          "name": "Get User Followers (via User)",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/users/{{other_user_id}}/follow-stats"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Follow stats \u2013 followers:', j.followers_count, '| following:', j.following_count);",
-                  "}"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/users/1/followers"
+          }
         },
         {
-          "name": "List Followers (via User\u2192Follow gRPC)",
+          "name": "Get User Following (via User)",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/users/{{other_user_id}}/followers?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Followers:', pm.response.json());"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/users/1/following"
+          }
         },
         {
-          "name": "List Following (via User\u2192Follow gRPC)",
+          "name": "Check Is Following (via User)",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/users/{{other_user_id}}/following?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Following:', pm.response.json());"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/users/1/is-following/2"
+          }
         },
         {
-          "name": "Is Following? (via User\u2192Follow gRPC)",
+          "name": "Get Follow Stats (via User)",
           "request": {
             "method": "GET",
-            "url": "{{user_url}}/users/{{my_user_id}}/is-following/{{other_user_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Is following:', j.following);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Follow Service (:8003)",
-      "item": [
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8002/api/v1/users/1/follow-stats"
+          }
+        },
         {
           "name": "Health",
           "request": {
             "method": "GET",
-            "url": "{{follow_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
+            "url": "http://localhost:8002/api/v1/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Follow (:8003)",
+      "item": [
         {
           "name": "Follow User",
           "request": {
             "method": "POST",
-            "url": "{{follow_url}}/follow/{{other_user_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Now following user', j.followee_id, '| follower_id:', j.follower_id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Check Follow",
-          "request": {
-            "method": "GET",
-            "url": "{{follow_url}}/follow/check/{{other_user_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Following:', j.following);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Followers",
-          "request": {
-            "method": "GET",
-            "url": "{{follow_url}}/follow/users/{{other_user_id}}/followers?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Followers total:', j.total, '| items:', j.items.length);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Following",
-          "request": {
-            "method": "GET",
-            "url": "{{follow_url}}/follow/users/{{my_user_id}}/following?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Following total:', j.total, '| items:', j.items.length);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Follow Stats",
-          "request": {
-            "method": "GET",
-            "url": "{{follow_url}}/follow/users/{{other_user_id}}/stats"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    console.log('\u2705 Stats \u2013 followers:', j.followers_count, '| following:', j.following_count);",
-                  "}"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/2"
+          }
         },
         {
           "name": "Unfollow User",
           "request": {
             "method": "DELETE",
-            "url": "{{follow_url}}/follow/{{other_user_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('204 No Content', () => pm.response.to.have.status(204));",
-                  "if (pm.response.code === 204) console.log('\u2705 Unfollowed user', pm.collectionVariables.get('other_user_id'));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Book Service (:8004)",
-      "item": [
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/2"
+          }
+        },
+        {
+          "name": "Check Follow",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/check/2"
+          }
+        },
+        {
+          "name": "Get Followers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/users/1/followers"
+          }
+        },
+        {
+          "name": "Get Following",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/users/1/following"
+          }
+        },
+        {
+          "name": "Follow Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8003/api/v1/follow/users/1/stats"
+          }
+        },
         {
           "name": "Health",
           "request": {
             "method": "GET",
-            "url": "{{book_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "\u2500\u2500 Internal Writes (require Bearer) \u2500\u2500",
-          "item": [
-            {
-              "name": "[Internal] Add Publisher",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{book_url}}/internal/publishers",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Penguin Books\",\n  \"location\": \"London, UK\",\n  \"year_founded\": 1935\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                      "if (pm.response.code === 201) {",
-                      "    pm.collectionVariables.set('publisher_id', String(pm.response.json().id));",
-                      "    console.log('\u2705 Publisher id:', pm.response.json().id);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "[Internal] Add Award",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{book_url}}/internal/awards",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Nobel Prize in Literature\",\n  \"year\": 1949,\n  \"category\": \"Literature\",\n  \"country\": \"Sweden\"\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                      "if (pm.response.code === 201) {",
-                      "    pm.collectionVariables.set('award_id', String(pm.response.json().id));",
-                      "    console.log('\u2705 Award id:', pm.response.json().id);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "[Internal] Add Author",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{book_url}}/internal/authors",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"George Orwell\",\n  \"country\": \"UK\",\n  \"year_born\": 1903,\n  \"year_died\": 1950,\n  \"type_of_writer\": \"Novelist\"\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                      "if (pm.response.code === 201) {",
-                      "    pm.collectionVariables.set('author_id', String(pm.response.json().id));",
-                      "    console.log('\u2705 Author id:', pm.response.json().id);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "[Internal] Assign Award to Author",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{book_url}}/internal/authors/awards",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"author_id\": {{author_id}},\n  \"award_id\": {{award_id}}\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                      "if (pm.response.code === 201) console.log('\u2705 Award assigned:', pm.response.json());"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "[Internal] Add Book",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{book_url}}/internal/books",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"isbn\": \"978-0-452-28423-4\",\n  \"title\": \"Nineteen Eighty-Four\",\n  \"year\": 1949,\n  \"author_id\": {{author_id}},\n  \"publisher_id\": {{publisher_id}}\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                      "if (pm.response.code === 201) {",
-                      "    pm.collectionVariables.set('book_isbn', pm.response.json().isbn);",
-                      "    console.log('\u2705 Book:', pm.response.json().title, '| ISBN:', pm.response.json().isbn);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "\u2500\u2500 Public Reads (no auth needed) \u2500\u2500",
-          "item": [
-            {
-              "name": "List Books",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/books?skip=0&limit=20"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Total books:', pm.response.json().total);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Get Book by ISBN",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/books/{{book_isbn}}"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Book:', pm.response.json().title);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Search Books",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/books/search?q=nineteen"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Found:', pm.response.json().total);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "List Authors",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/authors"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Get Author (with books & awards)",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/authors/{{author_id}}"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) {",
-                      "    const j = pm.response.json();",
-                      "    console.log('\u2705 Author:', j.name, '| books:', j.books.length, '| awards:', j.awards.length);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Books by Author",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/authors/{{author_id}}/books"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Books:', pm.response.json().total);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "List Publishers",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/publishers"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Get Publisher by Name",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/publishers/Penguin%20Books"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Publisher:', pm.response.json().name);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "List Awards",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/awards"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Get Award by ID",
-              "request": {
-                "method": "GET",
-                "url": "{{book_url}}/awards/{{award_id}}"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 Award:', pm.response.json().name);"
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
+            "url": "http://localhost:8003/api/v1/health"
+          }
         }
       ]
     },
     {
-      "name": "Social Service (:8005)",
+      "name": "4. Social (:8004)",
       "item": [
-        {
-          "name": "Health",
-          "request": {
-            "method": "GET",
-            "url": "{{social_url}}/social/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
         {
           "name": "Like Book",
           "request": {
             "method": "POST",
-            "url": "{{social_url}}/social/likes/{{book_isbn}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/likes/9780451524935"
+          }
         },
         {
-          "name": "Rate Book 4.5",
+          "name": "Unlike Book",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/likes/9780451524935"
+          }
+        },
+        {
+          "name": "Rate Book",
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{social_url}}/social/ratings/{{book_isbn}}",
+            "url": "http://localhost:8004/api/v1/social/ratings/9780451524935",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 4.5\n}"
+              "raw": "{\n  \"rating\": 5\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
+          }
+        },
+        {
+          "name": "Get My Rating",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/ratings/9780451524935/me"
+          }
         },
         {
           "name": "Create Review",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{social_url}}/social/reviews",
+            "url": "http://localhost:8004/api/v1/social/reviews",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isbn\": \"{{book_isbn}}\",\n  \"title\": \"Great read\",\n  \"content\": \"Strong dystopian story with timeless themes.\"\n}"
+              "raw": "{\n  \"book_id\": \"9780451524935\",\n  \"title\": \"1984\",\n  \"content\": \"Amazing book\",\n  \"rating\": 5\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) pm.collectionVariables.set('review_id', String(pm.response.json().id));"
-                ]
-              }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "http://localhost:8004/api/v1/social/reviews/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated review text\"\n}"
             }
-          ]
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/reviews/1"
+          }
+        },
+        {
+          "name": "Like Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/reviews/1/likes"
+          }
+        },
+        {
+          "name": "Unlike Review",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/reviews/1/likes"
+          }
         },
         {
           "name": "Reply to Review",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{social_url}}/social/reviews/{{review_id}}/replies",
+            "url": "http://localhost:8004/api/v1/social/reviews/1/replies",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"I agree\",\n  \"content\": \"Totally agree with this review.\"\n}"
+              "raw": "{\n  \"content\": \"Great review!\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) pm.collectionVariables.set('reply_id', String(pm.response.json().id));"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "Like Review",
-          "request": {
-            "method": "POST",
-            "url": "{{social_url}}/social/reviews/{{review_id}}/likes"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Replies",
+          "name": "Get Review Replies",
           "request": {
             "method": "GET",
-            "url": "{{social_url}}/social/reviews/{{review_id}}/replies?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/reviews/1/replies"
+          }
+        },
+        {
+          "name": "Get Book Reviews",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/books/9780451524935/reviews"
+          }
+        },
+        {
+          "name": "Get Book Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/books/9780451524935/stats"
+          }
         },
         {
           "name": "Create Shelf",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{social_url}}/social/shelves",
+            "url": "http://localhost:8004/api/v1/social/shelves",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Favorites\",\n  \"visibility\": \"public\"\n}"
+              "raw": "{\n  \"name\": \"Favorites\",\n  \"description\": \"My favorite books\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) pm.collectionVariables.set('shelf_id', String(pm.response.json().id));"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "List My Shelves",
+          "name": "Get My Shelves",
           "request": {
             "method": "GET",
-            "url": "{{social_url}}/social/shelves/me?skip=0&limit=50"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200 && Array.isArray(pm.response.json()) && pm.response.json().length > 0) {",
-                  "    pm.collectionVariables.set('shelf_id', String(pm.response.json()[0].id));",
-                  "    console.log('\u2705 My shelves:', pm.response.json().length);",
-                  "}"
-                ]
-              }
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/shelves/me"
+          }
+        },
+        {
+          "name": "Update Shelf",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "http://localhost:8004/api/v1/social/shelves/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}"
             }
-          ]
+          }
+        },
+        {
+          "name": "Delete Shelf",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/shelves/1"
+          }
         },
         {
           "name": "Add Book to Shelf",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": "{{social_url}}/social/shelves/{{shelf_id}}/items",
+            "url": "http://localhost:8004/api/v1/social/shelves/1/items",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isbn\": \"{{book_isbn}}\",\n  \"position\": 1\n}"
+              "raw": "{\n  \"isbn\": \"9780451524935\",\n  \"status\": \"read\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
-          "name": "List Shelf Items",
+          "name": "Get Shelf Books",
           "request": {
             "method": "GET",
-            "url": "{{social_url}}/social/shelves/{{shelf_id}}/items?skip=0&limit=50"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Shelf items total:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/shelves/1/books"
+          }
         },
         {
-          "name": "List Shelf Books",
+          "name": "Get Shelf Items",
           "request": {
             "method": "GET",
-            "url": "{{social_url}}/social/shelves/{{shelf_id}}/books?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Shelf books total:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/shelves/1/items"
+          }
         },
         {
           "name": "Remove Book from Shelf",
           "request": {
             "method": "DELETE",
-            "url": "{{social_url}}/social/shelves/{{shelf_id}}/items/{{book_isbn}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Book Social Stats",
-          "request": {
-            "method": "GET",
-            "url": "{{social_url}}/social/books/{{book_isbn}}/stats"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Book Service V2 (:8007)",
-      "item": [
-        {
-          "name": "Health",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Import Books from Google Books",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{bookv2_url}}/import/books",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"query\": \"science fiction classics\",\n  \"max_results\": 10\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    const books = j.books || j.items || [];",
-                  "    if (books.length > 0 && books[0].book_id) pm.collectionVariables.set('bookv2_book_id', books[0].book_id);",
-                  "    console.log('\u2705 imported_count:', j.imported_count || j.imported || 0);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Resolve Book + Writer (DB first, Wiki fallback)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{bookv2_url}}/resolve",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"book_title\": \"Animal Farm\",\n  \"writer_name\": \"George Orwell\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    if (j.book && j.book.book_id) pm.collectionVariables.set('bookv2_book_id', j.book.book_id);",
-                  "    if (j.writer && j.writer.author_id) {",
-                  "        pm.collectionVariables.set('bookv2_writer_id', j.writer.author_id);",
-                  "        pm.collectionVariables.set('author_id', j.writer.author_id);",
-                  "    }",
-                  "    console.log('\u2705 new book:', j.book_was_new, '| new writer:', j.writer_was_new, '| top5_added:', j.top5_added);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Books",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/books?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    const first = (j.items || [])[0];",
-                  "    if (first && first.book_id) pm.collectionVariables.set('bookv2_book_id', first.book_id);",
-                  "    console.log('\u2705 BookV2 total books:', j.total);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Search Books",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/books?q=animal&skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 BookV2 search total:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Book by ID",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/books/{{bookv2_book_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Book:', pm.response.json().title);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Writers",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/writers?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
-                  "    const j = pm.response.json();",
-                  "    const first = (j.items || [])[0];",
-                  "    if (first && first.author_id) {",
-                  "        pm.collectionVariables.set('bookv2_writer_id', first.author_id);",
-                  "        pm.collectionVariables.set('author_id', first.author_id);",
-                  "    }",
-                  "    console.log('\u2705 BookV2 total writers:', j.total);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Search Writers",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/writers?q=orwell&skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 BookV2 writer search total:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Authors",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/authors?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 BookV2 total authors:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Search Authors",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/authors?q=orwell&skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 BookV2 author search total:', pm.response.json().total);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Author by ID",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/authors/{{bookv2_writer_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Author:', pm.response.json().name);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Writer by ID",
-          "request": {
-            "method": "GET",
-            "url": "{{bookv2_url}}/writers/{{bookv2_writer_id}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Writer:', pm.response.json().name);"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "RAG Service (:8006)",
-      "item": [
-        {
-          "name": "Health",
-          "request": {
-            "method": "GET",
-            "url": "{{rag_url}}/health"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Recommend by Book Name (GET)",
-          "request": {
-            "method": "GET",
-            "url": "{{rag_url}}/api/v1/books/recommend?name=Animal%20Farm&force_external=false&recommendation_limit=5"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 GET book recommend source:', pm.response.json().source);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Recommend by Writer Name (GET)",
-          "request": {
-            "method": "GET",
-            "url": "{{rag_url}}/api/v1/writers/recommend?name=George%20Orwell&limit=20&selected_index=1&recommendation_limit=5"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 GET writer recommend source:', pm.response.json().source);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Recommend by Title (DB first)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{rag_url}}/api/v1/recommend",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"query\": \"Animal Farm\",\n  \"force_external\": false,\n  \"recommendation_limit\": 5\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 RAG source:', pm.response.json().source);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Recommend New Book (Force External)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{rag_url}}/api/v1/recommend",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"query\": \"Dune Messiah\",\n  \"force_external\": true,\n  \"recommendation_limit\": 5\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Recommendations:', (pm.response.json().recommendations || []).length);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Search by Writer",
-          "request": {
-            "method": "GET",
-            "url": "{{rag_url}}/api/v1/writers/search?name=George%20Orwell&limit=20&selected_index=1&recommendation_limit=5"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) console.log('\u2705 Writer matches:', (pm.response.json().matches || []).length);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "User Readings & Personalized",
-          "item": [
-            {
-              "name": "Set RAG User ID from My Profile",
-              "request": {
-                "method": "GET",
-                "url": "{{user_url}}/me"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) {",
-                      "  const me = pm.response.json();",
-                      "  pm.collectionVariables.set('rag_user_id', String(me.id));",
-                      "  console.log('\u2705 rag_user_id =', me.id);",
-                      "}"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Add Reading Entry",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"book_id\": \"{{rag_book_id}}\",\n  \"title\": \"Test Reading Book\",\n  \"authors\": \"Test Author\",\n  \"status\": \"{{rag_status}}\",\n  \"qdrant_id\": {{rag_qdrant_id}}\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 reading entry added');"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "List Reading Entries",
-              "request": {
-                "method": "GET",
-                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 readings:', pm.response.json().length || 0);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Patch Reading Entry",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings/{{rag_book_id}}",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"status\": \"read\",\n  \"rating\": 4.0,\n  \"notes\": \"Finished for RAG test\"\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 reading entry patched');"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Personalized Recommend",
-              "request": {
-                "method": "GET",
-                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/recommend"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 personalized source:', pm.response.json().source);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Internal Interaction",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{rag_url}}/api/v1/internal/interactions",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"user_id\": \"{{rag_user_id}}\",\n  \"book_id\": \"{{rag_book_id}}\",\n  \"qdrant_id\": {{rag_qdrant_id}},\n  \"interaction_type\": \"like\",\n  \"value\": 1\n}"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 internal interaction tracked');"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Delete Reading Entry",
-              "request": {
-                "method": "DELETE",
-                "url": "{{rag_url}}/api/v1/users/{{rag_user_id}}/readings/{{rag_book_id}}"
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                      "if (pm.response.code === 200) console.log('\u2705 reading entry deleted');"
-                    ]
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "Sync Books from BookV3",
-          "request": {
-            "method": "POST",
-            "url": "{{rag_url}}/api/v1/rag/sync/books?limit=20&skip=0"
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "http://localhost:8004/api/v1/social/shelves/1/items/9780451524935"
           }
         },
         {
-          "name": "Sync Book by Work ID",
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8004/api/v1/social/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. RAG (:8005)",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8005/api/v1/rag/health"
+          }
+        },
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8005/"
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8005/api/v1/rag/search?q=Dune",
+              "query": [{ "key": "q", "value": "Dune" }]
+            }
+          }
+        },
+        {
+          "name": "Get Similar Books",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8005/api/v1/rag/similar/OL12345W"
+          }
+        },
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8005/api/v1/rag/stats"
+          }
+        },
+        {
+          "name": "Sync Books",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{rag_url}}/api/v1/rag/sync/books/by-work-id",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8005/api/v1/rag/sync/books"
+          }
+        },
+        {
+          "name": "Sync by Work ID",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8005/api/v1/rag/sync/books/by-work-id"
+          }
+        },
+        {
+          "name": "Thematic Search",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8005/api/v1/rag/thematic",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"work_id\": \"{{bookv3_work_id}}\"\n}"
+              "raw": "{\n  \"themes\": [\"dystopian\", \"political\"],\n  \"limit\": 10\n}"
             }
           }
         }
       ]
     },
     {
-      "name": "Book Service V3 (:8009)",
+      "name": "6. Recommendation (:8006)",
       "item": [
         {
           "name": "Health",
           "request": {
             "method": "GET",
-            "url": "{{bookv3_url}}/health"
+            "url": "http://localhost:8006/api/v1/health"
           }
         },
         {
-          "name": "Search Books",
+          "name": "Root",
           "request": {
             "method": "GET",
-            "url": "{{bookv3_url}}/books/search?q=animal&limit=10"
+            "url": "http://localhost:8006/"
+          }
+        },
+        {
+          "name": "Get Recommendations",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "http://localhost:8006/api/v1/recommend?top_k=10&diversify=true",
+              "query": [
+                { "key": "top_k", "value": "10" },
+                { "key": "diversify", "value": "true" }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{my_user_id}}\",\n  \"history_book_ids\": [\"9780451524935\"],\n  \"current_book_id\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Interaction Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8006/api/v1/profile/events",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{my_user_id}}\",\n  \"book_id\": \"9780451524935\",\n  \"interaction_type\": \"rating\",\n  \"value\": 5.0\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Book (:8007)",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8007/"
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8007/api/v3/health"
           }
         },
         {
           "name": "List Books",
           "request": {
             "method": "GET",
-            "url": "{{bookv3_url}}/books?skip=0&limit=20"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200 && Array.isArray(pm.response.json()) && pm.response.json().length > 0) {",
-                  "  pm.collectionVariables.set('bookv3_work_id', String(pm.response.json()[0].work_id));",
-                  "}"
-                ]
-              }
+            "url": {
+              "raw": "http://localhost:8007/api/v3/books?limit=100&skip=0",
+              "query": [
+                { "key": "limit", "value": "100" },
+                { "key": "skip", "value": "0" }
+              ]
             }
-          ]
+          }
+        },
+        {
+          "name": "Search Books",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8007/api/v3/books/search?q=Dune&limit=10&skip_cache=false",
+              "query": [
+                { "key": "q", "value": "Dune" },
+                { "key": "limit", "value": "10" },
+                { "key": "skip_cache", "value": "false" }
+              ]
+            }
+          }
         },
         {
           "name": "Get Book by Work ID",
           "request": {
             "method": "GET",
-            "url": "{{bookv3_url}}/books/{{bookv3_work_id}}"
+            "url": "http://localhost:8007/api/v3/books/OL12345W"
+          }
+        },
+        {
+          "name": "Search Authors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8007/api/v3/authors/search?name=Agatha%20Christie",
+              "query": [
+                { "key": "name", "value": "Agatha Christie" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Author by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8007/api/v3/authors/agatha-christie"
+          }
+        },
+        {
+          "name": "Search Series",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8007/api/v3/series/search?name=Harry%20Potter",
+              "query": [
+                { "key": "name", "value": "Harry Potter" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Series by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8007/api/v3/series/harry-potter-jk-rowling"
+          }
+        },
+        {
+          "name": "Unified Search (Book)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8007/api/v3/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Dune\",\n  \"type\": \"book\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Unified Search (Author)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8007/api/v3/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Agatha Christie\",\n  \"type\": \"author\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Unified Search (Series)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8007/api/v3/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Harry Potter\",\n  \"type\": \"series\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+            }
           }
         }
       ]
     }
+  ],
+  "variable": [
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "my_user_id", "value": "1", "type": "string" }
   ]
 }

@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     RAG_SERVICE_URL: str | None = None
     SOCIAL_SERVICE_URL: str | None = None
 
+    # RAG Service gRPC (optional indexing notification)
+    RAG_SERVICE_GRPC_HOST: str = "localhost"
+    RAG_SERVICE_GRPC_PORT: int = 50055
+    ENABLE_RAG_NOTIFICATION: bool = True
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
