@@ -71,19 +71,20 @@ app = FastAPI(
 )
 
 # CORS middleware
-from fastapi.middleware.cors import CORSMiddleware
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8080",
         "http://127.0.0.1:8080",
-        "https://localhost:8080",  # Edge sometimes uses https for localhost
+        "https://localhost:8080",
+        "http://localhost:3000",   # React dev server
+        "http://127.0.0.1:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # Include routers
 app.include_router(router, tags=["v3"])
 
@@ -105,8 +106,12 @@ async def root():
 
 
 if __name__ == "__main__":
+    # Use the correct module path - adjust based on your package structure
+    # If your folder is named "bookie_v3" or "book_service_v3", change accordingly
+    module_path = "book.main:app"  # Change this if your package name is different
+
     uvicorn.run(
-        "book.main:app",
+        module_path,
         host="0.0.0.0",
         port=settings.HTTP_PORT,
         reload=settings.DEBUG,

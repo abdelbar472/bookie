@@ -1,6 +1,7 @@
 """
 V3 Enrichment Engine: Transforms raw API data into rich RAG-ready profiles
 """
+import asyncio
 import re
 import logging
 from typing import List, Dict, Optional, Any, Set
@@ -42,10 +43,19 @@ class EnrichmentEngine:
             ThemeCategory.BETRAYAL: ["betrayal", "treason", "deception", "lies", "trust"],
             ThemeCategory.REDEMPTION: ["redemption", "forgiveness", "salvation", "atonement"],
             ThemeCategory.FRIENDSHIP: ["friendship", "friends", "loyalty", "companions"],
-            ThemeCategory.FAMILY: ["family", "parents", "children", "legacy", "inheritance", "kin", "brother", "sister"],
-            "mystery": ["mystery", "investigation", "detective", "murder", "clue", "suspense"],
-            "magic": ["magic", "wizard", "witch", "spell", "sorcery", "fantasy", "enchantment"],
-            "historical": ["history", "past", "century", "ancient", "historical"],
+            ThemeCategory.FAMILY: ["family", "parents", "children", "legacy", "inheritance", "kin", "brother",
+                                   "sister"],
+            ThemeCategory.MAGIC: ["magic", "wizard", "witch", "spell", "sorcery", "fantasy", "enchantment"],
+            ThemeCategory.MYSTERY: ["mystery", "investigation", "detective", "murder", "clue", "suspense"],
+            ThemeCategory.HISTORICAL: ["history", "past", "century", "ancient", "historical"],
+            ThemeCategory.HORROR: ["horror", "terror", "haunted", "ghost", "supernatural", "fear"],
+            ThemeCategory.ADVENTURE: ["adventure", "journey", "quest", "exploration", "voyage", "expedition"],
+            ThemeCategory.POLITICS: ["politics", "government", "revolution", "rebellion", "empire", "kingdom"],
+            ThemeCategory.RELIGION: ["religion", "faith", "god", "spiritual", "divine", "sacred"],
+            ThemeCategory.DEATH: ["death", "mortality", "afterlife", "reaper", "dying"],
+            ThemeCategory.TIME: ["time", "timeline", "past", "future", "era", "age"],
+            ThemeCategory.MEMORY: ["memory", "remember", "forget", "nostalgia", "recollection"],
+            ThemeCategory.DYSTOPIA: ["dystopia", "dystopian", "totalitarian", "oppression", "surveillance"],
         }
 
         self.tone_indicators = {
@@ -63,13 +73,18 @@ class EnrichmentEngine:
     # ==================== MAIN ENTRY POINTS ====================
 
     async def enrich_books_from_query(self, query: str, include_arabic: bool = False) -> List[BookProfile]:
-        """
-        Main entry: Fetch and enrich books from search query
-        """
+        """Main entry: Fetch and enrich books from search query"""
         logger.info(f"Enriching books for query: {query}")
 
-        # Fetch from multiple sources
-        raw_items = await self._fetch_all_sources(query, include_arabic)
+        # Fetch from multiple sources with timeout protection
+        try:
+            raw_items = await asyncio.wait_for(
+                self._fetch_all_sources(query, include_arabic),
+                timeout=15.0  # Hard limit 15s for all sources combined
+            )
+        except asyncio.TimeoutError:
+            logger.warning(f"Timeout fetching sources for: {query}")
+            return []  # Return empty, don't hang
 
         if not raw_items:
             logger.warning(f"No results found for query: {query}")
@@ -81,12 +96,17 @@ class EnrichmentEngine:
 
         # Enrich each work
         profiles = []
+        from pydantic import ValidationError
+
         for work_data in grouped:
             try:
                 profile = await self._create_book_profile(work_data)
                 profiles.append(profile)
+            except ValidationError as e:
+                logger.error(f"Validation failed for '{work_data.get('title')}': {e}")
+                continue
             except Exception as e:
-                logger.error(f"Failed to enrich work {work_data.get('title')}: {e}")
+                logger.error(f"Failed to enrich work '{work_data.get('title')}': {e}")
                 continue
 
         return profiles
@@ -505,7 +525,7 @@ class EnrichmentEngine:
     def _extract_keywords(self, title: str, description: Optional[str]) -> List[str]:
         """Extract search keywords"""
         text = f"{title} {description or ''}".lower()
-        words = re.findall(r'\b[a-z]{5,}\b', text)
+        words = re.findall(r'[a-z]{5,}', text)
         # Filter common stop words
         stop_words = {"about", "after", "again", "against", "could", "would", "should"}
         filtered = [w for w in words if w not in stop_words]
@@ -637,7 +657,7 @@ class EnrichmentEngine:
         if analysis.target_audience:
             sections.extend(["", f"Target Audience: {analysis.target_audience}"])
 
-        return "\n".join(sections)
+        return "".join(sections)
 
     def _build_author_rag_doc(self, name: str, bio: AuthorBio,
                               style: AuthorStyleProfile,
@@ -663,7 +683,7 @@ class EnrichmentEngine:
             ", ".join(b.title for b in books[:5]),
         ]
 
-        return "\n".join(sections)
+        return "".join(sections)
 
     def _build_series_rag_doc(self, series_name: str, books: List[SeriesBookEntry],
                               themes: List[str], author: str) -> str:
@@ -685,9 +705,8 @@ class EnrichmentEngine:
             ", ".join(themes) if themes else "Various themes",
         ])
 
-        return "\n".join(sections)
+        return "".join(sections)
 
 
 # Singleton instance
 enrichment_engine = EnrichmentEngine()
-

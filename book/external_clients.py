@@ -25,13 +25,13 @@ GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
 def _is_arabic(text: str) -> bool:
     if not text:
         return False
-    return bool(re.search(r"[\u0600-\u06FF]", text))
+    return bool(re.search(r"[؀-ۿ]", text))
 
 
 def _normalize_arabic(text: str) -> str:
     if not text:
         return ""
-    text = re.sub(r"[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]", "", text)
+    text = re.sub(r"[ً-ٰٟۖ-ۭـ]", "", text)
     text = text.replace("أ", "ا").replace("إ", "ا").replace("آ", "ا")
     text = text.replace("ى", "ي").replace("ؤ", "و").replace("ئ", "ي")
     return text.strip()
@@ -42,8 +42,8 @@ def _slugify(text: str) -> str:
     normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
     normalized = normalized.lower().strip()
     normalized = normalized.replace("'", "")
-    normalized = re.sub(r"\b(el|al)[\s-]", "al-", normalized)
-    normalized = re.sub(r"y\b", "i", normalized)
+    normalized = re.sub(r"(el|al)[\s-]", "al-", normalized)
+    normalized = re.sub(r"y", "i", normalized)
     normalized = re.sub(r"[^\w\s-]", "", normalized)
     normalized = re.sub(r"[-\s]+", "-", normalized)
     return normalized or "unknown"
@@ -295,6 +295,17 @@ def _parse_openlibrary_docs(docs: List[Dict], source_tag: str) -> List[Dict[str,
         year = doc.get("first_publish_year")
         published_date = str(year) if year else None
 
+        # Build industry identifiers from isbn list
+        industry_identifiers = []
+        isbns = doc.get("isbn", []) or []
+        if isbns:
+            # Take first ISBN as ISBN_13 if long enough, else ISBN_10
+            first_isbn = str(isbns[0])
+            if len(first_isbn) >= 13:
+                industry_identifiers.append({"type": "ISBN_13", "identifier": first_isbn})
+            elif len(first_isbn) >= 10:
+                industry_identifiers.append({"type": "ISBN_10", "identifier": first_isbn})
+
         items.append({
             "id": doc.get("key") or doc.get("cover_edition_key") or title,
             "_source": source_tag,
@@ -305,10 +316,7 @@ def _parse_openlibrary_docs(docs: List[Dict], source_tag: str) -> List[Dict[str,
                 "language": language,
                 "categories": doc.get("subject", [])[:5],
                 "description": None,
-                "industryIdentifiers": [
-                    {"type": "ISBN_13", "identifier": isbn}
-                    for isbn in doc.get("isbn", [])[:1]
-                ],
+                "industryIdentifiers": industry_identifiers,
                 "imageLinks": {},
                 "pageCount": doc.get("number_of_pages_median"),
                 "publisher": (doc.get("publisher") or [None])[0],

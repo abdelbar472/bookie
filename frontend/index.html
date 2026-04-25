@@ -213,14 +213,14 @@ async function checkServices() {
     const serviceHealthUrls = [
         API.auth + '/health',
         API.user + '/health',
-        API.follow + '/follow/health',
+          API.follow + '/health',
         API.social + '/health',
         API.rag + '/health',
         API.rec + '/health',
         API.book + '/health',
     ];
     const checks = await Promise.all(serviceHealthUrls.map((url) =>
-        fetch(url).then(() => true).catch(() => false)
+        fetch(url).then((res) => res.ok).catch(() => false)
     ));
     const up = checks.filter(Boolean).length;
     status.textContent = `${up}/${serviceHealthUrls.length} services up`;
@@ -228,7 +228,12 @@ async function checkServices() {
 }
 checkServices();
 
-if (token) { showApp(); loadProfile(); }
+if (token) { showApp(); loadProfile(); loadBooks(); }
+
+function truncate(text, max = 120) {
+    if (!text) return '';
+    return text.length > max ? `${text.substring(0, max)}...` : text;
+}
 
 function switchTab(tab) {
     document.querySelectorAll('#authPanel .tab').forEach(t => t.classList.remove('active'));
@@ -267,8 +272,21 @@ async function api(url, opts = {}) {
     const res = await fetch(url, opts);
     if (res.status === 401) { logout(); throw new Error('Session expired'); }
     if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || `HTTP ${res.status}`);
+        let message = `HTTP ${res.status}`;
+        try {
+            const payload = await res.json();
+            if (typeof payload?.detail === 'string') {
+                message = payload.detail;
+            } else if (payload?.detail) {
+                message = JSON.stringify(payload.detail);
+            } else {
+                message = JSON.stringify(payload);
+            }
+        } catch (_) {
+            const errText = await res.text();
+            if (errText) message = errText;
+        }
+        throw new Error(message);
     }
     if (res.status === 204) return null;
     return res.json();
@@ -321,6 +339,7 @@ function showApp() {
     document.getElementById('authPanel').classList.add('hidden');
     document.getElementById('appPanel').classList.remove('hidden');
     document.getElementById('userName').textContent = `👤 ${username}`;
+    loadBooks();
 }
 
 // Profile
@@ -355,13 +374,13 @@ async function loadBooks() {
             <div class="card">
                 <h3>${b.title || 'Untitled'}</h3>
                 <p>${b.authors?.join(', ') || b.author || 'Unknown author'}</p>
-                <p style="font-size:12px;color:#666;margin-top:4px;">${b.description?.substring(0, 100)}...</p>
+                <p style="font-size:12px;color:#666;margin-top:4px;">${truncate(b.description, 100)}</p>
                 <div class="meta">
                     <span class="badge badge-book">${b.work_id || b.isbn || ''}</span>
                     <span>${b.published_date || b.year || ''}</span>
                 </div>
             </div>
-        `).join('');
+        `).join('') || '<p>No cached books yet. Search to fetch and cache titles.</p>';
     } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; }
 }
 
@@ -376,7 +395,7 @@ async function searchBooks() {
             <div class="card">
                 <h3>${b.title || 'Untitled'}</h3>
                 <p>${b.authors?.join(', ') || b.author || 'Unknown'}</p>
-                <p style="font-size:12px;color:#666;">${b.description?.substring(0, 120)}...</p>
+                <p style="font-size:12px;color:#666;">${truncate(b.description, 120)}</p>
                 <div class="meta">
                     <span class="badge badge-book">${b.work_id || ''}</span>
                     <span>Score: ${b.score?.toFixed(2) || 'N/A'}</span>
@@ -546,7 +565,7 @@ async function getRecommendations() {
             <div class="card">
                 <h3>${r.title || 'Unknown'}</h3>
                 <p>${r.authors?.join(', ') || ''}</p>
-                <p style="font-size:12px;color:#666;">${r.description?.substring(0, 100)}...</p>
+                <p style="font-size:12px;color:#666;">${truncate(r.description, 100)}</p>
                 <div class="meta">
                     <span class="badge badge-auth">Score: ${r.score?.toFixed(2) || 'N/A'}</span>
                     <span>${r.genres?.[0] || ''}</span>

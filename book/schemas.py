@@ -49,6 +49,18 @@ class ThemeCategory(str, Enum):
     REDEMPTION = "redemption"
     FRIENDSHIP = "friendship"
     FAMILY = "family"
+    MAGIC = "magic"
+    MYSTERY = "mystery"
+    HISTORICAL = "historical"
+    HORROR = "horror"
+    ADVENTURE = "adventure"
+    POLITICS = "politics"
+    RELIGION = "religion"
+    DEATH = "death"
+    TIME = "time"
+    MEMORY = "memory"
+    DYSTOPIA = "dystopia"  # for 1984, Brave New World, etc.
+    COMING_OF_AGE_ALT = "coming of age"  # alternative spacing
 
 
 # ==================== BOOK PROFILE ====================

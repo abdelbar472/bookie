@@ -18,6 +18,7 @@ class RAGServiceGRPCClient:
         self.port = settings.RAG_SERVICE_GRPC_PORT
         self.channel: Optional[grpc.aio.Channel] = None
         self.stub: Optional[rag_pb2_grpc.RagServiceStub] = None
+        self._partial_failure_count = 0
 
     async def connect(self) -> bool:
         try:
@@ -70,7 +71,17 @@ class RAGServiceGRPCClient:
             request = rag_pb2.IndexBooksRequest(books=[payload])
             response = await self.stub.IndexBooks(request, timeout=10)
             if response.failed > 0:
-                logger.warning("RAG rejected index for '%s': %s", book.get("title"), response.message)
+                self._partial_failure_count += 1
+                title = book.get("title")
+                if self._partial_failure_count == 1 or self._partial_failure_count % 25 == 0:
+                    logger.warning(
+                        "RAG partial indexing failures ongoing (%s events). Latest '%s': %s",
+                        self._partial_failure_count,
+                        title,
+                        response.message,
+                    )
+                else:
+                    logger.debug("RAG rejected index for '%s': %s", title, response.message)
             return response.indexed > 0
         except Exception as exc:
             logger.error("Failed to notify RAG: %s", exc)

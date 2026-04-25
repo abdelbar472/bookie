@@ -13,6 +13,14 @@ class RAGEngine:
     def __init__(self):
         self.embedding_gen = embedding_generator
         self.vector_store = vector_store
+        self._embedding_unavailable_logged = False
+
+    def _embedding_is_ready(self) -> bool:
+        available, reason = self.embedding_gen.availability_status()
+        if not available and not self._embedding_unavailable_logged:
+            logger.warning("RAG embedding unavailable. Skipping indexing until fixed: %s", reason)
+            self._embedding_unavailable_logged = True
+        return available
 
     async def index_book(self, book: Dict[str, Any]) -> bool:
         try:
@@ -45,6 +53,8 @@ class RAGEngine:
                 )
             if not documents:
                 return False
+            if not self._embedding_is_ready():
+                return False
             embeddings = await self.embedding_gen.generate([doc["text"] for doc in documents])
             return await self.vector_store.upsert_documents(documents, embeddings)
         except Exception as exc:
@@ -54,6 +64,8 @@ class RAGEngine:
     async def index_author(self, author: Dict[str, Any]) -> bool:
         try:
             if not author.get("rag_document"):
+                return False
+            if not self._embedding_is_ready():
                 return False
             document = {
                 "id": f"author:{author['author_id']}",

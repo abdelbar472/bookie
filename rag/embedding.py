@@ -1,9 +1,9 @@
 """Embedding generation for retrieval pipelines."""
 
 import logging
-from typing import List
+from typing import List, Tuple
 
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
 try:
     import openai
@@ -23,12 +23,25 @@ class EmbeddingGenerator:
         self.model = settings.EMBEDDING_MODEL
         self.dimension = settings.EMBEDDING_DIMENSION
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    def availability_status(self) -> Tuple[bool, str]:
+        if self.client is None:
+            return False, "openai package is not installed. Install dependencies from rag/requirements.txt"
+        if not settings.OPENAI_API_KEY:
+            return False, "OPENAI_API_KEY is not set for rag-service"
+        return True, ""
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_not_exception_type(RuntimeError),
+        reraise=True,
+    )
     async def generate(self, texts: List[str]) -> List[List[float]]:
         if not texts:
             return []
-        if self.client is None:
-            raise RuntimeError("openai package is not installed. Install dependencies from rag/requirements.txt")
+        available, reason = self.availability_status()
+        if not available:
+            raise RuntimeError(reason)
 
         response = await self.client.embeddings.create(model=self.model, input=texts)
         return [item.embedding for item in response.data]
