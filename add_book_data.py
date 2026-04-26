@@ -16,6 +16,9 @@ TEST_CASES = {
         "Naguib Mahfouz", "Alaa Al Aswany", "Tawfiq al-Hakim", "Yusuf Idris",
         "Ahlam Mosteghanemi", "Khalil Gibran", "Mahmoud Darwish", "Nawal El Saadawi",
         "Ahmed Khaled Tawfik", "Sonallah Ibrahim", "Khaled Khalifa", "Adania Shibli",
+        "Taha Hussein", "Ihsan Abdel Quddous", "Gamal El Ghitani", "Ghassan Kanafani",
+        "Emile Habibi", "Hanan al-Shaykh", "Leila Aboulela", "Hoda Barakat",
+        "Bensalem Himmich", "Ibrahim Nasrallah",
 
         # English & American
         "William Shakespeare", "Jane Austen", "George Orwell", "Ernest Hemingway",

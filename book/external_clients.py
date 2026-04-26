@@ -9,9 +9,10 @@ import unicodedata
 import logging
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote_plus, urlencode
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from .config import settings
 
@@ -179,11 +180,19 @@ def _build_google_url(query: str, max_results: int, start_index: int = 0,
     return f"{GOOGLE_BOOKS_API}?{'&'.join(params)}"
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=4),
+    retry=retry_if_exception(lambda exc: isinstance(exc, (URLError, TimeoutError)) and not isinstance(exc, HTTPError)),
+)
 def _fetch_json(url: str) -> Dict[str, Any]:
     req = Request(url, headers={"User-Agent": "bookie-v3/1.0"})
-    with urlopen(req, timeout=15) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urlopen(req, timeout=10) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except HTTPError:
+        # HTTP status failures are usually not transient; skip retry storm.
+        raise
 
 
 async def fetch_google_books(query: str, max_results: int = 15, start_index: int = 0) -> List[Dict[str, Any]]:
@@ -253,7 +262,21 @@ async def fetch_openlibrary_books_by_author(author_name: str, limit: int = 20) -
         logger.warning(f"OpenLibrary author fetch failed: {e}")
         return []
 
-    return _parse_openlibrary_docs(payload.get("docs", []), "openlibrary_author")
+    parsed = _parse_openlibrary_docs(payload.get("docs", []), "openlibrary_author")
+    if parsed:
+        return parsed
+
+    # Fallback for transliteration drift where strict author= misses records.
+    broad_url = f"https://openlibrary.org/search.json?q={quote_plus(author_name)}&limit={safe_limit}"
+    try:
+        broad_payload = await asyncio.to_thread(_fetch_json, broad_url)
+    except Exception as e:
+        logger.warning(f"OpenLibrary broad author fetch failed: {e}")
+        return []
+
+    broad_parsed = _parse_openlibrary_docs(broad_payload.get("docs", []), "openlibrary_author_broad")
+    deduped: Dict[str, Dict[str, Any]] = {str(item.get("id")): item for item in broad_parsed}
+    return list(deduped.values())
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))

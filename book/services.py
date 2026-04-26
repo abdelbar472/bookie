@@ -22,6 +22,48 @@ from .schemas import (
 
 logger = logging.getLogger(__name__)
 
+KNOWN_AUTHOR_ALIASES: Dict[str, List[str]] = {
+    "ahmed khaled tawfik": [
+        "ahmed khaled tawfiq",
+        "ahmad khaled tawfiq",
+        "ahmed khaled towfik",
+        "ahmed khaled tofik",
+        "ahmed khaled",
+        "احمد خالد توفيق",
+    ]
+}
+
+
+def _normalize_lookup(text: str) -> str:
+    return " ".join((text or "").lower().replace(".", " ").replace("-", " ").split())
+
+
+def _name_variants(name: str) -> List[str]:
+    base = _normalize_lookup(name)
+    variants = {base}
+    variants.add(base.replace(" q", " k").replace("q ", "k ").replace("q", "k"))
+    variants.add(base.replace(" k", " q").replace("k ", "q ").replace("k", "q"))
+    variants.add(base.replace(" al ", " "))
+    variants.add(base.replace(" el ", " "))
+    variants.add(base.replace("ph", "f"))
+    variants.add(base.replace("ou", "u"))
+    variants.add(base.replace("ee", "i"))
+    variants.add(base.replace("ahmed", "ahmad"))
+    variants.add(base.replace("khaled", "khalid"))
+    variants.update(KNOWN_AUTHOR_ALIASES.get(base, []))
+    return [v for v in variants if v]
+
+
+def _author_matches(book: BookProfile, query_name: str) -> bool:
+    variants = _name_variants(query_name)
+    candidates = [_normalize_lookup(book.primary_author)] + [_normalize_lookup(a) for a in book.authors]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        if any(v in candidate or candidate in v for v in variants):
+            return True
+    return False
+
 
 class BookService:
     """Main service for book operations."""
@@ -116,17 +158,25 @@ class BookService:
 
             from .config import settings as service_settings
 
-            if service_settings.ENABLE_RAG_NOTIFICATION:
-                from .grpc_client import notify_rag_indexing
-
-                for profile in profiles:
-                    try:
-                        await notify_rag_indexing(profile.model_dump())
-                    except Exception as notify_exc:
-                        logger.warning("RAG notification failed for %s: %s", profile.work_id, notify_exc)
+            if service_settings.ENABLE_RAG_NOTIFICATION and profiles:
+                # Keep API latency low: do indexing notifications in background.
+                asyncio.create_task(BookService._notify_rag_indexing(profiles))
 
         except Exception as exc:
             logger.warning("Failed to cache books: %s", exc)
+
+    @staticmethod
+    async def _notify_rag_indexing(profiles: List[BookProfile]) -> None:
+        from .grpc_client import notify_rag_indexing
+
+        failed = 0
+        for profile in profiles:
+            try:
+                await notify_rag_indexing(profile.model_dump())
+            except Exception:
+                failed += 1
+        if failed:
+            logger.warning("RAG notification background task failed for %s/%s books", failed, len(profiles))
 
     @staticmethod
     async def list_books(limit: int = 100, skip: int = 0) -> List[BookProfile]:
@@ -155,8 +205,7 @@ class AuthorService:
             author_books = [
                 b
                 for b in books
-                if b.primary_author.lower() == name.lower()
-                or any(name.lower() in a.lower() for a in b.authors)
+                if _author_matches(b, name)
             ]
             if author_books:
                 logger.info("Cache hit for author '%s' with %s books", name, len(author_books))
@@ -171,21 +220,50 @@ class AuthorService:
 
         # 2. Fetch author-specific books from Google Books
         logger.info('Fetching from Google Books API: inauthor:"%s"', name)
-        raw_items = await fetch_google_books(f'inauthor:"{name}"', max_results=40)
+        try:
+            raw_items = await asyncio.wait_for(fetch_google_books(f'inauthor:"{name}"', max_results=24), timeout=9.0)
+        except asyncio.TimeoutError:
+            logger.warning("Google author query timed out for '%s'", name)
+            raw_items = []
+        except Exception as exc:
+            logger.warning("Google author query failed for '%s': %s", name, exc)
+            raw_items = []
         logger.info("Google Books returned %s items for author '%s'", len(raw_items), name)
+
+        if not raw_items:
+            logger.info("Trying broader Google query for author: %s", name)
+            try:
+                raw_items = await asyncio.wait_for(fetch_google_books(name, max_results=20), timeout=7.0)
+            except asyncio.TimeoutError:
+                logger.warning("Broader Google author query timed out for '%s'", name)
+                raw_items = []
+            except Exception as exc:
+                logger.warning("Broader Google author query failed for '%s': %s", name, exc)
+                raw_items = []
+            logger.info("Broader Google query returned %s items for author '%s'", len(raw_items), name)
 
         # 3. Fallback to OpenLibrary if Google returns nothing
         if not raw_items:
-            logger.info("Trying OpenLibrary for author: %s", name)
-            raw_items = await fetch_openlibrary_books_by_author(name, limit=30)
-            logger.info("OpenLibrary returned %s items for author '%s'", len(raw_items), name)
+            for candidate in _name_variants(name):
+                logger.info("Trying OpenLibrary for author variant: %s", candidate)
+                try:
+                    raw_items = await asyncio.wait_for(fetch_openlibrary_books_by_author(candidate, limit=20), timeout=9.0)
+                except asyncio.TimeoutError:
+                    logger.warning("OpenLibrary author query timed out for variant '%s'", candidate)
+                    raw_items = []
+                except Exception as exc:
+                    logger.warning("OpenLibrary author query failed for variant '%s': %s", candidate, exc)
+                    raw_items = []
+                if raw_items:
+                    logger.info("OpenLibrary returned %s items for author '%s'", len(raw_items), candidate)
+                    break
 
         if not raw_items:
             logger.error("NO raw items found for author '%s' from ANY source", name)
             return None
 
         # 4. Enrich the raw items directly
-        grouped = enrichment_engine._group_editions(raw_items)
+        grouped = enrichment_engine._group_editions(raw_items)[:20]
         logger.info("Grouped into %s unique works for author '%s'", len(grouped), name)
 
         book_profiles = []
@@ -207,8 +285,7 @@ class AuthorService:
         author_books = [
             b
             for b in book_profiles
-            if name.lower() in b.primary_author.lower()
-            or any(name.lower() in a.lower() for a in b.authors)
+            if _author_matches(b, name)
         ]
 
         logger.info("Author filter matched %s/%s books for '%s'", len(author_books), len(book_profiles), name)
@@ -314,33 +391,31 @@ class SeriesService:
             except Exception:
                 pass
 
-        # 2. Fetch books for this series
-        try:
-            books = await asyncio.wait_for(
-                enrichment_engine.enrich_books_from_query(f"{name} series", include_arabic=_is_arabic(name)),
-                timeout=12.0
-            )
-            logger.info("Series query '%s series' returned %s books", name, len(books))
-        except asyncio.TimeoutError:
-            logger.warning("Series enrichment timed out for: %s", name)
-            books = []
+        # 2. Fetch books using small query variants with bounded per-query time.
+        query_candidates = [f"{name} series", name]
+        if "سلسلة" in name:
+            stripped = " ".join(name.replace("سلسلة", " ").split())
+            if stripped:
+                query_candidates.append(stripped)
 
-        # 3. Also try a broader search
-        if not books:
+        books: List[BookProfile] = []
+        for query_text in query_candidates:
             try:
                 books = await asyncio.wait_for(
-                    enrichment_engine.enrich_books_from_query(name, include_arabic=_is_arabic(name)),
-                    timeout=10.0
+                    enrichment_engine.enrich_books_from_query(query_text, include_arabic=_is_arabic(name)),
+                    timeout=8.0,
                 )
-                logger.info("Broad query '%s' returned %s books", name, len(books))
+                logger.info("Series query '%s' returned %s books", query_text, len(books))
+                if books:
+                    break
             except asyncio.TimeoutError:
-                logger.warning("Broad series search timed out for: %s", name)
-                books = []
+                logger.warning("Series enrichment timed out for query: %s", query_text)
 
         # 4. Filter to actual series matches
+        normalized_name = _normalize_lookup(name)
         series_books = [
             b for b in books
-            if b.series_name and name.lower() in b.series_name.lower()
+            if b.series_name and (normalized_name in _normalize_lookup(b.series_name) or _normalize_lookup(b.series_name) in normalized_name)
         ]
         logger.info("Series name filter: %s books match", len(series_books))
 
@@ -348,7 +423,7 @@ class SeriesService:
         if not series_books:
             series_books = [
                 b for b in books
-                if name.lower() in b.title.lower()
+                if normalized_name in _normalize_lookup(b.title)
             ]
             logger.info("Title filter: %s books match", len(series_books))
 
