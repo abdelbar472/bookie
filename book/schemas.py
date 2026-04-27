@@ -121,6 +121,11 @@ class BookProfile(BaseModel):
     work_id: str
     google_books_id: Optional[str] = None
     openlibrary_key: Optional[str] = None
+    # Wikipedia
+    wikipedia_url: Optional[str] = None
+    wikipedia_title: Optional[str] = None
+    wikipedia_lang: Optional[str] = None
+    wikipedia_image_url: Optional[str] = None
 
     # Core Metadata
     title: str
@@ -178,6 +183,9 @@ class BookProfile(BaseModel):
 
         if self.series_name:
             sections.append(f"Series: {self.series_name} (Book {self.series_position or '?'})")
+
+        if self.wikipedia_url:
+            sections.append(f"Wikipedia: {self.wikipedia_url}")
 
         sections.extend([
             "",

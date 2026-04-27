@@ -1,5 +1,6 @@
 """
 V3 Enrichment Engine: Transforms raw API data into rich RAG-ready profiles
+Enhanced with Wikipedia summaries for every book and author
 """
 import asyncio
 import re
@@ -17,7 +18,7 @@ from .schemas import (
 from .external_clients import (
     fetch_google_books, fetch_arabic_books, fetch_english_books,
     fetch_openlibrary_books_by_author, fetch_openlibrary_books_by_title,
-    resolve_author, _slugify, _is_arabic, _normalize_arabic
+    resolve_author, resolve_book_wikipedia, _slugify, _is_arabic, _normalize_arabic
 )
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 class EnrichmentEngine:
     """
     Transforms raw book data into enriched profiles for RAG
+    Enhanced with Wikipedia summaries for comprehensive coverage
     """
 
     def __init__(self):
@@ -73,7 +75,7 @@ class EnrichmentEngine:
     # ==================== MAIN ENTRY POINTS ====================
 
     async def enrich_books_from_query(self, query: str, include_arabic: bool = False) -> List[BookProfile]:
-        """Main entry: Fetch and enrich books from search query"""
+        """Main entry: Fetch and enrich books from search query with Wikipedia summaries"""
         logger.info(f"Enriching books for query: {query}")
 
         # Fetch from multiple sources with timeout protection
@@ -94,7 +96,7 @@ class EnrichmentEngine:
         grouped = self._group_editions(raw_items)
         logger.info(f"Grouped into {len(grouped)} unique works")
 
-        # Enrich each work
+        # Enrich each work (including Wikipedia summaries)
         profiles = []
         from pydantic import ValidationError
 
@@ -114,16 +116,35 @@ class EnrichmentEngine:
     async def enrich_author(self, author_name: str, books: List[BookProfile]) -> AuthorProfile:
         """
         Create enriched author profile from books + Wikipedia
+        Every author gets a Wikipedia biography summary
         """
         logger.info(f"Enriching author: {author_name}")
 
-        # Fetch Wikipedia data
-        wiki_data = await resolve_author(author_name)
+        # Fetch Wikipedia data with timeout protection
+        try:
+            wiki_data = await asyncio.wait_for(resolve_author(author_name), timeout=10.0)
+        except asyncio.TimeoutError:
+            logger.warning(f"Wikipedia timeout for author: {author_name}")
+            wiki_data = {"bio": None, "wikipedia_url": None, "wikipedia_title": None,
+                        "wikipedia_lang": "en", "aliases": [], "image_url": None}
+        except Exception as e:
+            logger.warning(f"Wikipedia fetch failed for author {author_name}: {e}")
+            wiki_data = {"bio": None, "wikipedia_url": None, "wikipedia_title": None,
+                        "wikipedia_lang": "en", "aliases": [], "image_url": None}
 
-        # Build bio
+        # Build bio with Wikipedia summary
+        bio_text = wiki_data.get("bio")
+        if bio_text:
+            full_bio = bio_text
+            short_bio = self._truncate_text(bio_text, 300)
+        else:
+            # Generate a fallback bio from book data if no Wikipedia entry
+            full_bio = self._generate_author_fallback_bio(author_name, books)
+            short_bio = self._truncate_text(full_bio, 300) if full_bio else None
+
         bio = AuthorBio(
-            short_bio=self._truncate_text(wiki_data.get("bio"), 300) if wiki_data.get("bio") else None,
-            full_bio=wiki_data.get("bio"),
+            short_bio=short_bio,
+            full_bio=full_bio,
             wikipedia_url=wiki_data.get("wikipedia_url"),
             wikipedia_title=wiki_data.get("wikipedia_title"),
             wikipedia_lang=wiki_data.get("wikipedia_lang", "en"),
@@ -154,6 +175,7 @@ class EnrichmentEngine:
     async def enrich_series(self, series_name: str, books: List[BookProfile]) -> SeriesProfile:
         """
         Create enriched series profile from constituent books
+        Includes Wikipedia summary if available
         """
         logger.info(f"Enriching series: {series_name}")
 
@@ -189,13 +211,30 @@ class EnrichmentEngine:
 
         primary_author = books[0].primary_author
 
+        # Try to get Wikipedia summary for series
+        series_wiki = None
+        try:
+            series_wiki = await asyncio.wait_for(
+                resolve_book_wikipedia(series_name, primary_author), timeout=8.0
+            )
+        except Exception as e:
+            logger.debug(f"Series Wikipedia lookup failed for {series_name}: {e}")
+
+        # Build description from Wikipedia or fallback
+        if series_wiki and series_wiki.get("summary"):
+            description = series_wiki.get("summary")
+            premise = series_wiki.get("full_extract") or description
+        else:
+            description = f"The {series_name} series by {primary_author}."
+            premise = self._extract_series_premise(books)
+
         profile = SeriesProfile(
             series_id=f"{_slugify(series_name)}-{_slugify(primary_author)}",
             series_name=series_name,
             primary_author=primary_author,
             author_id=_slugify(primary_author),
-            description=f"The {series_name} series by {primary_author}.",
-            premise=self._extract_series_premise(books),
+            description=description,
+            premise=premise,
             books=entries,
             total_books=len(books),
             main_themes=main_themes,
@@ -208,7 +247,7 @@ class EnrichmentEngine:
     # ==================== BOOK ENRICHMENT ====================
 
     async def _create_book_profile(self, work_data: Dict) -> BookProfile:
-        """Create BookProfile from grouped work data"""
+        """Create BookProfile from grouped work data with Wikipedia summary"""
 
         work_id = work_data["work_id"]
         title = work_data["title"]
@@ -232,12 +271,53 @@ class EnrichmentEngine:
             )
             editions.append(edition)
 
+        # Get base description from Google Books/OpenLibrary
+        base_description = work_data.get("description", "") or ""
+
+        # Fetch Wikipedia summary for the book (with timeout)
+        wiki_summary = None
+        wiki_url = None
+        wiki_title = None
+        wiki_lang = "en"
+        wiki_image = None
+
+        try:
+            wiki_data = await asyncio.wait_for(
+                resolve_book_wikipedia(title, primary_author), timeout=8.0
+            )
+            wiki_summary = wiki_data.get("summary")
+            wiki_url = wiki_data.get("wikipedia_url")
+            wiki_title = wiki_data.get("wikipedia_title")
+            wiki_lang = wiki_data.get("wikipedia_lang", "en")
+            wiki_image = wiki_data.get("image_url")
+        except Exception as e:
+            logger.debug(f"Wikipedia book lookup failed for {title}: {e}")
+
+        # Combine descriptions: Wikipedia summary + Google Books description
+        if wiki_summary and base_description:
+            # Use Wikipedia as primary summary, append Google Books for detail
+            description = f"{wiki_summary}\n\n{base_description}"
+            description_sources = ["wikipedia", "google_books"]
+        elif wiki_summary:
+            description = wiki_summary
+            description_sources = ["wikipedia"]
+        elif base_description:
+            description = base_description
+            description_sources = ["google_books"]
+        else:
+            # Generate fallback description
+            description = self._generate_book_fallback_description(title, primary_author, work_data.get("categories", []))
+            description_sources = ["auto_generated"]
+
         # Content analysis
-        description = work_data.get("description", "") or ""
         content_analysis = self._analyze_content(description, title)
 
         # Quality metrics
         quality = self._calculate_quality(work_data, editions)
+        # Boost quality if we have Wikipedia data
+        if wiki_summary:
+            quality.description_quality = min(100, quality.description_quality + 20)
+            quality.confidence_score = min(1.0, quality.confidence_score + 0.15)
 
         # Extract metadata
         first_year = self._extract_year(work_data.get("published_date"))
@@ -247,6 +327,10 @@ class EnrichmentEngine:
             work_id=work_id,
             google_books_id=work_data.get("google_books_id"),
             openlibrary_key=work_data.get("openlibrary_key"),
+            wikipedia_url=wiki_url,
+            wikipedia_title=wiki_title,
+            wikipedia_lang=wiki_lang,
+            wikipedia_image_url=wiki_image,
             title=title,
             subtitle=work_data.get("subtitle"),
             authors=authors,
@@ -254,7 +338,7 @@ class EnrichmentEngine:
             series_name=work_data.get("saga_name"),
             series_position=work_data.get("series_position"),
             description=description if description else None,
-            description_sources=["google_books"],  # Could be multiple
+            description_sources=description_sources,
             content_analysis=content_analysis,
             categories=work_data.get("categories", []),
             genres=self._extract_genres(work_data.get("categories", [])),
@@ -420,6 +504,45 @@ class EnrichmentEngine:
 
         return list(groups.values())
 
+    # ==================== FALLBACK GENERATORS ====================
+
+    def _generate_author_fallback_bio(self, author_name: str, books: List[BookProfile]) -> Optional[str]:
+        """Generate a fallback biography when Wikipedia is not available"""
+        if not books:
+            return f"{author_name} is an author."
+
+        genres = []
+        themes = []
+        years = []
+        for book in books:
+            genres.extend(book.genres)
+            themes.extend(book.content_analysis.key_themes)
+            if book.first_published_year:
+                years.append(book.first_published_year)
+
+        top_genres = [g for g, _ in Counter(genres).most_common(3)]
+        top_themes = [t for t, _ in Counter(themes).most_common(3)]
+
+        bio_parts = [f"{author_name} is an author"]
+        if top_genres:
+            bio_parts.append(f"known for works in {', '.join(top_genres)}")
+        if top_themes:
+            bio_parts.append(f"often exploring themes of {', '.join(top_themes)}")
+        if years:
+            min_year, max_year = min(years), max(years)
+            if min_year == max_year:
+                bio_parts.append(f"with works published in {min_year}")
+            else:
+                bio_parts.append(f"active from {min_year} to {max_year}")
+
+        bio_parts.append(f". Notable works include {', '.join(b.title for b in books[:3])}.")
+        return " ".join(bio_parts)
+
+    def _generate_book_fallback_description(self, title: str, author: str, categories: List[str]) -> str:
+        """Generate a fallback description when no external description is available"""
+        genre_str = ", ".join(categories[:2]) if categories else "literature"
+        return f"{title} is a work by {author}. Categorized as {genre_str}. No detailed description available."
+
     # ==================== UTILITY METHODS ====================
 
     def _create_work_id(self, title: str, primary_author: str) -> str:
@@ -441,7 +564,7 @@ class EnrichmentEngine:
             }
 
         # Pattern: "Title - Series Name, Book X" or similar
-        match = re.search(r'(?:-|—)\s*(.+?)(?:\s+(?:book|vol\.?|volume|part)\s+(\d+))', title, re.IGNORECASE)
+        match = re.search(r'(?:-|\u2014)\s*(.+?)(?:\s+(?:book|vol\.?|volume|part)\s+(\d+))', title, re.IGNORECASE)
         if match:
             return {"name": match.group(1).strip(), "position": float(match.group(2))}
 
@@ -525,7 +648,7 @@ class EnrichmentEngine:
     def _extract_keywords(self, title: str, description: Optional[str]) -> List[str]:
         """Extract search keywords"""
         text = f"{title} {description or ''}".lower()
-        words = re.findall(r'[a-z]{5,}', text)
+        words = re.findall(r'\b[a-z]{5,}\b', text)
         # Filter common stop words
         stop_words = {"about", "after", "again", "against", "could", "would", "should"}
         filtered = [w for w in words if w not in stop_words]
@@ -657,7 +780,7 @@ class EnrichmentEngine:
         if analysis.target_audience:
             sections.extend(["", f"Target Audience: {analysis.target_audience}"])
 
-        return "".join(sections)
+        return "\n".join(sections)
 
     def _build_author_rag_doc(self, name: str, bio: AuthorBio,
                               style: AuthorStyleProfile,
@@ -683,7 +806,7 @@ class EnrichmentEngine:
             ", ".join(b.title for b in books[:5]),
         ]
 
-        return "".join(sections)
+        return "\n".join(sections)
 
     def _build_series_rag_doc(self, series_name: str, books: List[SeriesBookEntry],
                               themes: List[str], author: str) -> str:
@@ -705,7 +828,7 @@ class EnrichmentEngine:
             ", ".join(themes) if themes else "Various themes",
         ])
 
-        return "".join(sections)
+        return "\n".join(sections)
 
 
 # Singleton instance

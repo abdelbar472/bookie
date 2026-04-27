@@ -8,9 +8,18 @@ from collections import Counter
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from .config import settings
 from .database import DatabaseUnavailableError, check_db_health, get_collection
 from .enrichment_engine import enrichment_engine
-from .external_clients import fetch_google_books, fetch_openlibrary_books_by_author, _is_arabic, _slugify
+from .external_clients import (
+    build_author_name_variants,
+    fetch_author_aliases,
+    fetch_google_books,
+    fetch_openlibrary_author_works,
+    fetch_openlibrary_books_by_author,
+    _is_arabic,
+    _slugify, fetch_arabic_books,
+)
 from .schemas import (
     AuthorProfile,
     AuthorSearchResponse,
@@ -22,36 +31,34 @@ from .schemas import (
 
 logger = logging.getLogger(__name__)
 
-KNOWN_AUTHOR_ALIASES: Dict[str, List[str]] = {
-    "ahmed khaled tawfik": [
-        "ahmed khaled tawfiq",
-        "ahmad khaled tawfiq",
-        "ahmed khaled towfik",
-        "ahmed khaled tofik",
-        "ahmed khaled",
-        "احمد خالد توفيق",
-    ]
-}
-
 
 def _normalize_lookup(text: str) -> str:
     return " ".join((text or "").lower().replace(".", " ").replace("-", " ").split())
 
 
 def _name_variants(name: str) -> List[str]:
-    base = _normalize_lookup(name)
-    variants = {base}
-    variants.add(base.replace(" q", " k").replace("q ", "k ").replace("q", "k"))
-    variants.add(base.replace(" k", " q").replace("k ", "q ").replace("k", "q"))
-    variants.add(base.replace(" al ", " "))
-    variants.add(base.replace(" el ", " "))
-    variants.add(base.replace("ph", "f"))
-    variants.add(base.replace("ou", "u"))
-    variants.add(base.replace("ee", "i"))
-    variants.add(base.replace("ahmed", "ahmad"))
-    variants.add(base.replace("khaled", "khalid"))
-    variants.update(KNOWN_AUTHOR_ALIASES.get(base, []))
+    variants = {_normalize_lookup(name)}
+    for variant in build_author_name_variants(name):
+        variants.add(_normalize_lookup(variant))
     return [v for v in variants if v]
+
+
+def _merge_unique_items(*sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {}
+    for src in sources:
+        for item in src:
+            volume = item.get("volumeInfo", {})
+            key_parts = [
+                str(item.get("id") or "").strip(),
+                str(volume.get("title") or "").strip().lower(),
+                "|".join((a or "").strip().lower() for a in (volume.get("authors") or [])[:2]),
+            ]
+            key = "::".join(part for part in key_parts if part)
+            if not key:
+                continue
+            if key not in merged:
+                merged[key] = item
+    return list(merged.values())
 
 
 def _author_matches(book: BookProfile, query_name: str) -> bool:
@@ -198,118 +205,152 @@ class AuthorService:
         """Search for author and related books."""
         logger.info("Searching author: %s", name)
 
-        # 1. Check cache first — verify it has books
+        # 1. Check cache first
         cached = await AuthorService._get_cached_author(name)
         if cached:
             books = await BookService.list_books(limit=200)
-            author_books = [
-                b
-                for b in books
-                if _author_matches(b, name)
-            ]
+            author_books = [b for b in books if _author_matches(b, name)]
             if author_books:
                 logger.info("Cache hit for author '%s' with %s books", name, len(author_books))
                 return AuthorSearchResponse(
-                    query=name,
-                    author=cached,
-                    books=author_books,
-                    total_books=len(author_books),
+                    query=name, author=cached, books=author_books, total_books=len(author_books)
                 )
             else:
                 logger.warning("Cache hit for author '%s' but NO books — stale cache, refetching", name)
 
-        # 2. Fetch author-specific books from Google Books
-        logger.info('Fetching from Google Books API: inauthor:"%s"', name)
-        try:
-            raw_items = await asyncio.wait_for(fetch_google_books(f'inauthor:"{name}"', max_results=24), timeout=9.0)
-        except asyncio.TimeoutError:
-            logger.warning("Google author query timed out for '%s'", name)
-            raw_items = []
-        except Exception as exc:
-            logger.warning("Google author query failed for '%s': %s", name, exc)
-            raw_items = []
-        logger.info("Google Books returned %s items for author '%s'", len(raw_items), name)
+        # 2. RESOLVE NAMES — this is the key fix
+        from .external_clients import resolve_author_names
+        name_data = await resolve_author_names(name)
 
-        if not raw_items:
-            logger.info("Trying broader Google query for author: %s", name)
+        arabic_names = name_data.get("arabic_names", [])
+        latin_names = name_data.get("latin_names", [])
+        all_variants = name_data.get("variants", [name])
+
+        logger.info("Resolved '%s' → %s variants (%s Arabic, %s Latin)",
+                   name, len(all_variants), len(arabic_names), len(latin_names))
+
+        # 3. Build search candidates: Arabic names first (for Arabic APIs), then Latin
+        search_candidates = []
+
+        # Arabic candidates → use with Arabic Google Books
+        for an in arabic_names[:2]:
+            if an not in [c[1] for c in search_candidates]:
+                search_candidates.append(("ar", an))
+
+        # Latin candidates → use with English Google Books + OpenLibrary
+        for ln in latin_names[:4]:
+            if ln not in [c[1] for c in search_candidates]:
+                search_candidates.append(("en", ln))
+
+        # Fallback to input
+        if not search_candidates:
+            search_candidates.append(("en" if not _is_arabic(name) else "ar", name))
+
+        raw_items: List[Dict[str, Any]] = []
+        min_results = max(1, settings.AUTHOR_SEARCH_MIN_RESULTS)
+
+        for lang, candidate in search_candidates[:6]:
+            logger.info('Fetching for author candidate: "%s" (lang=%s)', candidate, lang)
+
+            # Google Books — language-appropriate
             try:
-                raw_items = await asyncio.wait_for(fetch_google_books(name, max_results=20), timeout=7.0)
+                if lang == "ar":
+                    google_results = await asyncio.wait_for(
+                        fetch_arabic_books(candidate, max_results=24),
+                        timeout=9.0,
+                    )
+                else:
+                    google_results = await asyncio.wait_for(
+                        fetch_google_books(f'inauthor:"{candidate}"', max_results=24),
+                        timeout=9.0,
+                    )
             except asyncio.TimeoutError:
-                logger.warning("Broader Google author query timed out for '%s'", name)
-                raw_items = []
+                logger.warning("Google query timed out for '%s'", candidate)
+                google_results = []
             except Exception as exc:
-                logger.warning("Broader Google author query failed for '%s': %s", name, exc)
-                raw_items = []
-            logger.info("Broader Google query returned %s items for author '%s'", len(raw_items), name)
+                logger.warning("Google query failed for '%s': %s", candidate, exc)
+                google_results = []
 
-        # 3. Fallback to OpenLibrary if Google returns nothing
-        if not raw_items:
-            for candidate in _name_variants(name):
-                logger.info("Trying OpenLibrary for author variant: %s", candidate)
+            # Broad fallback for Latin names only
+            broad_google = []
+            if lang != "ar" and len(google_results) < min_results:
                 try:
-                    raw_items = await asyncio.wait_for(fetch_openlibrary_books_by_author(candidate, limit=20), timeout=9.0)
+                    broad_google = await asyncio.wait_for(
+                        fetch_google_books(candidate, max_results=20),
+                        timeout=7.0,
+                    )
                 except asyncio.TimeoutError:
-                    logger.warning("OpenLibrary author query timed out for variant '%s'", candidate)
-                    raw_items = []
+                    broad_google = []
+                except Exception:
+                    broad_google = []
+
+            # OpenLibrary — only for Latin names (no Arabic support)
+            ol_search = []
+            ol_works = []
+            if lang != "ar":
+                try:
+                    ol_search = await asyncio.wait_for(
+                        fetch_openlibrary_books_by_author(candidate, limit=24),
+                        timeout=18.0,
+                    )
+                except asyncio.TimeoutError:
+                    pass
                 except Exception as exc:
-                    logger.warning("OpenLibrary author query failed for variant '%s': %s", candidate, exc)
-                    raw_items = []
-                if raw_items:
-                    logger.info("OpenLibrary returned %s items for author '%s'", len(raw_items), candidate)
-                    break
+                    logger.warning("OpenLibrary search failed for '%s': %s", candidate, exc)
+
+                if settings.ENABLE_OPENLIBRARY_AUTHOR_WORKS:
+                    try:
+                        ol_works = await asyncio.wait_for(
+                            fetch_openlibrary_author_works(candidate, limit=30),
+                            timeout=20.0,
+                        )
+                    except asyncio.TimeoutError:
+                        pass
+                    except Exception as exc:
+                        logger.warning("OpenLibrary author-works failed for '%s': %s", candidate, exc)
+
+            raw_items = _merge_unique_items(raw_items, google_results, broad_google, ol_search, ol_works)
+            logger.info(
+                "Candidate '%s' merged results: total=%s (google=%s, broad=%s, ol_search=%s, ol_works=%s)",
+                candidate, len(raw_items), len(google_results), len(broad_google), len(ol_search), len(ol_works),
+            )
+
+            if len(raw_items) >= min_results:
+                break
 
         if not raw_items:
             logger.error("NO raw items found for author '%s' from ANY source", name)
             return None
 
-        # 4. Enrich the raw items directly
-        grouped = enrichment_engine._group_editions(raw_items)[:20]
+        # 4. Group editions into unique works
+        grouped = enrichment_engine._group_editions(raw_items)
         logger.info("Grouped into %s unique works for author '%s'", len(grouped), name)
 
-        book_profiles = []
+        # 5. Enrich each work into BookProfile
+        profiles = []
         for work_data in grouped:
             try:
                 profile = await enrichment_engine._create_book_profile(work_data)
-                book_profiles.append(profile)
-            except Exception as e:
-                logger.error("Failed to enrich work for author '%s': %s", name, e)
+                profiles.append(profile)
+            except Exception as exc:
+                logger.error("Failed to enrich work '%s': %s", work_data.get("title"), exc)
                 continue
 
-        logger.info("Created %s book profiles for author '%s'", len(book_profiles), name)
-
-        if not book_profiles:
-            logger.error("ZERO book profiles created for author '%s'", name)
-            return None
-
-        # 5. Filter to ensure we only get this author's books
-        author_books = [
-            b
-            for b in book_profiles
-            if _author_matches(b, name)
-        ]
-
-        logger.info("Author filter matched %s/%s books for '%s'", len(author_books), len(book_profiles), name)
-
-        # 6. CRITICAL FIX: If filter is too strict, use ALL fetched books
-        # This happens when author name variations don't match exactly
+        # 6. Filter to books that actually match this author
+        author_books = [b for b in profiles if _author_matches(b, name)]
         if not author_books:
-            logger.warning("Strict filter returned 0 for '%s', using all %s fetched books", name, len(book_profiles))
-            author_books = book_profiles
+            # Fallback: if strict filtering removes everything, use all results
+            logger.warning("Strict author filter removed all books for '%s', using all %s results", name, len(profiles))
+            author_books = profiles
 
-        if not author_books:
-            logger.error("ZERO books for author '%s' after all attempts", name)
-            return None
+        logger.info("Author '%s' matched %s books after filtering", name, len(author_books))
 
-        # 7. Build author profile from these books
+        # 7. Enrich author profile
         author_profile = await enrichment_engine.enrich_author(name, author_books)
 
-        # 8. Only cache if we have actual books
-        if len(author_books) > 0:
-            await AuthorService._cache_author(author_profile)
-            await BookService._cache_books(author_books, f"author:{name}")
-            logger.info("SUCCESS — Cached author '%s' with %s books", name, len(author_books))
-        else:
-            logger.warning("NOT caching author '%s' — zero books", name)
+        # 8. Cache results
+        await AuthorService._cache_author(author_profile)
+        await BookService._cache_books(author_books, f"author:{name}")
 
         return AuthorSearchResponse(
             query=name,
@@ -335,14 +376,16 @@ class AuthorService:
         """Try to get author from cache."""
         try:
             col = get_collection("author_profiles")
-            doc = await col.find_one(
-                {
-                    "$or": [
-                        {"author_id": _slugify(name)},
-                        {"name": {"$regex": name, "$options": "i"}},
-                    ]
-                }
-            )
+            # Try exact match first
+            doc = await col.find_one({"author_id": _slugify(name)})
+            if doc:
+                return AuthorProfile(**doc)
+            # Try name match
+            doc = await col.find_one({"name": {"$regex": f"^{re.escape(name)}$", "$options": "i"}})
+            if doc:
+                return AuthorProfile(**doc)
+            # Try name variants
+            doc = await col.find_one({"name_variants": {"$regex": f"^{re.escape(name)}$", "$options": "i"}})
             if doc:
                 return AuthorProfile(**doc)
         except Exception as exc:
@@ -351,7 +394,7 @@ class AuthorService:
 
     @staticmethod
     async def _cache_author(profile: AuthorProfile) -> None:
-        """Store author in cache."""
+        """Store author profile in cache."""
         try:
             col = get_collection("author_profiles")
             await col.update_one(

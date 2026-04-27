@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     # Enrichment
     MAX_BOOKS_PER_QUERY: int = 20
     ENABLE_ARABIC_SEARCH: bool = True
+    AUTHOR_SEARCH_MIN_RESULTS: int = 5
+
+    # External API reliability
+    EXTERNAL_TIMEOUT_SECONDS: float = 10.0
+    EXTERNAL_RETRY_ATTEMPTS: int = 3
+    ENABLE_OPENLIBRARY_AUTHOR_WORKS: bool = True
+    ENABLE_WIKIDATA_ALIASES: bool = True
+    WIKIDATA_MAX_ALIASES: int = 20
 
     # External Service URLs
     RAG_SERVICE_URL: str | None = None

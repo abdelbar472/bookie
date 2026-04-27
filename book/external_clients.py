@@ -1,348 +1,574 @@
 """
-External API clients for book data aggregation
-Google Books, OpenLibrary, Wikipedia
+V3 Business Logic Layer
+Coordinates enrichment, storage, and external service integration
 """
 import asyncio
-import json
-import re
-import unicodedata
 import logging
+from collections import Counter
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from urllib.parse import quote_plus, urlencode
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
-
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from .config import settings
+from .database import DatabaseUnavailableError, check_db_health, get_collection
+from .enrichment_engine import enrichment_engine
+from .external_clients import (
+    build_author_name_variants,
+    fetch_author_aliases,
+    fetch_google_books,
+    fetch_openlibrary_author_works,
+    fetch_openlibrary_books_by_author,
+    _is_arabic,
+    _slugify, fetch_arabic_books,
+)
+from .schemas import (
+    AuthorProfile,
+    AuthorSearchResponse,
+    BookProfile,
+    BookSearchResponse,
+    SeriesProfile,
+    SeriesSearchResponse,
+)
 
 logger = logging.getLogger(__name__)
 
-GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
+
+def _normalize_lookup(text: str) -> str:
+    return " ".join((text or "").lower().replace(".", " ").replace("-", " ").split())
 
 
-# ==================== TEXT UTILITIES ====================
-
-def _is_arabic(text: str) -> bool:
-    if not text:
-        return False
-    return bool(re.search(r"[؀-ۿ]", text))
-
-
-def _normalize_arabic(text: str) -> str:
-    if not text:
-        return ""
-    text = re.sub(r"[ً-ٰٟۖ-ۭـ]", "", text)
-    text = text.replace("أ", "ا").replace("إ", "ا").replace("آ", "ا")
-    text = text.replace("ى", "ي").replace("ؤ", "و").replace("ئ", "ي")
-    return text.strip()
+def _name_variants(name: str) -> List[str]:
+    variants = {_normalize_lookup(name)}
+    for variant in build_author_name_variants(name):
+        variants.add(_normalize_lookup(variant))
+    return [v for v in variants if v]
 
 
-def _slugify(text: str) -> str:
-    normalized = unicodedata.normalize("NFKD", text or "")
-    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
-    normalized = normalized.lower().strip()
-    normalized = normalized.replace("'", "")
-    normalized = re.sub(r"(el|al)[\s-]", "al-", normalized)
-    normalized = re.sub(r"y", "i", normalized)
-    normalized = re.sub(r"[^\w\s-]", "", normalized)
-    normalized = re.sub(r"[-\s]+", "-", normalized)
-    return normalized or "unknown"
+def _merge_unique_items(*sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {}
+    for src in sources:
+        for item in src:
+            volume = item.get("volumeInfo", {})
+            key_parts = [
+                str(item.get("id") or "").strip(),
+                str(volume.get("title") or "").strip().lower(),
+                "|".join((a or "").strip().lower() for a in (volume.get("authors") or [])[:2]),
+            ]
+            key = "::".join(part for part in key_parts if part)
+            if not key:
+                continue
+            if key not in merged:
+                merged[key] = item
+    return list(merged.values())
 
 
-# ==================== WIKIPEDIA ====================
-
-async def search_wikipedia(author_name: str, lang: str = "en") -> Optional[str]:
-    """Search Wikipedia for author and return page title"""
-    url = f"https://{lang}.wikipedia.org/w/api.php"
-    params = {
-        "action": "query",
-        "list": "search",
-        "srsearch": author_name,
-        "format": "json",
-        "srlimit": 1
-    }
-
-    try:
-        req = Request(f"{url}?{urlencode(params)}",
-                      headers={"User-Agent": "BookieV3/1.0"})
-        with urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-        results = data.get("query", {}).get("search", [])
-        return results[0]["title"] if results else None
-    except Exception as e:
-        logger.debug(f"Wikipedia search failed: {e}")
-        return None
-
-
-async def fetch_wikipedia_bio(title: str, lang: str) -> Optional[Dict]:
-    """Fetch author bio from Wikipedia"""
-    url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/{quote_plus(title.replace(' ', '_'))}"
-
-    try:
-        req = Request(url, headers={"User-Agent": "BookieV3/1.0"})
-        with urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-        return {
-            "title": data.get("title"),
-            "bio": data.get("extract"),
-            "url": data.get("content_urls", {}).get("desktop", {}).get("page"),
-            "image_url": data.get("thumbnail", {}).get("source") or data.get("originalimage", {}).get("source")
-        }
-    except Exception as e:
-        logger.debug(f"Wikipedia fetch failed: {e}")
-        return None
-
-
-async def resolve_author(author_name: str) -> Dict[str, Any]:
-    """Resolve author from Wikipedia (English and Arabic)"""
-    author_name = (author_name or "").strip()
-    is_arabic = _is_arabic(author_name)
-
-    aliases = [author_name]
-    best_bio = None
-
-    # Run both language searches concurrently
-    en_task = search_wikipedia(author_name, "en")
-    ar_task = search_wikipedia(author_name, "ar")
-    en_title, ar_title = await asyncio.gather(en_task, ar_task)
-
-    titles_to_fetch = []
-    if en_title:
-        aliases.append(en_title)
-        titles_to_fetch.append((en_title, "en"))
-    if ar_title:
-        aliases.append(ar_title)
-        titles_to_fetch.append((ar_title, "ar"))
-
-    # Expand aliases
-    def _expand_aliases(name: str) -> List[str]:
-        expanded = [name]
-        low = name.lower()
-        if "q" in low:
-            expanded.append(name.replace("q", "k").replace("Q", "K"))
-        if "k" in low:
-            expanded.append(name.replace("k", "q").replace("K", "Q"))
-        if " al-" in low.replace("el-", "al-"):
-            expanded.append(name.replace(" al-", " "))
-            expanded.append(name.replace(" al-", " el-"))
-        return expanded
-
-    aliases.extend([a for base in list(aliases) for a in _expand_aliases(base)])
-    aliases = list(set(aliases))
-
-    if titles_to_fetch:
-        bio_tasks = [fetch_wikipedia_bio(t, l) for t, l in titles_to_fetch]
-        bio_results = await asyncio.gather(*bio_tasks)
-
-        for (t, l), bio_data in zip(titles_to_fetch, bio_results):
-            if bio_data and not best_bio:
-                best_bio = {
-                    "author_id": _slugify(author_name),
-                    "name": author_name,
-                    "bio": bio_data.get("bio"),
-                    "wikipedia_title": bio_data.get("title"),
-                    "wikipedia_lang": l,
-                    "wikipedia_url": bio_data.get("url"),
-                    "image_url": bio_data.get("image_url"),
-                }
-
-    if best_bio:
-        best_bio["aliases"] = list(set(aliases))
-        return best_bio
-
-    # Fallback
-    return {
-        "author_id": _slugify(author_name),
-        "name": author_name,
-        "bio": None,
-        "wikipedia_title": None,
-        "wikipedia_lang": "ar" if is_arabic else "en",
-        "wikipedia_url": None,
-        "image_url": None,
-        "aliases": aliases,
-    }
-
-
-# ==================== GOOGLE BOOKS ====================
-
-def _build_google_url(query: str, max_results: int, start_index: int = 0,
-                      lang_restrict: Optional[str] = None) -> str:
-    params = [
-        f"q={quote_plus(query)}",
-        f"maxResults={max(1, min(max_results, 40))}",
-        f"startIndex={start_index}"
-    ]
-    if lang_restrict:
-        params.append(f"langRestrict={quote_plus(lang_restrict)}")
-    if settings.GOOGLE_BOOKS_API_KEY:
-        params.append(f"key={quote_plus(settings.GOOGLE_BOOKS_API_KEY)}")
-    return f"{GOOGLE_BOOKS_API}?{'&'.join(params)}"
-
-
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=1, max=4),
-    retry=retry_if_exception(lambda exc: isinstance(exc, (URLError, TimeoutError)) and not isinstance(exc, HTTPError)),
-)
-def _fetch_json(url: str) -> Dict[str, Any]:
-    req = Request(url, headers={"User-Agent": "bookie-v3/1.0"})
-    try:
-        with urlopen(req, timeout=10) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except HTTPError:
-        # HTTP status failures are usually not transient; skip retry storm.
-        raise
-
-
-async def fetch_google_books(query: str, max_results: int = 15, start_index: int = 0) -> List[Dict[str, Any]]:
-    if not query.strip():
-        return []
-    url = _build_google_url(query=query, max_results=max_results, start_index=start_index)
-    try:
-        payload = await asyncio.to_thread(_fetch_json, url)
-        items = payload.get("items") or []
-        # Tag with source
-        for item in items:
-            item["_source"] = "google_books"
-        return items
-    except Exception as e:
-        logger.warning(f"Google Books fetch failed: {e}")
-        return []
-
-
-async def fetch_arabic_books(query: str, max_results: int = 15, start_index: int = 0) -> List[Dict[str, Any]]:
-    if not query.strip():
-        return []
-    normalized_query = _normalize_arabic(query)
-    url = _build_google_url(query=normalized_query, max_results=max_results,
-                            start_index=start_index, lang_restrict="ar")
-    try:
-        payload = await asyncio.to_thread(_fetch_json, url)
-        items = payload.get("items") or []
-        for item in items:
-            item["_source"] = "google_books_arabic"
-        return items
-    except Exception as e:
-        logger.warning(f"Arabic books fetch failed: {e}")
-        return []
-
-
-async def fetch_english_books(query: str, max_results: int = 15, start_index: int = 0) -> List[Dict[str, Any]]:
-    if not query.strip():
-        return []
-    url = _build_google_url(query=query, max_results=max_results,
-                            start_index=start_index, lang_restrict="en")
-    try:
-        payload = await asyncio.to_thread(_fetch_json, url)
-        items = payload.get("items") or []
-        for item in items:
-            item["_source"] = "google_books_english"
-        return items
-    except Exception as e:
-        logger.warning(f"English books fetch failed: {e}")
-        return []
-
-
-# ==================== OPENLIBRARY ====================
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-async def fetch_openlibrary_books_by_author(author_name: str, limit: int = 20) -> List[Dict[str, Any]]:
-    """Fallback source when Google Books returns no useful items."""
-    author_name = (author_name or "").strip()
-    if not author_name:
-        return []
-
-    safe_limit = max(1, min(limit, 100))
-    url = f"https://openlibrary.org/search.json?author={quote_plus(author_name)}&limit={safe_limit}"
-
-    try:
-        payload = await asyncio.to_thread(_fetch_json, url)
-    except Exception as e:
-        logger.warning(f"OpenLibrary author fetch failed: {e}")
-        return []
-
-    parsed = _parse_openlibrary_docs(payload.get("docs", []), "openlibrary_author")
-    if parsed:
-        return parsed
-
-    # Fallback for transliteration drift where strict author= misses records.
-    broad_url = f"https://openlibrary.org/search.json?q={quote_plus(author_name)}&limit={safe_limit}"
-    try:
-        broad_payload = await asyncio.to_thread(_fetch_json, broad_url)
-    except Exception as e:
-        logger.warning(f"OpenLibrary broad author fetch failed: {e}")
-        return []
-
-    broad_parsed = _parse_openlibrary_docs(broad_payload.get("docs", []), "openlibrary_author_broad")
-    deduped: Dict[str, Dict[str, Any]] = {str(item.get("id")): item for item in broad_parsed}
-    return list(deduped.values())
-
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-async def fetch_openlibrary_books_by_title(title: str, limit: int = 20) -> List[Dict[str, Any]]:
-    """Fallback source for title search"""
-    title = (title or "").strip()
-    if not title:
-        return []
-
-    safe_limit = max(1, min(limit, 100))
-    url = f"https://openlibrary.org/search.json?title={quote_plus(title)}&limit={safe_limit}"
-
-    try:
-        payload = await asyncio.to_thread(_fetch_json, url)
-        if not payload.get("docs"):
-            url_broad = f"https://openlibrary.org/search.json?q={quote_plus(title)}&limit={safe_limit}"
-            payload = await asyncio.to_thread(_fetch_json, url_broad)
-    except Exception as e:
-        logger.warning(f"OpenLibrary title fetch failed: {e}")
-        return []
-
-    return _parse_openlibrary_docs(payload.get("docs", []), "openlibrary_title")
-
-
-def _parse_openlibrary_docs(docs: List[Dict], source_tag: str) -> List[Dict[str, Any]]:
-    """Parse OpenLibrary docs into Google Books-like format"""
-    items = []
-    for doc in docs:
-        title = (doc.get("title") or "").strip()
-        authors = [a for a in (doc.get("author_name") or []) if isinstance(a, str) and a.strip()]
-        if not title or not authors:
+def _author_matches(book: BookProfile, query_name: str) -> bool:
+    variants = _name_variants(query_name)
+    candidates = [_normalize_lookup(book.primary_author)] + [_normalize_lookup(a) for a in book.authors]
+    for candidate in candidates:
+        if not candidate:
             continue
+        if any(v in candidate or candidate in v for v in variants):
+            return True
+    return False
 
-        language = None
-        languages = doc.get("language") or []
-        if isinstance(languages, list) and languages:
-            language = languages[0]
 
-        year = doc.get("first_publish_year")
-        published_date = str(year) if year else None
+class BookService:
+    """Main service for book operations."""
 
-        # Build industry identifiers from isbn list
-        industry_identifiers = []
-        isbns = doc.get("isbn", []) or []
-        if isbns:
-            # Take first ISBN as ISBN_13 if long enough, else ISBN_10
-            first_isbn = str(isbns[0])
-            if len(first_isbn) >= 13:
-                industry_identifiers.append({"type": "ISBN_13", "identifier": first_isbn})
-            elif len(first_isbn) >= 10:
-                industry_identifiers.append({"type": "ISBN_10", "identifier": first_isbn})
+    @staticmethod
+    async def search_books(query: str, limit: int = 10, skip_cache: bool = False) -> BookSearchResponse:
+        """Search for books with enrichment and caching."""
+        logger.info("Searching books: query='%s', limit=%s", query, limit)
 
-        items.append({
-            "id": doc.get("key") or doc.get("cover_edition_key") or title,
-            "_source": source_tag,
-            "volumeInfo": {
-                "title": title,
-                "authors": authors,
-                "publishedDate": published_date,
-                "language": language,
-                "categories": doc.get("subject", [])[:5],
-                "description": None,
-                "industryIdentifiers": industry_identifiers,
-                "imageLinks": {},
-                "pageCount": doc.get("number_of_pages_median"),
-                "publisher": (doc.get("publisher") or [None])[0],
-            },
-        })
-    return items
+        if not skip_cache:
+            cached = await BookService._get_cached_books(query)
+            if cached:
+                logger.info("Returning %s cached results", len(cached))
+                return BookSearchResponse(
+                    query=query,
+                    count=len(cached),
+                    results=cached[:limit],
+                    sources=["cache"],
+                    from_cache=True,
+                )
+
+        include_arabic = _is_arabic(query)
+        profiles = await enrichment_engine.enrich_books_from_query(query, include_arabic)
+
+        if not profiles:
+            return BookSearchResponse(
+                query=query,
+                count=0,
+                results=[],
+                sources=[],
+                from_cache=False,
+            )
+
+        await BookService._cache_books(profiles, query)
+
+        return BookSearchResponse(
+            query=query,
+            count=len(profiles),
+            results=profiles[:limit],
+            sources=["google_books", "openlibrary"],
+            from_cache=False,
+        )
+
+    @staticmethod
+    async def get_book_by_id(work_id: str) -> Optional[BookProfile]:
+        """Get specific book by work ID."""
+        try:
+            col = get_collection("book_profiles")
+            doc = await col.find_one({"work_id": work_id})
+            if doc:
+                return BookProfile(**doc)
+        except DatabaseUnavailableError:
+            pass
+        return None
+
+    @staticmethod
+    async def _get_cached_books(query: str) -> List[BookProfile]:
+        """Try to get books from cache."""
+        try:
+            col = get_collection("book_profiles")
+            cursor = col.find({
+                "$or": [
+                    {"title": {"$regex": query, "$options": "i"}},
+                    {"keywords": {"$regex": query, "$options": "i"}},
+                ]
+            }).limit(20)
+            docs = await cursor.to_list(length=20)
+            return [BookProfile(**doc) for doc in docs]
+        except Exception as exc:
+            logger.debug("Cache lookup failed: %s", exc)
+            return []
+
+    @staticmethod
+    async def _cache_books(profiles: List[BookProfile], query: str) -> None:
+        """Store enriched books in cache and optionally notify RAG service."""
+        try:
+            col = get_collection("book_profiles")
+            for profile in profiles:
+                await col.update_one(
+                    {"work_id": profile.work_id},
+                    {
+                        "$set": {
+                            **profile.model_dump(),
+                            "cached_at": datetime.now(timezone.utc),
+                            "cache_query": query,
+                        }
+                    },
+                    upsert=True,
+                )
+
+            logger.info("Cached %s books", len(profiles))
+
+            from .config import settings as service_settings
+
+            if service_settings.ENABLE_RAG_NOTIFICATION and profiles:
+                # Keep API latency low: do indexing notifications in background.
+                asyncio.create_task(BookService._notify_rag_indexing(profiles))
+
+        except Exception as exc:
+            logger.warning("Failed to cache books: %s", exc)
+
+    @staticmethod
+    async def _notify_rag_indexing(profiles: List[BookProfile]) -> None:
+        from .grpc_client import notify_rag_indexing
+
+        failed = 0
+        for profile in profiles:
+            try:
+                await notify_rag_indexing(profile.model_dump())
+            except Exception:
+                failed += 1
+        if failed:
+            logger.warning("RAG notification background task failed for %s/%s books", failed, len(profiles))
+
+    @staticmethod
+    async def list_books(limit: int = 100, skip: int = 0) -> List[BookProfile]:
+        """List all cached books."""
+        try:
+            col = get_collection("book_profiles")
+            cursor = col.find().skip(skip).limit(limit)
+            docs = await cursor.to_list(length=limit)
+            return [BookProfile(**doc) for doc in docs]
+        except DatabaseUnavailableError:
+            return []
+
+
+class AuthorService:
+    """Service for author operations."""
+
+    @staticmethod
+    async def search_author(name: str) -> Optional[AuthorSearchResponse]:
+        """Search for author and related books."""
+        logger.info("Searching author: %s", name)
+
+        # 1. Check cache first
+        cached = await AuthorService._get_cached_author(name)
+        if cached:
+            books = await BookService.list_books(limit=200)
+            author_books = [b for b in books if _author_matches(b, name)]
+            if author_books:
+                logger.info("Cache hit for author '%s' with %s books", name, len(author_books))
+                return AuthorSearchResponse(
+                    query=name, author=cached, books=author_books, total_books=len(author_books)
+                )
+            else:
+                logger.warning("Cache hit for author '%s' but NO books — stale cache, refetching", name)
+
+        # 2. RESOLVE NAMES — this is the key fix
+        from .external_clients import resolve_author_names
+        name_data = await resolve_author_names(name)
+
+        arabic_names = name_data.get("arabic_names", [])
+        latin_names = name_data.get("latin_names", [])
+        all_variants = name_data.get("variants", [name])
+
+        logger.info("Resolved '%s' → %s variants (%s Arabic, %s Latin)",
+                   name, len(all_variants), len(arabic_names), len(latin_names))
+
+        # 3. Build search candidates: Arabic names first (for Arabic APIs), then Latin
+        search_candidates = []
+
+        # Arabic candidates → use with Arabic Google Books
+        for an in arabic_names[:2]:
+            if an not in [c[1] for c in search_candidates]:
+                search_candidates.append(("ar", an))
+
+        # Latin candidates → use with English Google Books + OpenLibrary
+        for ln in latin_names[:4]:
+            if ln not in [c[1] for c in search_candidates]:
+                search_candidates.append(("en", ln))
+
+        # Fallback to input
+        if not search_candidates:
+            search_candidates.append(("en" if not _is_arabic(name) else "ar", name))
+
+        raw_items: List[Dict[str, Any]] = []
+        min_results = max(1, settings.AUTHOR_SEARCH_MIN_RESULTS)
+
+        for lang, candidate in search_candidates[:6]:
+            logger.info('Fetching for author candidate: "%s" (lang=%s)', candidate, lang)
+
+            # Google Books — language-appropriate
+            try:
+                if lang == "ar":
+                    google_results = await asyncio.wait_for(
+                        fetch_arabic_books(candidate, max_results=24),
+                        timeout=9.0,
+                    )
+                else:
+                    google_results = await asyncio.wait_for(
+                        fetch_google_books(f'inauthor:"{candidate}"', max_results=24),
+                        timeout=9.0,
+                    )
+            except asyncio.TimeoutError:
+                logger.warning("Google query timed out for '%s'", candidate)
+                google_results = []
+            except Exception as exc:
+                logger.warning("Google query failed for '%s': %s", candidate, exc)
+                google_results = []
+
+            # Broad fallback for Latin names only
+            broad_google = []
+            if lang != "ar" and len(google_results) < min_results:
+                try:
+                    broad_google = await asyncio.wait_for(
+                        fetch_google_books(candidate, max_results=20),
+                        timeout=7.0,
+                    )
+                except asyncio.TimeoutError:
+                    broad_google = []
+                except Exception:
+                    broad_google = []
+
+            # OpenLibrary — only for Latin names (no Arabic support)
+            ol_search = []
+            ol_works = []
+            if lang != "ar":
+                try:
+                    ol_search = await asyncio.wait_for(
+                        fetch_openlibrary_books_by_author(candidate, limit=24),
+                        timeout=18.0,
+                    )
+                except asyncio.TimeoutError:
+                    pass
+                except Exception as exc:
+                    logger.warning("OpenLibrary search failed for '%s': %s", candidate, exc)
+
+                if settings.ENABLE_OPENLIBRARY_AUTHOR_WORKS:
+                    try:
+                        ol_works = await asyncio.wait_for(
+                            fetch_openlibrary_author_works(candidate, limit=30),
+                            timeout=20.0,
+                        )
+                    except asyncio.TimeoutError:
+                        pass
+                    except Exception as exc:
+                        logger.warning("OpenLibrary author-works failed for '%s': %s", candidate, exc)
+
+            raw_items = _merge_unique_items(raw_items, google_results, broad_google, ol_search, ol_works)
+            logger.info(
+                "Candidate '%s' merged results: total=%s (google=%s, broad=%s, ol_search=%s, ol_works=%s)",
+                candidate, len(raw_items), len(google_results), len(broad_google), len(ol_search), len(ol_works),
+            )
+
+            if len(raw_items) >= min_results:
+                break
+
+        if not raw_items:
+            logger.error("NO raw items found for author '%s' from ANY source", name)
+            return None
+
+        # 4. Group editions into unique works
+        grouped = enrichment_engine._group_editions(raw_items)
+        logger.info("Grouped into %s unique works for author '%s'", len(grouped), name)
+
+        # 5. Enrich each work into BookProfile
+        profiles = []
+        for work_data in grouped:
+            try:
+                profile = await enrichment_engine._create_book_profile(work_data)
+                profiles.append(profile)
+            except Exception as exc:
+                logger.error("Failed to enrich work '%s': %s", work_data.get("title"), exc)
+                continue
+
+        # 6. Filter to books that actually match this author
+        author_books = [b for b in profiles if _author_matches(b, name)]
+        if not author_books:
+            # Fallback: if strict filtering removes everything, use all results
+            logger.warning("Strict author filter removed all books for '%s', using all %s results", name, len(profiles))
+            author_books = profiles
+
+        logger.info("Author '%s' matched %s books after filtering", name, len(author_books))
+
+        # 7. Enrich author profile
+        author_profile = await enrichment_engine.enrich_author(name, author_books)
+
+        # 8. Cache results
+        await AuthorService._cache_author(author_profile)
+        await BookService._cache_books(author_books, f"author:{name}")
+
+        return AuthorSearchResponse(
+            query=name,
+            author=author_profile,
+            books=author_books,
+            total_books=len(author_books),
+        )
+
+    @staticmethod
+    async def get_author_by_id(author_id: str) -> Optional[AuthorProfile]:
+        """Get author by ID."""
+        try:
+            col = get_collection("author_profiles")
+            doc = await col.find_one({"author_id": author_id})
+            if doc:
+                return AuthorProfile(**doc)
+        except DatabaseUnavailableError:
+            pass
+        return None
+
+    @staticmethod
+    async def _get_cached_author(name: str) -> Optional[AuthorProfile]:
+        """Try to get author from cache."""
+        try:
+            col = get_collection("author_profiles")
+            # Try exact match first
+            doc = await col.find_one({"author_id": _slugify(name)})
+            if doc:
+                return AuthorProfile(**doc)
+            # Try name match
+            doc = await col.find_one({"name": {"$regex": f"^{re.escape(name)}$", "$options": "i"}})
+            if doc:
+                return AuthorProfile(**doc)
+            # Try name variants
+            doc = await col.find_one({"name_variants": {"$regex": f"^{re.escape(name)}$", "$options": "i"}})
+            if doc:
+                return AuthorProfile(**doc)
+        except Exception as exc:
+            logger.debug("Author cache lookup failed: %s", exc)
+        return None
+
+    @staticmethod
+    async def _cache_author(profile: AuthorProfile) -> None:
+        """Store author profile in cache."""
+        try:
+            col = get_collection("author_profiles")
+            await col.update_one(
+                {"author_id": profile.author_id},
+                {
+                    "$set": {
+                        **profile.model_dump(),
+                        "cached_at": datetime.now(timezone.utc),
+                    }
+                },
+                upsert=True,
+            )
+            logger.info("Cached author: %s", profile.name)
+        except Exception as exc:
+            logger.warning("Failed to cache author: %s", exc)
+
+
+class SeriesService:
+    """Service for series operations."""
+
+    @staticmethod
+    async def search_series(name: str) -> Optional[SeriesSearchResponse]:
+        """Search for book series with timeout protection."""
+        logger.info("Searching series: %s", name)
+
+        # 1. Check cache first — verify it has books
+        cached = await SeriesService._get_cached_series(name)
+        if cached:
+            try:
+                all_books = await BookService.list_books(limit=200)
+                series_books = [b for b in all_books if b.series_name and name.lower() in b.series_name.lower()]
+                if series_books:
+                    logger.info("Cache hit for series '%s' with %s books", name, len(series_books))
+                    return SeriesSearchResponse(query=name, series=cached, books=series_books)
+                else:
+                    logger.warning("Cache hit for series '%s' but NO books — stale cache, refetching", name)
+            except Exception:
+                pass
+
+        # 2. Fetch books using small query variants with bounded per-query time.
+        query_candidates = [f"{name} series", name]
+        if "سلسلة" in name:
+            stripped = " ".join(name.replace("سلسلة", " ").split())
+            if stripped:
+                query_candidates.append(stripped)
+
+        books: List[BookProfile] = []
+        for query_text in query_candidates:
+            try:
+                books = await asyncio.wait_for(
+                    enrichment_engine.enrich_books_from_query(query_text, include_arabic=_is_arabic(name)),
+                    timeout=8.0,
+                )
+                logger.info("Series query '%s' returned %s books", query_text, len(books))
+                if books:
+                    break
+            except asyncio.TimeoutError:
+                logger.warning("Series enrichment timed out for query: %s", query_text)
+
+        # 4. Filter to actual series matches
+        normalized_name = _normalize_lookup(name)
+        series_books = [
+            b for b in books
+            if b.series_name and (normalized_name in _normalize_lookup(b.series_name) or _normalize_lookup(b.series_name) in normalized_name)
+        ]
+        logger.info("Series name filter: %s books match", len(series_books))
+
+        # 5. Also include books where the title contains the series name
+        if not series_books:
+            series_books = [
+                b for b in books
+                if normalized_name in _normalize_lookup(b.title)
+            ]
+            logger.info("Title filter: %s books match", len(series_books))
+
+        # 6. Final fallback
+        if not series_books:
+            series_books = books
+            logger.info("Using all %s fetched books as fallback", len(books))
+
+        if not series_books:
+            logger.warning("No books found for series: %s", name)
+            return None
+
+        # 7. Determine actual series name from books
+        series_names = [b.series_name for b in series_books if b.series_name]
+        if series_names:
+            actual_name = Counter(series_names).most_common(1)[0][0]
+            actual_books = [b for b in series_books if b.series_name == actual_name]
+            logger.info("Detected series name '%s' with %s books", actual_name, len(actual_books))
+        else:
+            actual_name = name
+            actual_books = series_books
+            logger.info("No series name detected, using '%s' with %s books", actual_name, len(actual_books))
+
+        # 8. Build series profile
+        series_profile = await enrichment_engine.enrich_series(actual_name, actual_books)
+
+        # 9. Only cache if we have actual books
+        if len(actual_books) > 0:
+            await SeriesService._cache_series(series_profile)
+            await BookService._cache_books(actual_books, f"series:{name}")
+            logger.info("SUCCESS — Cached series '%s' with %s books", actual_name, len(actual_books))
+        else:
+            logger.warning("NOT caching series '%s' — zero books", name)
+
+        return SeriesSearchResponse(
+            query=name,
+            series=series_profile,
+            books=actual_books,
+        )
+
+    @staticmethod
+    async def get_series_by_id(series_id: str) -> Optional[SeriesProfile]:
+        """Get series by ID."""
+        try:
+            col = get_collection("series_profiles")
+            doc = await col.find_one({"series_id": series_id})
+            if doc:
+                return SeriesProfile(**doc)
+        except DatabaseUnavailableError:
+            pass
+        return None
+
+    @staticmethod
+    async def _get_cached_series(name: str) -> Optional[SeriesProfile]:
+        """Try to get series from cache."""
+        try:
+            col = get_collection("series_profiles")
+            doc = await col.find_one(
+                {
+                    "$or": [
+                        {"series_id": _slugify(name)},
+                        {"series_name": {"$regex": name, "$options": "i"}},
+                    ]
+                }
+            )
+            if doc:
+                return SeriesProfile(**doc)
+        except Exception as exc:
+            logger.debug("Series cache lookup failed: %s", exc)
+        return None
+
+    @staticmethod
+    async def _cache_series(profile: SeriesProfile) -> None:
+        """Store series in cache."""
+        try:
+            col = get_collection("series_profiles")
+            await col.update_one(
+                {"series_id": profile.series_id},
+                {
+                    "$set": {
+                        **profile.model_dump(),
+                        "cached_at": datetime.now(timezone.utc),
+                    }
+                },
+                upsert=True,
+            )
+            logger.info("Cached series: %s", profile.series_name)
+        except Exception as exc:
+            logger.warning("Failed to cache series: %s", exc)
+
+
+class HealthService:
+    """Health check service."""
+
+    @staticmethod
+    async def get_health() -> Dict[str, Any]:
+        """Get service health status."""
+        db_health = check_db_health()
+
+        return {
+            "status": "healthy" if db_health["connected"] else "degraded",
+            "version": "3.0.0",
+            "database": db_health,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
