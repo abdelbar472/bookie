@@ -60,7 +60,6 @@ class ThemeCategory(str, Enum):
     TIME = "time"
     MEMORY = "memory"
     DYSTOPIA = "dystopia"  # for 1984, Brave New World, etc.
-    COMING_OF_AGE_ALT = "coming of age"  # alternative spacing
 
 
 # ==================== BOOK PROFILE ====================

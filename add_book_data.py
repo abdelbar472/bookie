@@ -59,9 +59,9 @@ def test_endpoint(session: requests.Session, method: str, url: str, json_data=No
     start = time.time()
     try:
         if method == "GET":
-            resp = session.get(url, timeout=30)
+            resp = session.get(url, timeout=180)
         else:
-            resp = session.post(url, json=json_data, timeout=30)
+            resp = session.post(url, json=json_data, timeout=180)
 
         duration = round(time.time() - start, 3)
 

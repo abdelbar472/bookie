@@ -96,29 +96,34 @@ class EnrichmentEngine:
         grouped = self._group_editions(raw_items)
         logger.info(f"Grouped into {len(grouped)} unique works")
 
-        # Enrich each work (including Wikipedia summaries)
-        profiles = []
+        # Enrich each work (including Wikipedia summaries) concurrently
         from pydantic import ValidationError
 
+        enrich_tasks = []
         for work_data in grouped:
-            try:
-                profile = await self._create_book_profile(work_data)
-                profiles.append(profile)
-            except ValidationError as e:
-                logger.error(f"Validation failed for '{work_data.get('title')}': {e}")
-                continue
-            except Exception as e:
-                logger.error(f"Failed to enrich work '{work_data.get('title')}': {e}")
-                continue
+            enrich_tasks.append(self._create_book_profile(work_data))
+
+        profiles = []
+        results = await asyncio.gather(*enrich_tasks, return_exceptions=True)
+        for i, res in enumerate(results):
+            if isinstance(res, ValidationError):
+                logger.error(f"Validation failed for '{grouped[i].get('title')}': {res}")
+            elif isinstance(res, Exception):
+                logger.error(f"Failed to enrich work '{grouped[i].get('title')}': {res}")
+            else:
+                profiles.append(res)
 
         return profiles
 
     async def enrich_author(self, author_name: str, books: List[BookProfile]) -> AuthorProfile:
         """
         Create enriched author profile from books + Wikipedia
-        Every author gets a Wikipedia biography summary
+        Language-aware: Wikipedia search matches author language
         """
         logger.info(f"Enriching author: {author_name}")
+
+        from .external_clients import detect_language
+        author_lang = detect_language(author_name)
 
         # Fetch Wikipedia data with timeout protection
         try:
@@ -126,11 +131,11 @@ class EnrichmentEngine:
         except asyncio.TimeoutError:
             logger.warning(f"Wikipedia timeout for author: {author_name}")
             wiki_data = {"bio": None, "wikipedia_url": None, "wikipedia_title": None,
-                        "wikipedia_lang": "en", "aliases": [], "image_url": None}
+                        "wikipedia_lang": author_lang or "en", "aliases": [], "image_url": None}
         except Exception as e:
             logger.warning(f"Wikipedia fetch failed for author {author_name}: {e}")
             wiki_data = {"bio": None, "wikipedia_url": None, "wikipedia_title": None,
-                        "wikipedia_lang": "en", "aliases": [], "image_url": None}
+                        "wikipedia_lang": author_lang or "en", "aliases": [], "image_url": None}
 
         # Build bio with Wikipedia summary
         bio_text = wiki_data.get("bio")
@@ -259,8 +264,8 @@ class EnrichmentEngine:
         for ed in work_data.get("editions", []):
             edition = EditionEnriched(
                 edition_id=ed.get("book_id", "unknown"),
-                isbn_10=self._extract_isbn(ed, "ISBN_10"),
-                isbn_13=self._extract_isbn(ed, "ISBN_13"),
+                isbn_10=ed.get("isbn_10"),
+                isbn_13=ed.get("isbn_13"),
                 published_date=ed.get("published_date"),
                 publisher=ed.get("publisher"),
                 page_count=ed.get("page_count"),
@@ -319,8 +324,12 @@ class EnrichmentEngine:
             quality.description_quality = min(100, quality.description_quality + 20)
             quality.confidence_score = min(1.0, quality.confidence_score + 0.15)
 
-        # Extract metadata
-        first_year = self._extract_year(work_data.get("published_date"))
+        # Extract first published year from earliest edition
+        edition_dates = [ed.get("published_date") for ed in work_data.get("editions", []) if ed.get("published_date")]
+        first_year = min(
+            (self._extract_year(d) for d in edition_dates if self._extract_year(d)),
+            default=None,
+        )
 
         # Build profile
         profile = BookProfile(
@@ -420,22 +429,33 @@ class EnrichmentEngine:
     # ==================== FETCHING & GROUPING ====================
 
     async def _fetch_all_sources(self, query: str, include_arabic: bool) -> List[Dict]:
-        """Fetch from all available sources"""
+        """Fetch from all available sources — clean language-aware routing."""
         all_items = []
+        tasks = []
 
-        # Google Books (general)
-        items = await fetch_google_books(query, max_results=20)
-        all_items.extend(items)
+        from .external_clients import detect_language
+        lang = detect_language(query)
 
-        # Language-specific
-        if include_arabic or _is_arabic(query):
-            arabic_items = await fetch_arabic_books(query, max_results=15)
-            all_items.extend(arabic_items)
+        if lang == "ar":
+            # Arabic: search Arabic Google Books, then general
+            tasks.append(fetch_arabic_books(query, max_results=20))
+            tasks.append(fetch_google_books(query, max_results=10))
+        elif lang == "en":
+            # English: search English collection only
+            tasks.append(fetch_google_books(query, max_results=20, lang_restrict="en"))
+        else:
+            # Unknown: general search
+            tasks.append(fetch_google_books(query, max_results=20))
 
-        # Always try OpenLibrary for better descriptions/coverage as fallback
-        if len(all_items) < 30:
-            ol_items = await fetch_openlibrary_books_by_title(query, limit=10)
-            all_items.extend(ol_items)
+        # OpenLibrary only for non-Arabic (Latin-script data only)
+        if lang != "ar":
+            tasks.append(fetch_openlibrary_books_by_title(query, limit=10))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for res in results:
+            if isinstance(res, list):
+                all_items.extend(res)
 
         return all_items
 
@@ -462,6 +482,8 @@ class EnrichmentEngine:
             # Build edition
             edition = {
                 "book_id": item.get("id") or self._extract_isbn_from_volume(volume),
+                "isbn_10": self._extract_isbn({"industryIdentifiers": volume.get("industryIdentifiers", [])}, "ISBN_10"),
+                "isbn_13": self._extract_isbn({"industryIdentifiers": volume.get("industryIdentifiers", [])}, "ISBN_13"),
                 "published_date": volume.get("publishedDate"),
                 "thumbnail": volume.get("imageLinks", {}).get("thumbnail"),
                 "language": volume.get("language"),
@@ -555,26 +577,41 @@ class EnrichmentEngine:
 
     def _extract_series_info(self, title: str) -> Dict[str, Any]:
         """Extract series name and position from title"""
-        # Pattern: "Title (Series Name, #1)" or "Title (Series Name #1)"
-        match = re.search(r'\(([^)]+)(?:,?\s*#?([0-9]+(?:\.\d+)?))\s*\)', title, re.IGNORECASE)
-        if match:
+        # Pattern 1: "(Series Name, #N)" / "(Series Name, Book N)" / "(Series Name #N)"
+        match = re.search(
+            r'\(([^,)#]+?)(?:,?\s*(?:#|book\s+|vol\.?\s+|part\s+)?(\d+(?:\.\d+)?))\s*\)',
+            title, re.IGNORECASE
+        )
+        if match and match.group(2):
             return {
-                "name": match.group(1).strip(),
-                "position": float(match.group(2)) if match.group(2) else None
+                "name": match.group(1).strip().rstrip(","),
+                "position": float(match.group(2)),
             }
 
-        # Pattern: "Title - Series Name, Book X" or similar
+        # Pattern 2: "Title - Series Name, Book N" or em-dash variant
         match = re.search(r'(?:-|\u2014)\s*(.+?)(?:\s+(?:book|vol\.?|volume|part)\s+(\d+))', title, re.IGNORECASE)
         if match:
             return {"name": match.group(1).strip(), "position": float(match.group(2))}
 
-        # Pattern: "Series Name: Book Title"
-        if ':' in title:
-            parts = title.split(':', 1)
+        # Pattern 3: "Title, Book N" — only when no parens (avoids clobbering pattern 1)
+        if "(" not in title:
+            match = re.search(r'^(.+?),\s*(?:book|vol\.?|volume|part)\s+(\d+)', title, re.IGNORECASE)
+            if match:
+                return {"name": match.group(1).strip(), "position": float(match.group(2))}
+
+        # Pattern 4: "Series Name: Subtitle" — colon heuristic
+        if ":" in title:
+            parts = title.split(":", 1)
             potential_series = parts[0].strip()
-            # Heuristic: if series part is short and doesn't look like a subtitle
-            if len(potential_series.split()) <= 4 and not potential_series.endswith('?'):
+            if len(potential_series.split()) <= 4 and not potential_series.endswith("?"):
                 return {"name": potential_series, "position": None}
+
+        # Pattern 5: "Series Name and the …" — Harry Potter / fantasy title style
+        match = re.search(r'^(.+?)\s+and\s+the\s+', title, re.IGNORECASE)
+        if match:
+            candidate = match.group(1).strip()
+            if 1 <= len(candidate.split()) <= 3:
+                return {"name": candidate, "position": None}
 
         return {}
 

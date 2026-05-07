@@ -83,7 +83,12 @@ async def _create_indexes() -> None:
         await book_db.book_profiles.create_index("primary_author")
         await book_db.book_profiles.create_index("series_name")
         await book_db.book_profiles.create_index("genres")
-        await book_db.book_profiles.create_index([("title", "text"), ("description", "text")])
+        await book_db.book_profiles.create_index([
+            ("title", "text"),
+            ("description", "text"),
+            ("primary_author", "text"),
+            ("authors", "text"),
+        ])
 
         # Author profiles indexes
         await book_db.author_profiles.create_index("author_id", unique=True)
