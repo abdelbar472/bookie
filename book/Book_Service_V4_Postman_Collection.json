@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "Book Service V4 API",
+    "description": "FastAPI Book Service with MongoDB - V4 with Wikipedia enrichment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v3/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "health"]
+        }
+      }
+    },
+    {
+      "name": "Search Books",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v3/books/search?q={{book_query}}&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "books", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "{{book_query}}",
+              "description": "Book title or keywords"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Maximum results"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Authors",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v3/authors/search?name={{author_name}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "authors", "search"],
+          "query": [
+            {
+              "key": "name",
+              "value": "{{author_name}}",
+              "description": "Author name"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Author Books",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v3/authors/{{author_id}}/books?limit=20",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "authors", "{{author_id}}", "books"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Maximum books to return"
+            },
+            {
+              "key": "offset",
+              "value": "0",
+              "description": "Books to skip"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Series",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v3/series/search?name={{series_name}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "series", "search"],
+          "query": [
+            {
+              "key": "name",
+              "value": "{{series_name}}",
+              "description": "Series name"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Unified Search (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"{{unified_query}}\",\n  \"type\": \"{{search_type}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v3/search",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v3", "search"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8001",
+      "type": "string"
+    },
+    {
+      "key": "book_query",
+      "value": "1984",
+      "type": "string"
+    },
+    {
+      "key": "author_name",
+      "value": "George Orwell",
+      "type": "string"
+    },
+    {
+      "key": "author_id",
+      "value": "george-orwell",
+      "type": "string"
+    },
+    {
+      "key": "series_name",
+      "value": "Harry Potter",
+      "type": "string"
+    },
+    {
+      "key": "unified_query",
+      "value": "Dune",
+      "type": "string"
+    },
+    {
+      "key": "search_type",
+      "value": "book",
+      "type": "string"
+    }
+  ]
+}

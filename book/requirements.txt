@@ -1,0 +1,9 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+motor==3.6.0
+pydantic==2.9.2
+pydantic-settings==2.5.2
+aiohttp==3.10.5
+python-dotenv==1.0.1
+grpcio==1.80.0
+grpcio-tools==1.80.0

@@ -1,4 +1,4 @@
-"""gRPC client for optional Book->RAG indexing notifications."""
+"""gRPC client for Book->RAG indexing notifications."""
 import asyncio
 import logging
 from typing import Optional

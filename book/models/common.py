@@ -1,0 +1,42 @@
+from enum import Enum
+
+
+class ThemeCategory(str, Enum):
+    IDENTITY = "identity"
+    POWER = "power"
+    LOVE = "love"
+    WAR = "war"
+    TECHNOLOGY = "technology"
+    NATURE = "nature"
+    SOCIETY = "society"
+    COMING_OF_AGE = "coming_of_age"
+    GOOD_VS_EVIL = "good_vs_evil"
+    SURVIVAL = "survival"
+    BETRAYAL = "betrayal"
+    REDEMPTION = "redemption"
+    FRIENDSHIP = "friendship"
+    FAMILY = "family"
+    MAGIC = "magic"
+    MYSTERY = "mystery"
+    HISTORICAL = "historical"
+    HORROR = "horror"
+    ADVENTURE = "adventure"
+    POLITICS = "politics"
+    RELIGION = "religion"
+    DEATH = "death"
+    TIME = "time"
+    MEMORY = "memory"
+    DYSTOPIA = "dystopia"
+
+
+class ContentTone(str, Enum):
+    DARK = "dark"
+    LIGHT = "light"
+    HUMOROUS = "humorous"
+    PHILOSOPHICAL = "philosophical"
+    ACTION_PACKED = "action_packed"
+    ROMANTIC = "romantic"
+    MYSTERIOUS = "mysterious"
+    MELANCHOLIC = "melancholic"
+    HOPEFUL = "hopeful"
+    SERIOUS = "serious"

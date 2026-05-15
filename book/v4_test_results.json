@@ -1,0 +1,2422 @@
+{
+  "test_run_at": "2026-05-14T02:44:31.639666",
+  "service": "Book Service V4",
+  "total_tests": 19,
+  "successful": 18,
+  "results": [
+    {
+      "test": "Health",
+      "url": "http://127.0.0.1:8001/api/v3/health",
+      "status_code": 200,
+      "duration_seconds": 0.004,
+      "success": true,
+      "items_count": 0,
+      "response": {
+        "status": "ok",
+        "service": "book-service-v4",
+        "message": "On-demand enrichment with MongoDB"
+      }
+    },
+    {
+      "test": "Author: Naguib Mahfouz",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=Naguib%20Mahfouz",
+      "status_code": 200,
+      "duration_seconds": 0.009,
+      "success": true,
+      "items_count": 20,
+      "response": {
+        "results": [
+          {
+            "_id": "naguib-mahfouz",
+            "author_id": "naguib-mahfouz",
+            "bio": {
+              "short_bio": "Naguib Mahfouz is a author.",
+              "wikipedia_lang": "en"
+            },
+            "last_enriched_at": "2026-05-13T20:07:42.816000",
+            "name": "Naguib Mahfouz",
+            "name_variants": [],
+            "notable_works": [
+              "the-wisdom-of-naguib-mahfouz-naguib-mahfouz",
+              "morning-and-evening-talk-naguib-mahfouz",
+              "sugar-street-naguib-mahfouz",
+              "the-search-naguib-mahfouz",
+              "the-harafish-naguib-mahfouz",
+              "respected-sir-naguib-mahfouz",
+              "palace-of-desire-naguib-mahfouz",
+              "the-naguib-mahfouz-centennial-library-naguib-mahfouz"
+            ],
+            "rag_document": "Author: Naguib Mahfouz\nBio: Naguib Mahfouz is a author.\nNotable Works: The Wisdom of Naguib Mahfouz, Morning and Evening Talk, Sugar Street, The Search, The Harafish\n",
+            "series": [],
+            "sources": [],
+            "stats": {
+              "total_works": 20,
+              "series_count": 0
+            },
+            "style_profile": {
+              "description": "Naguib Mahfouz is a prolific international author known for crafting compelling narratives that resonate with readers worldwide through 20 published works.",
+              "genres": [],
+              "common_themes": [],
+              "tone": []
+            },
+            "books": [
+              {
+                "work_id": "the-wisdom-of-naguib-mahfouz-naguib-mahfouz",
+                "title": "The Wisdom of Naguib Mahfouz",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "With a writing career spanning some seventy years, Naguib Mahfouz is one of the most recognized writers in the world. His study of philosophy at what is now Cairo University greatly influenced his works, as did his wide readings and his work in the government and in the Cinema Organization. The Wisdom of Naguib Mahfouz, like the earlier Life's Wisdom, is a unique collection of quotations selected from the great author's works, offering philosophical insights on themes such as childhood, youth, love, marriage, war, freedom, death, the supernatural, the afterlife, the soul, immortality, and many other subjects that take us through life's journey.",
+                "description_sources": [],
+                "first_published_year": 2011,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=k2mQZwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "morning-and-evening-talk-naguib-mahfouz",
+                "title": "Morning and Evening Talk",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "From the Nobel Prize–winning author of The Cairo Trilogy and \"a storyteller of the first order” (Vanity Fair) comes an epic novel that portrays five generations of one sprawling family against the upheavals of two centuries of modern Egyptian history. Set in Cairo, Morning and Evening Talk traces three related families from the arrival of Napoleon to the 1980s, through short character sketches arranged in alphabetical order. This highly experimental device produces a kind of biographical dictionary, whose individual entries come together to paint a vivid portrait of life in Cairo from a range of perspectives. The characters include representatives of every class and human type and as the intricate family saga unfolds, a powerful picture of a society in transition emerges. This is a tale of change and continuity, of the death of a traditional way of life and the road to independence and beyond, seen through the eyes of Egypt's citizens. Naguib Mahfouz's last chronicle of Cairo is both an elegy to a bygone era and a tribute to the Egyptian spirit.",
+                "description_sources": [],
+                "first_published_year": 2011,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=7eg3coaWK3kC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "sugar-street-naguib-mahfouz",
+                "title": "Sugar Street",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz",
+                  "Najīb Maḥfūẓ"
+                ],
+                "description": "\"Sugar Street, the climactic conclusion to Mafhouz's masterpiece trilogy, is the captivating portrait of a family struggling to change with the rise of modern Egypt. As Cairo shrugs off the final vestiges of colonialism, Ahmad Al Jawad has lost his power and surveys the world from a latticed balcony. Unable to control his family's destiny, he watches helplessly as his dynasty and the traditions he holds dear disintegrate before his eyes. But through Ahamd's three grandsons we see modern how Egypt takes shape. One grandson is a communist activist, another a Muslim fundamentalist, both working for what they believe will be a better world. And Ridwan, the inheritor of his father's charms, launches a political career aided by a homosexual affair with prominent politician.\"",
+                "description_sources": [],
+                "first_published_year": 1994,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=nXOQNCpZ2ZEC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-search-naguib-mahfouz",
+                "title": "The Search",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "",
+                "description_sources": [],
+                "first_published_year": 1989,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-harafish-naguib-mahfouz",
+                "title": "The Harafish",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz",
+                  "Najīb Maḥfūẓ"
+                ],
+                "description": "Winner of the Nobel Prize for Literature in 1988, Naguib Mahfouz is perhaps the best-known living Arab writer. His books have had great success in this country, particularly The Cairo Trilogy. Fans of the famed trilogy will be delighted with The Harafish, an epic novel that chronicles the dramatic history of the al-Nagi family -- a family that moves, over many generations, from the height of power and glory to the depths of decadence and decay. The Harafish begins with the tale of Ashur al-Nagi, a man who grows from humble beginnings to become a great leader, a legend among his people. Generation after generation, however, Ashur's descendants grow further from his legendary example. They lose touch with their origins as they amass and then squander large fortunes, marry prostitutes when they marry at all, and develop rivalries that end in death. The community's upper class keeps a watchful eye on the descendants of al-Nagi for fear of losing their privileges, but they find no threat of another such as Ashur. Not, that is, until the al-Nagi who, like his noble ancestor, finds his power once again from among The Harafish, or the common people. Through the strength of their numbers and their passion, the glory of the name of al-Nagi is restored. \"Of all [Mahfouz's] experiments in recent decades, this is the one which owes least to western inspiration and is probably the most successful. The Harafish, fluently translated by Catherine Cobham, makes accessible and engrossing reading.\" -- The Washington Post Book World.",
+                "description_sources": [],
+                "first_published_year": 1994,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=vENjAAAAMAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "respected-sir-naguib-mahfouz",
+                "title": "Respected Sir",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "In Respected Sir, Mahfouz retells a familiar theme—vaulting ambition—in a powerful and religious metaphor. Othman Bayuumi's humble origins do not stop him from coveting the Director-Generalship of the governmental department he has entered as an archives clerk. It is a vision that becomes a lifelong pursuit, superseding all other interests or people in his life. What is essentially a prosaic experience becomes—in Mahfouz's hands—a beautifully crafted story of an exalted and arduous holy quest.",
+                "description_sources": [],
+                "first_published_year": 2016,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=RZ9BDAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "palace-of-desire-naguib-mahfouz",
+                "title": "Palace of Desire",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "",
+                "description_sources": [],
+                "first_published_year": 2010,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=ucT7XwAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-naguib-mahfouz-centennial-library-naguib-mahfouz",
+                "title": "The Naguib Mahfouz Centennial Library",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "To celebrate the centenary of the birth of the great Egyptian writer and Nobel laureate Naguib Mahfouz, the AUC Press, which has been publishing English translations of Mahfouz's work since 1978, presents all his novels, three collections of short stories, and his autobiographical writings in a single library of 20 hardbound volumes, including all 42 works translated into English. From Khufu's Wisdom, first published in Arabic in 1939, to his last work of extended fiction, The Coffeehouse (1988), all thirty-five of his novels are here, along with thirty-eight short stories His Echoes of an Autobiography is included, as well as his exquisite late series of intensely short fictions known as The Dreams and the collection of his weekly newspaper columns, Naguib Mahfouz at Sidi Gaber. This unique library brings together all Naguib Mahfouz's translated work for the first time in a very special publishing event. Â· Volume 1: Khufu's Wisdom, Rhadopis of Nubia, Thebes at War Â· Volume 2: Cairo Modern, Khan al-Khalili Â· Volume 3: Midaq Alley Â· Volume 4: The Mirage Â· Volume 5: The Beginning and the End Â· Volume 6: Palace Walk Â· Volume 7: Palace of Desire Â· Volume 8: Sugar Street Â· Volume 9: Children of the Alley Â· Volume 10: The Thief and the Dogs, Autumn Quail, The Search Â· Volume 11: The Beggar, Adrift on the Nile, Miramar Â· Volume 12: Mirrors, Love in the Rain, Karnak CaféÂ#382;ÂOElig;Â· Volume 13: Fountain and Tomb, Heart of the Night, Respected Sir Â· Volume 14: The Harafish Â· Volume 15: In the Time of Love, Wedding Song, Arabian Nights and Days Â· Volume 16: The Final Hour, Before the Throne Â· Volume 17: The Journey of Ibn Fattouma, Akhenaten: Dweller in Truth Â· Volume 18: The Day the Leader Was Killed, Morning and Evening Talk, The Coffeehouse Â· Volume 19: Echoes of an Autobiography, The Dreams, Dreams of Departure, Naguib Mahfouz at Sidi Gaber Â· Volume 20: The Time and the Place, The Seventh Heaven, Voices from the Other World.",
+                "description_sources": [],
+                "first_published_year": 2011,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=8bnc0QEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-time-and-the-place-naguib-mahfouz",
+                "title": "The Time and the Place",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "Selected and translated by the distinguished scholar Denys Johnson-Daivies, these stories have all the celebrated and distinctive characters and qualities found in Mahfouz's novels: The denizens of the dark, narrow alleyways of Cairo, who struggle to survive the poverty; melancholy ruminations on death; experiments with the supernatural; and witty excursions into Cairene middle-class life.",
+                "description_sources": [],
+                "first_published_year": 2016,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=ap9BDAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "palace-walk-naguib-mahfouz",
+                "title": "Palace Walk",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "",
+                "description_sources": [],
+                "first_published_year": 2010,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=GR0yXwAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-mirage-naguib-mahfouz",
+                "title": "The Mirage",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "A stunning example of Nobel Prize-winning Egyptian author Naguib Mahfouz’s psychological portraiture, The Mirage is the story of an intense young man who has been so dominated by his mother that her death sets him dangerously adrift in a world he cannot manage alone. Kamil Ru’ba is a tortured soul who hopes that writing the story of his life will help him gain control of it. Raised by a mother who fled her abusive husband and became overbearingly possessive and protective toward her young son, he has long been isolated emotionally and physically. Now in his twenties, Kamil seeks to escape her posthumous grasp. Finding and successfully courting the woman of his dreams seems to promise salvation, until his ignorance of mature love and his fear and jealousy lead to tragedy.",
+                "description_sources": [],
+                "first_published_year": 2012,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=uX8GMmpZ8xwC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-dreams-naguib-mahfouz",
+                "title": "The Dreams",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "In his final years, Egyptian Nobel Laureate Naguib Mahfouz distilled his storyteller's art to its most essential level. Written with the compression and power of dreams, these poetic vignettes, originally collected in two books, The Dreams and Dreams of Departure, here combined in one volume for the first time. These stories telescope epic tales into tersely haunting miniatures. A man finds his neighborhood has turned into a circus, but his joy turns to anger when he cannot escape it. An obscure writer finally achieves fame-through the epitaph on his grave. A group of friends telling jokes in an alley face the murderous revenge of an ancient Egyptian queen. Figures from Mahfouz's past-women he loved, men who inspired him, even fictional characters from his own novels-float through tales dreamed by a mind too fertile ever to rest, even in sleep. Translated by Raymond Stock",
+                "description_sources": [],
+                "first_published_year": 2011,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=1QTJ7OQ8-f0C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "before-the-throne-naguib-mahfouz",
+                "title": "Before the Throne",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "Nearly sixty of Egypt’s past leaders—from the time of the Pharoahs to the twentieth century—are summoned to judgment in the Court of Osiris in the Afterlife, in this extraordinary novel by Nobel Prize–winning author Naguib Mahfouz. Before the Throne calls forth a parade of those who have shaped the modern nation of Egypt—from the ruler who first unified Egypt in 3000 BC to Anwar Sadat, the president assassinated by religious extremists in 1981, and including figures as various as the famous pharaoh Ramesses II and the medieval vizier Qaraqush. As they defend their decisions under questioning by Osiris, Isis, and Horus, those who acted for the nation’s good are honored with immortality in paradise while those who failed to protect it are condemned either to the inferno or to “the place of insignificance.” Full of Mahfouz’s unique insight into his country’s timeless qualities, this provocative work skillfully traces five thousand years of Egypt’s past as it flows into the turbulent present. Translated from the Arabic by Raymond Stock",
+                "description_sources": [],
+                "first_published_year": 2012,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=4BqStJVHnwsC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-cairo-trilogy-naguib-mahfouz",
+                "title": "The Cairo Trilogy",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "Nobel Prize-winner Naguib Mahfouz’s magnificent epic trilogy of colonial Egypt—Palace Walk, Palace of Desire, and Sugar Street—together for the first time in one beautiful hardcover volume. The masterwork of the Nobel Prize-winning author, the three novels of The Cairo Trilogy trace three generations of the family of tyrannical patriarch Al-Sayyid Ahmad Abd al-Jawad, who rules his household with a strict hand while living a secret life of self-indulgence. Palace Walk introduces us to his gentle, oppressed wife, Amina, his cloistered daughters, Aisha and Khadija, and his three sons–the tragic and idealistic Fahmy, the dissolute hedonist Yasin, and the soul-searching intellectual Kamal. Al-Sayyid Ahmad’s rebellious children struggle to move beyond his domination in Palace of Desire, as the world around them opens to the currents of modernity and political and domestic turmoil brought by the 1920s. Sugar Street brings Mahfouz’s vivid tapestry of an evolving Egypt to a dramatic climax as the aging patriarch sees one grandson become a Communist, one a Muslim fundamentalist, and one the lover of a powerful politician. Throughout the trilogy, the family’s trials mirror those of their turbulent country during the years spanning the two World Wars, as change comes to a society that has resisted it for centuries. Filled with compelling drama, earthy humor, and remarkable insight, “The Cairo Trilogy extends our knowledge of life; it also confirms it” (The Boston Globe). Everyman's Library pursues the highest production standards, printing on acid-free cream-colored paper, with full-cloth cases with two-color foil stamping, decorative endpapers, silk ribbon markers, European-style half-round spines, and a full-color illustrated jacket. Contemporary Classics include an introduction, a select bibliography, and a chronology of the author's life and times.",
+                "description_sources": [],
+                "first_published_year": 2016,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=SKBBDAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "i-found-myselfthe-last-dreams-naguib-mahfouz",
+                "title": "I Found Myself...The Last Dreams",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "FROM THE NOBEL PRIZE-WINNING AUTHOR – WITH AN INTRODUCTION BY HISHAM MATAR After an assassination attempt and in waning health, Naguib Mahfouz became more cautious in his twilight years. At the same time, in nightly dreams, his imagination began to roam his beloved city, Cairo, with a rare freedom. In this collection of vivid vignettes linked together by the author’s precisely rendered nocturnal wanderings through Cairo, figures from Mahfouz’s personal life blend with his anxieties about Egypt’s political past and future. Each dream is layered with philosophical and spiritual musings, hopes and disappointments. Over the course of the book, they build to a rich and complex picture of Mahfouz’s subconscious. A master of both detailed realism and fabulous storytelling’ GUARDIAN",
+                "description_sources": [],
+                "first_published_year": 2025,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=Jns0EQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "miramar-naguib-mahfouz",
+                "title": "Miramar",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "A highly charged, tightly written tale ofnbsp;nbsp;intersecting lives that provides us with both an engagingnbsp;nbsp;and powerful story as well as a vivid portrait ofnbsp;nbsp;life in Egypt in the late 1960's.",
+                "description_sources": [],
+                "first_published_year": 1988,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "arabic-phonetics-naguib-mahfouz",
+                "title": "Arabic Phonetics",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz",
+                  "Semaan Khalil"
+                ],
+                "description": "",
+                "description_sources": [],
+                "first_published_year": 1990,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "after-the-nobel-prize-1989-1994-naguib-mahfouz",
+                "title": "After the Nobel Prize 1989-1994",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "Naguib Mahfouz, the Arab world’s only Nobel literature laureate, is best known internationally for his short stories and novels, including The Cairo Trilogy. But in Egypt he was equally familiar to newspaper readers for the column he wrote for many years in the leading daily Al-Ahram, in which he reflected on issues of the day from domestic and international events, politics, and economics to historic anniversaries, inspirational personalities, and questions of cultural freedom. This volume brings together the 285 articles he wrote between January 1989 and the near-fatal knife attack in October 1994. In carefully crafted short texts, his social conscience is revealed as he highlights political shortcomings, economic injustice, and corruption in Egypt and the wider Arab world. His philosophical sensitivity comes to the fore as he contemplates the meaning of a historic events, contributions of an influential people, and what is required to lead a good life. The collapse of the Soviet Union, the Oslo peace accords, the spread of terrorism, the Cairo earthquake, the passing of Louis Awad, Yusuf Idris, Yahya Hakki, the third term of Hosni Mubarak, climate change, and more come under Naguib Mahfouz’s fine scrutiny. For any fan of Mahfouz’s fiction, this collection opens a window on a different side of his intellect, and it offers insights from one of the region’s greatest modern minds.",
+                "description_sources": [],
+                "first_published_year": 2020,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=acJIzQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "whisperings-on-the-nile-naguib-mahfouz",
+                "title": "Whisperings on the Nile",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "",
+                "description_sources": [],
+                "first_published_year": 1976,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              },
+              {
+                "work_id": "echoes-of-an-autobiography-naguib-mahfouz",
+                "title": "Echoes of an Autobiography",
+                "primary_author": "Naguib Mahfouz",
+                "authors": [
+                  "Naguib Mahfouz"
+                ],
+                "description": "From the Foreword by Nadine Gordimer: \"These pieces are meditations which echo that which was, has been, and is the writer Mahfouz. They are--in the words of the title of one of the prose pieces--'The Dialogue of the Late Afternoon' of his life. I don't believe any autobiography, with its inevitable implication of self-presentation, could have matched what we have here.\" With more than 500,000 copies of his books in print, Naguib Mahfouz has established a following of readers for whom Echoes of an Autobiography provides a unique opportunity to catch an intimate glimpse into the life and mind of this magnificent storyteller. Here, in his first work of nonfiction ever to be published in the United States, Mahfouz considers the myriad perplexities of existence, including preoccupations with old age, death, and life's transitory nature. A surprising and delightful departure from his bestselling and much-loved fiction, this unusual and thoughtful book is breathtaking evidence of the fact that Naguib Mahfouz is not only a \"storyteller of the first order\" (Vanity Fair), but also a profound thinker of the first order.",
+                "description_sources": [],
+                "first_published_year": 2016,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=sZ5BDAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T20:07:42.815000",
+                "meta": {}
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "from_cache": true
+      }
+    },
+    {
+      "test": "Author: Alaa Al Aswany",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=Alaa%20Al%20Aswany",
+      "status_code": "error",
+      "error": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+      "duration_seconds": 0.013
+    },
+    {
+      "test": "Author: Ahmed Khaled Tawfik",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=Ahmed%20Khaled%20Tawfik",
+      "status_code": 200,
+      "duration_seconds": 4.041,
+      "success": true,
+      "items_count": 9,
+      "response": {
+        "results": [
+          {
+            "_id": "ahmed-khaled-tawfik",
+            "author_id": "ahmed-khaled-tawfik",
+            "bio": {
+              "short_bio": "Ahmed Khaled Tawfik is a writer and author.",
+              "wikipedia_lang": "en"
+            },
+            "last_enriched_at": "2026-05-13T01:38:36.755000",
+            "name": "Ahmed Khaled Tawfik",
+            "name_variants": [],
+            "notable_works": [
+              "utopia-ahmed-khaled-tawfik",
+              "قصة-تكملها-أنت-ahmed-khaled-tawfik",
+              "ولد-قليل-الأدب-ahmed-khaled-tawfik",
+              "قوس-قزح-ahmed-khaled-tawfik",
+              "al-batal-zo-al-alf-wagh-ahmed-khaled-tawfik",
+              "layal-arabeya-ahmed-khaled-tawfik",
+              "ostora-sheb-mokhifa-ma-waraa-al-tabiea-ahmed-khaled-tawfik",
+              "ostoorat-al-fata-al-zarkaa-ahmed-khaled-tawfik",
+              "al-mausoa-assehiya-ahmed-khaled-tawfik"
+            ],
+            "rag_document": "Author: Ahmed Khaled Tawfik\nBio: Ahmed Khaled Tawfik is a writer and author.\nNotable Works: Utopia, قصة تكملها أنت, ولد قليل الأدب, قوس قزح, Al batal zo al alf wagh\n",
+            "series": [],
+            "sources": [],
+            "stats": {
+              "total_works": 9,
+              "series_count": 0,
+              "most_popular_work": "Utopia"
+            },
+            "style_profile": {
+              "description": "Ahmed Khaled Tawfik is a writer author.",
+              "genres": [],
+              "common_themes": [],
+              "tone": []
+            }
+          }
+        ],
+        "total": 1,
+        "from_cache": true
+      }
+    },
+    {
+      "test": "Author: William Shakespeare",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=William%20Shakespeare",
+      "status_code": 200,
+      "duration_seconds": 0.005,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "_id": "william-shakespeare",
+            "author_id": "william-shakespeare",
+            "bio": {
+              "short_bio": "William Shakespeare is a writer and author.",
+              "wikipedia_lang": "en"
+            },
+            "last_enriched_at": "2026-05-13T01:39:18.543000",
+            "name": "William Shakespeare",
+            "name_variants": [],
+            "notable_works": [
+              "hamlet-william-shakespeare",
+              "the-works-of-william-shakespeare-william-shakespeare",
+              "william-shakespeare-the-complete-works-william-shakespeare",
+              "cymbeline-william-shakespeare",
+              "the-complete-works-of-william-shakespeare-william-shakespeare",
+              "the-tempest-william-shakespeare",
+              "the-poems-sonnets-of-william-shakespeare-william-shakespeare",
+              "henry-vi-part-3-william-shakespeare",
+              "romeo-and-juliet-william-shakespeare",
+              "macbeth-william-shakespeare"
+            ],
+            "rag_document": "Author: William Shakespeare\nBio: William Shakespeare is a writer and author.\nNotable Works: HAMLET, The Works of William Shakespeare, William Shakespeare: the Complete Works, Cymbeline, The Complete Works of William Shakespeare\n",
+            "series": [],
+            "sources": [],
+            "stats": {
+              "total_works": 12,
+              "series_count": 0,
+              "most_popular_work": "HAMLET"
+            },
+            "style_profile": {
+              "description": "William Shakespeare is a writer author.",
+              "genres": [],
+              "common_themes": [],
+              "tone": []
+            }
+          }
+        ],
+        "total": 1,
+        "from_cache": true
+      }
+    },
+    {
+      "test": "Author: George Orwell",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=George%20Orwell",
+      "status_code": 200,
+      "duration_seconds": 0.012,
+      "success": true,
+      "items_count": 10,
+      "response": {
+        "results": [
+          {
+            "_id": "george-orwell",
+            "author_id": "george-orwell",
+            "bio": {
+              "short_bio": "George Orwell is a author.",
+              "full_bio": "George Orwell is a prominent author.",
+              "wikipedia_lang": "en"
+            },
+            "last_enriched_at": "2026-05-13T23:41:21.770000",
+            "name": "George Orwell",
+            "name_variants": [],
+            "notable_works": [
+              "1984-george-orwell",
+              "essays-george-orwell",
+              "a-life-in-letters-george-orwell",
+              "the-complete-novels-of-george-orwell-george-orwell",
+              "down-and-out-in-paris-and-london-george-orwell",
+              "orwells-england-george-orwell",
+              "the-greatest-works-of-george-orwell-george-orwell",
+              "the-george-orwell-collection-george-orwell",
+              "the-essential-works-of-george-orwell-george-orwell",
+              "george-orwell-a-life-in-letters-george-orwell"
+            ],
+            "rag_document": "Author: George Orwell\n\nBiography:\nGeorge Orwell is a prominent author.\n\nSource: Wikipedia (en)\n\nBooks:\n• 1984\n• Essays\n• A Life in Letters\n• The Complete Novels of George Orwell\n• Down and Out in Paris and London\n• Orwell's England\n• The Greatest Works of George Orwell\n• The George Orwell Collection\n• The Essential Works of George Orwell\n• George Orwell: A Life in Letters\n",
+            "series": [],
+            "sources": [],
+            "stats": {
+              "total_works": 10,
+              "series_count": 0
+            },
+            "style_profile": {
+              "description": "George Orwell is a prominent author.",
+              "genres": [],
+              "common_themes": [],
+              "tone": []
+            },
+            "books": [
+              {
+                "work_id": "1984-george-orwell",
+                "title": "1984",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "75th ANNIVERSARY EDITION “Orwell saw, to his credit, that the act of falsifying reality is only secondarily a way of changing perceptions. It is, above all, a way of asserting power.”—The New Yorker In 1984, London is a grim city in the totalitarian state of Oceania where Big Brother is always watching you and the Thought Police can practically read your mind. Winston Smith is a man in grave danger for the simple reason that his memory still functions. Drawn into a forbidden love affair, Winston finds the courage to join a secret revolutionary organization called The Brotherhood, dedicated to the destruction of the Party. Together with his beloved Julia, he hazards his life in a deadly match against the powers that be. Lionel Trilling said of Orwell’s masterpiece, “1984 is a profound, terrifying, and wholly fascinating book. It is a fantasy of the political future, and like any such fantasy, serves its author as a magnifying device for an examination of the present.” Though the year 1984 now exists in the past, Orwell’s novel remains an urgent call for the individual willing to speak truth to power.",
+                "description_sources": [],
+                "first_published_year": 2013,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=kotPYEqx7kMC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.767000",
+                "meta": {}
+              },
+              {
+                "work_id": "essays-george-orwell",
+                "title": "Essays",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "These essays, reviews and articles illuminate the life and work of one of the most individual writers of this century - a man who created a unique literary manner from the process of thinking aloud and who elevated political writing to an art.",
+                "description_sources": [],
+                "first_published_year": 2000,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=PqGMFPCiBEsC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.768000",
+                "meta": {}
+              },
+              {
+                "work_id": "a-life-in-letters-george-orwell",
+                "title": "A Life in Letters",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell",
+                  "Peter Davison"
+                ],
+                "description": "George Orwell was a tireless and lively correspondent. He communicated with family members, friends and newspapers, figures such as Henry Miller, Cyril Connolly, Stephen Spender and Arthur Koestler, and strangers who wrote to him out of the blue. This carefully selected volume of his correspondence provides an eloquent narrative of Orwell's life, from his schooldays to his final illness. Orwell's letters afford a unique and fascinating view of his thoughts on matters both personal, political and much in between, from poltergeists, to girls' school songs and the art of playing croquet. In a note home to his mother from school, he reports having 'aufel fun after tea'; much later he writes of choosing a pseudonym and smuggling a copy of Ulysses into the country. We catch illuminating glimpses of his family life: his son Richard's developing teeth, the death of his wife Eileen and his own illness. His talent as a political writer comes to the fore in his descriptions of Barcelona during the Spanish Civil War, his opinions on bayonets, and on the chaining of German prisoners. And of course, letters to friends and his publisher chart the development and publication of some of the most famous novels in the English language, providing unparalleled insight into his views on his own work and that of his contemporaries. A Life in Letters features previously unpublished material, including letters which shed new light on a love that would haunt him for his whole life, as well as revealing the inspiration for some of his most famous characters. Presented for the first time in a dedicated volume, this selection of Orwell's letters is an indispensible companion to his diaries.",
+                "description_sources": [],
+                "first_published_year": 2010,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=BfJ0PgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.768000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-complete-novels-of-george-orwell-george-orwell",
+                "title": "The Complete Novels of George Orwell",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "'The greatest writer of the twentieth century' Observer George Orwell's best-known novels, Animal Farm, describing a revolution that goes horribly wrong, and Nineteen Eighty-Four, portraying a world where human freedom has been crushed, are two of the most famous, well-quoted and influential political satires ever written. The other novels in this volume also tell stories of people at odds with repressive institutions: the corrupt imperialism of Burmese Days, disaffection with materialistic society in Keep the Aspidistra Flying, the perils of modern suburban living in Coming Up for Air and surviving on the streets in A Clergyman's Daughter. All the novels brought together here display Orwell's humour, his understanding of human nature and his great compassion.",
+                "description_sources": [],
+                "first_published_year": 2001,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=zyMluFEwA7AC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "down-and-out-in-paris-and-london-george-orwell",
+                "title": "Down and Out in Paris and London",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "globally known for his works: Animal Farm; 1984; Down and Out in Paris and London; Burmese Days; Keep the Aspidistra Flying, among others. Down and Out in Paris and London is a memoir of the most defining period of the author's life and his first work. It was upon its publication in 1933 that the pseudonym George Orwell was born, at the suggestion of his editor. After working as a British Empire police officer in Burma, George Orwell decided to understand the life, ways, and thoughts of the poor population and went to live as one of them. Orwell lived in destitution for a long time before finding work as a dishwasher in a hotel, and all the experiences he had in both cities resulted in this precious book. In Down and Out in Paris and London, Orwell discusses his times living in poverty in such a realistic and moving way that it is impossible to put the book down before finishing it.",
+                "description_sources": [],
+                "first_published_year": 2024,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=7EcSEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "orwells-england-george-orwell",
+                "title": "Orwell's England",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "Containing The Road to Wigan Pier , Orwell's account of poverty in Northern England, this title also includes The English People , in which he lists the nation's characteristics, and his essays on class, the horrors of private school life, and the merits of cricket, gardening and pubs.",
+                "description_sources": [],
+                "first_published_year": 2001,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=sL3cOvAxgRsC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-greatest-works-of-george-orwell-george-orwell",
+                "title": "The Greatest Works of George Orwell",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "In \"The Greatest Works of George Orwell,\" readers are presented with a comprehensive compilation of Orwell's most influential texts, including \"1984,\" \"Animal Farm,\" and \"Homage to Catalonia.\" The book showcases Orwell's mastery of prose, characterized by clarity, stark imagery, and incisive social critique. Set against the backdrop of totalitarianism and societal injustices of the 20th century, Orwell's works examine the moral dilemmas confronting humanity, making keen observations on power dynamics, the manipulation of language, and the erosion of individual freedoms. This collection not only highlights the thematic coherence of Orwell's thought but also reflects the historical context of his writing during the tumultuous periods of the Spanish Civil War and World War II. George Orwell, born Eric Arthur Blair in 1903, was a journalist, social critic, and literary figure who dedicated his life to exposing the pitfalls of oppression and inequality. His experiences as a colonial police officer in Burma and participation in the Spanish Civil War profoundly shaped his worldview, driving him to advocate for social justice and truth. Orwell's unyielding commitment to revealing society's ills and his belief in the power of language make his works timeless; they serve as cautionary tales about the perils of totalitarianism and the importance of individual thought. Readers are highly encouraged to delve into this essential anthology, as it provides not only a compelling narrative but also profound insights into the human condition. Orwell's works resonate with contemporary issues, encouraging critical reflection on political structures and personal agency. This collection is indispensable for anyone seeking to understand the relevance of Orwell's writings in today's world.",
+                "description_sources": [],
+                "first_published_year": 2023,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=05vhEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-george-orwell-collection-george-orwell",
+                "title": "The George Orwell Collection",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "Discover two of the 20th Century's most important novels from the legendary George Orwell. First published in 1945, Animal Farm – the history of a revolution that went wrong – is Orwell's brilliant satire on the corrupting influence of power. This edition features an exclusive introduction by Alan Johnson. Alongside this stands the dystopian masterpiece, 1984, the powerful and prophetic novel that defined the twentieth century. This edition has a new, specially commissioned introduction by Alex Massie which recognises the importance that Barnhill, Orwell's home on the Island of Jura, had on the writing of this classic. 'The greatest British novel to have been written since the war' – Time Out on 1984 Titles included in this eBook bundle are: Animal Farm Nineteen Eighty-Four",
+                "description_sources": [],
+                "first_published_year": 2023,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=Mby6EAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "the-essential-works-of-george-orwell-george-orwell",
+                "title": "The Essential Works of George Orwell",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "The Essential Works of George Orwell compiles the critical essays, novels, and journalistic writings that define Orwell's literary legacy. This collection encapsulates his keen observations on society, politics, and human existence, framed within a stark yet poignant prose style that is both accessible and profound. Spanning the tumultuous backdrop of the early to mid-20th century, the works delve into themes of totalitarianism, democratic socialism, and the complexities of individual freedom. Renowned for his unflinching honesty, Orwell's writing serves as both a mirror and a warning, reflecting the moral dilemmas of his time while remaining disturbingly relevant today. George Orwell, born Eric Arthur Blair, was deeply influenced by his experiences in the Spanish Civil War and his aversion to totalitarian regimes, which ignited his passionate advocacy for social justice and truth in literature. His struggles with poverty and his keen interest in the intricacies of language and propaganda shaped the narratives of his works, making him a formidable figure in 20th-century literature. Orwell's unique perspective as a social commentator and wartime journalist profoundly informed his exploration of the human condition. Readers seeking a profound understanding of societal structures and individual agency will find The Essential Works of George Orwell indispensable. This anthology not only provides a comprehensive introduction to Orwell's thought-provoking arguments but also invites readers to engage with pressing issues that transcend generations. Dive into this essential collection to uncover the enduring relevance and incisive critique embedded within Orwell's body of work. In this enriched edition, we have carefully created added value for your reading experience: - A comprehensive Introduction outlines these selected works' unifying features, themes, or stylistic evolutions. - The Author Biography highlights personal milestones and literary influences that shape the entire body of writing. - A Historical Context section situates the works in their broader era—social currents, cultural trends, and key events that underpin their creation. - A concise Synopsis (Selection) offers an accessible overview of the included texts, helping readers navigate plotlines and main ideas without revealing critical twists. - A unified Analysis examines recurring motifs and stylistic hallmarks across the collection, tying the stories together while spotlighting the different work's strengths. - Reflection questions inspire deeper contemplation of the author's overarching message, inviting readers to draw connections among different texts and relate them to modern contexts. - Lastly, our hand‐picked Memorable Quotes distill pivotal lines and turning points, serving as touchstones for the collection's central themes.",
+                "description_sources": [],
+                "first_published_year": 2023,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=2zbmEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              },
+              {
+                "work_id": "george-orwell-a-life-in-letters-george-orwell",
+                "title": "George Orwell: A Life in Letters",
+                "primary_author": "George Orwell",
+                "authors": [
+                  "George Orwell"
+                ],
+                "description": "A compilation of personal letters creates an autobiography of the author of \"Nineteen Eighty-Four\" through his correspondence with other literary luminaries, including T.S. Eliot and Henry Miller, as well as letters to complete strangers.",
+                "description_sources": [],
+                "first_published_year": 2013,
+                "original_language": "en",
+                "genres": [],
+                "categories": [],
+                "keywords": [],
+                "content_analysis": {
+                  "key_themes": [],
+                  "dominant_themes": [],
+                  "tone": [],
+                  "mood": "neutral",
+                  "pacing": "moderate",
+                  "characters": [],
+                  "locations": []
+                },
+                "quality": {
+                  "description_quality": 0,
+                  "has_cover": false,
+                  "has_isbn": false,
+                  "has_page_count": false,
+                  "source_count": 0,
+                  "confidence_score": 0.0
+                },
+                "editions": [],
+                "edition_count": 0,
+                "image_url": "http://books.google.com/books/content?id=_WE4AAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
+                "rag_document": "",
+                "sources": [],
+                "last_enriched_at": "2026-05-13T23:41:21.769000",
+                "meta": {}
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "from_cache": true
+      }
+    },
+    {
+      "test": "Author: Haruki Murakami",
+      "url": "http://127.0.0.1:8001/api/v3/authors/search?name=Haruki%20Murakami",
+      "status_code": 200,
+      "duration_seconds": 0.007,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "_id": "haruki-murakami",
+            "author_id": "haruki-murakami",
+            "bio": {
+              "short_bio": "Haruki Murakami is a writer and author.",
+              "wikipedia_lang": "en"
+            },
+            "last_enriched_at": "2026-05-13T01:39:42.416000",
+            "name": "Haruki Murakami",
+            "name_variants": [],
+            "notable_works": [
+              "haruki-murakami-manga-stories-3-haruki-murakami",
+              "first-person-singular-haruki-murakami",
+              "haruki-murakami-manga-stories-2-haruki-murakami",
+              "a-wild-sheep-chase-haruki-murakami",
+              "the-city-and-its-uncertain-walls-haruki-murakami",
+              "blind-willow-sleeping-woman-haruki-murakami",
+              "after-dark-haruki-murakami",
+              "norwegian-wood-haruki-murakami",
+              "men-without-women-haruki-murakami",
+              "murakami-t-haruki-murakami"
+            ],
+            "rag_document": "Author: Haruki Murakami\nBio: Haruki Murakami is a writer and author.\nNotable Works: Haruki Murakami Manga Stories 3, First Person Singular, Haruki Murakami Manga Stories 2, A Wild Sheep Chase, The City and Its Uncertain Walls\n",
+            "series": [],
+            "sources": [],
+            "stats": {
+              "total_works": 12,
+              "series_count": 0,
+              "most_popular_work": "Haruki Murakami Manga Stories 3"
+            },
+            "style_profile": {
+              "description": "Haruki Murakami is a writer author.",
+              "genres": [],
+              "common_themes": [],
+              "tone": []
+            }
+          }
+        ],
+        "total": 1,
+        "from_cache": true
+      }
+    },
+    {
+      "test": "Book: 1984",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=1984",
+      "status_code": 200,
+      "duration_seconds": 1.426,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "nineteen-eighty-four-george-orwell",
+            "title": "Nineteen Eighty-Four",
+            "subtitle": null,
+            "primary_author": "George Orwell",
+            "authors": [
+              "George Orwell"
+            ],
+            "description": "Nineteen Eighty-Four is a significant literary work by George Orwell.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "en",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: Nineteen Eighty-Four\nAuthor: George Orwell\nDescription: Nineteen Eighty-Four is a significant literary work by George Orwell.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:16.416764",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "1984"
+      }
+    },
+    {
+      "test": "Book: Dune",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=Dune",
+      "status_code": 200,
+      "duration_seconds": 1.199,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "dune-frank-herbert",
+            "title": "Dune",
+            "subtitle": null,
+            "primary_author": "Frank Herbert",
+            "authors": [
+              "Frank Herbert"
+            ],
+            "description": "Dune is a significant literary work by Frank Herbert.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "en",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: Dune\nAuthor: Frank Herbert\nDescription: Dune is a significant literary work by Frank Herbert.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:17.616502",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "Dune"
+      }
+    },
+    {
+      "test": "Book: The Alchemist",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=The%20Alchemist",
+      "status_code": 200,
+      "duration_seconds": 0.887,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "o-alquimista-paulo-coelho",
+            "title": "O Alquimista",
+            "subtitle": null,
+            "primary_author": "Paulo Coelho",
+            "authors": [
+              "Paulo Coelho"
+            ],
+            "description": "O Alquimista is a significant literary work by Paulo Coelho.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "en",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: O Alquimista\nAuthor: Paulo Coelho\nDescription: O Alquimista is a significant literary work by Paulo Coelho.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:18.499864",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "The Alchemist"
+      }
+    },
+    {
+      "test": "Book: ألف ليلة وليلة",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=%D8%A3%D9%84%D9%81%20%D9%84%D9%8A%D9%84%D8%A9%20%D9%88%D9%84%D9%8A%D9%84%D8%A9",
+      "status_code": 200,
+      "duration_seconds": 1.709,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "ألف-ليلة-وليلةcom-hibah-hāniʼ",
+            "title": "ألف ليلة وليلة.com",
+            "subtitle": null,
+            "primary_author": "Hibah Hāniʼ",
+            "authors": [
+              "Hibah Hāniʼ"
+            ],
+            "description": "ألف ليلة وليلة.com is a significant literary work by Hibah Hāniʼ.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "ar",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: ألف ليلة وليلة.com\nAuthor: Hibah Hāniʼ\nDescription: ألف ليلة وليلة.com is a significant literary work by Hibah Hāniʼ.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:20.207615",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "ألف ليلة وليلة"
+      }
+    },
+    {
+      "test": "Book: زقاق المدق",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=%D8%B2%D9%82%D8%A7%D9%82%20%D8%A7%D9%84%D9%85%D8%AF%D9%82",
+      "status_code": 200,
+      "duration_seconds": 1.035,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "زقاق-المدق-نجيب-محفوظ",
+            "title": "زقاق المدق",
+            "subtitle": null,
+            "primary_author": "نجيب محفوظ",
+            "authors": [
+              "نجيب محفوظ"
+            ],
+            "description": "زقاق المدق is a significant literary work by نجيب محفوظ.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "ar",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: زقاق المدق\nAuthor: نجيب محفوظ\nDescription: زقاق المدق is a significant literary work by نجيب محفوظ.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:21.245641",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "زقاق المدق"
+      }
+    },
+    {
+      "test": "Book: Harry Potter",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=Harry%20Potter",
+      "status_code": 200,
+      "duration_seconds": 3.661,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "harry-potter-and-the-philosophers-stone-j-k-rowling",
+            "title": "Harry Potter and the Philosopher's Stone",
+            "subtitle": null,
+            "primary_author": "J. K. Rowling",
+            "authors": [
+              "J. K. Rowling"
+            ],
+            "description": "Harry Potter and the Philosopher's Stone is a significant literary work by J. K. Rowling.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "en",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: Harry Potter and the Philosopher's Stone\nAuthor: J. K. Rowling\nDescription: Harry Potter and the Philosopher's Stone is a significant literary work by J. K. Rowling.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:24.899501",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "Harry Potter"
+      }
+    },
+    {
+      "test": "Book: One Hundred Years of Solitude",
+      "url": "http://127.0.0.1:8001/api/v3/books/search?q=One%20Hundred%20Years%20of%20Solitude",
+      "status_code": 200,
+      "duration_seconds": 1.382,
+      "success": true,
+      "items_count": 1,
+      "response": {
+        "results": [
+          {
+            "work_id": "cien-años-de-soledad-gabriel-garcía-márquez",
+            "title": "Cien años de soledad",
+            "subtitle": null,
+            "primary_author": "Gabriel García Márquez",
+            "authors": [
+              "Gabriel García Márquez"
+            ],
+            "description": "Cien años de soledad is a significant literary work by Gabriel García Márquez.",
+            "description_sources": [],
+            "first_published_year": null,
+            "original_language": "en",
+            "series_name": null,
+            "series_position": null,
+            "series_id": null,
+            "genres": [],
+            "categories": [],
+            "keywords": [],
+            "content_analysis": {
+              "key_themes": [],
+              "dominant_themes": [],
+              "tone": [],
+              "mood": "neutral",
+              "pacing": "moderate",
+              "target_audience": null,
+              "characters": [],
+              "locations": []
+            },
+            "quality": {
+              "description_quality": 0,
+              "has_cover": false,
+              "has_isbn": false,
+              "has_page_count": false,
+              "source_count": 3,
+              "confidence_score": 0.0
+            },
+            "editions": [],
+            "edition_count": 0,
+            "image_url": null,
+            "wikipedia_url": null,
+            "wikipedia_title": null,
+            "rag_document": "Title: Cien años de soledad\nAuthor: Gabriel García Márquez\nDescription: Cien años de soledad is a significant literary work by Gabriel García Márquez.\n\nWikipedia Summary: \n",
+            "sources": [],
+            "last_enriched_at": "2026-05-13T23:44:26.291644",
+            "meta": {}
+          }
+        ],
+        "total": 1,
+        "query": "One Hundred Years of Solitude"
+      }
+    },
+    {
+      "test": "Series: Harry Potter",
+      "url": "http://127.0.0.1:8001/api/v3/series/search?name=Harry%20Potter",
+      "status_code": 200,
+      "duration_seconds": 0.954,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "series_id": "harry-potter-j-k-rowling",
+            "series_name": "Harry Potter",
+            "primary_author": "J. K. Rowling",
+            "author_id": "j-k-rowling",
+            "description": "The Harry Potter series.",
+            "premise": null,
+            "books": [
+              {
+                "work_id": "harry-potter-and-the-philosophers-stone-j-k-rowling",
+                "title": "Harry Potter and the Philosopher's Stone",
+                "position": 1.0,
+                "published_year": 1997,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-chamber-of-secrets-j-k-rowling",
+                "title": "Harry Potter and the Chamber of Secrets",
+                "position": 2.0,
+                "published_year": 1998,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-prisoner-of-azkaban-j-k-rowling",
+                "title": "Harry Potter and the Prisoner of Azkaban",
+                "position": 3.0,
+                "published_year": 1999,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-deathly-hallows-j-k-rowling",
+                "title": "Harry Potter and the Deathly Hallows",
+                "position": 4.0,
+                "published_year": 2007,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-goblet-of-fire-j-k-rowling",
+                "title": "Harry Potter and the Goblet of Fire",
+                "position": 5.0,
+                "published_year": 2000,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-order-of-the-phoenix-j-k-rowling",
+                "title": "Harry Potter and the Order of the Phoenix",
+                "position": 6.0,
+                "published_year": 2003,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-half-blood-prince-j-k-rowling",
+                "title": "Harry Potter and the Half-Blood Prince",
+                "position": 7.0,
+                "published_year": 2005,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-series-1-7-j-k-rowling",
+                "title": "Harry Potter (series) 1-7",
+                "position": 8.0,
+                "published_year": 1999,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-and-the-cursed-child-jack-thorne",
+                "title": "Harry Potter and the Cursed Child",
+                "position": 9.0,
+                "published_year": 2001,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-poster-annual-2008-warner-bros-entertainment-inc",
+                "title": "Harry Potter poster annual 2008",
+                "position": 10.0,
+                "published_year": 2007,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-j-k-rowling",
+                "title": "Harry Potter",
+                "position": 11.0,
+                "published_year": 2001,
+                "summary": null
+              },
+              {
+                "work_id": "harry-potter-series-1-4-j-k-rowling",
+                "title": "Harry Potter (series) 1-4",
+                "position": 12.0,
+                "published_year": 1999,
+                "summary": null
+              }
+            ],
+            "total_books": 12,
+            "reading_order": [],
+            "main_themes": [],
+            "image_url": null,
+            "wikipedia_url": null,
+            "rag_document": "Series: Harry Potter\nBy: J. K. Rowling\nTotal Books: 12\n\nDescription:\nA remarkable book series.\n\nBooks in Series:\n• Harry Potter and the Philosopher's Stone\n• Harry Potter and the Chamber of Secrets\n• Harry Potter and the Prisoner of Azkaban\n• Harry Potter and the Deathly Hallows\n• Harry Potter and the Goblet of Fire\n• Harry Potter and the Order of the Phoenix\n• Harry Potter and the Half-Blood Prince\n• Harry Potter (series) 1-7\n• Harry Potter and the Cursed Child\n• Harry Potter poster annual 2008\n",
+            "last_enriched_at": "2026-05-13T23:44:27.204365",
+            "sources": []
+          }
+        ],
+        "total": 1,
+        "query": "Harry Potter"
+      }
+    },
+    {
+      "test": "Series: Dune",
+      "url": "http://127.0.0.1:8001/api/v3/series/search?name=Dune",
+      "status_code": 200,
+      "duration_seconds": 1.165,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "series_id": "dune-frank-herbert",
+            "series_name": "Dune",
+            "primary_author": "Frank Herbert",
+            "author_id": "frank-herbert",
+            "description": "The Dune series.",
+            "premise": null,
+            "books": [
+              {
+                "work_id": "dune-frank-herbert",
+                "title": "Dune",
+                "position": 1.0,
+                "published_year": 1965,
+                "summary": null
+              },
+              {
+                "work_id": "dune-messiah-frank-herbert",
+                "title": "Dune Messiah",
+                "position": 2.0,
+                "published_year": 1969,
+                "summary": null
+              },
+              {
+                "work_id": "children-of-dune-frank-herbert",
+                "title": "Children of Dune",
+                "position": 3.0,
+                "published_year": 1976,
+                "summary": null
+              },
+              {
+                "work_id": "heretics-of-dune-frank-herbert",
+                "title": "Heretics of Dune",
+                "position": 4.0,
+                "published_year": 1984,
+                "summary": null
+              },
+              {
+                "work_id": "god-emperor-of-dune-frank-herbert",
+                "title": "God Emperor of Dune",
+                "position": 5.0,
+                "published_year": 1981,
+                "summary": null
+              },
+              {
+                "work_id": "chapterhouse-dune-frank-herbert",
+                "title": "Chapterhouse Dune",
+                "position": 6.0,
+                "published_year": 1985,
+                "summary": null
+              },
+              {
+                "work_id": "the-great-dune-trilogy-frank-herbert",
+                "title": "The Great Dune Trilogy",
+                "position": 7.0,
+                "published_year": 1977,
+                "summary": null
+              },
+              {
+                "work_id": "go-ask-alice-beatrice-sparks",
+                "title": "Go Ask Alice",
+                "position": 8.0,
+                "published_year": 1971,
+                "summary": null
+              },
+              {
+                "work_id": "dune-brian-herbert",
+                "title": "Dune",
+                "position": 9.0,
+                "published_year": 2001,
+                "summary": null
+              },
+              {
+                "work_id": "sandworms-of-dune-kevin-j-anderson",
+                "title": "Sandworms of Dune",
+                "position": 10.0,
+                "published_year": 2007,
+                "summary": null
+              },
+              {
+                "work_id": "the-butlerian-jihad-kevin-j-anderson",
+                "title": "The Butlerian Jihad",
+                "position": 11.0,
+                "published_year": 2002,
+                "summary": null
+              },
+              {
+                "work_id": "mémoires-dune-jeune-fille-rangée-simone-de-beauvoir",
+                "title": "Mémoires d'une jeune fille rangée",
+                "position": 12.0,
+                "published_year": 1900,
+                "summary": null
+              }
+            ],
+            "total_books": 12,
+            "reading_order": [],
+            "main_themes": [],
+            "image_url": null,
+            "wikipedia_url": null,
+            "rag_document": "Series: Dune\nBy: Frank Herbert\nTotal Books: 12\n\nDescription:\nA remarkable book series.\n\nBooks in Series:\n• Dune\n• Dune Messiah\n• Children of Dune\n• Heretics of Dune\n• God Emperor of Dune\n• Chapterhouse Dune\n• The Great Dune Trilogy\n• Go Ask Alice\n• Dune\n• Sandworms of Dune\n",
+            "last_enriched_at": "2026-05-13T23:44:28.409578",
+            "sources": []
+          }
+        ],
+        "total": 1,
+        "query": "Dune"
+      }
+    },
+    {
+      "test": "Series: The Lord of the Rings",
+      "url": "http://127.0.0.1:8001/api/v3/series/search?name=The%20Lord%20of%20the%20Rings",
+      "status_code": 200,
+      "duration_seconds": 0.94,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "series_id": "the-lord-of-the-rings-jrr-tolkien",
+            "series_name": "The Lord of the Rings",
+            "primary_author": "J.R.R. Tolkien",
+            "author_id": "jrr-tolkien",
+            "description": "The The Lord of the Rings series.",
+            "premise": null,
+            "books": [
+              {
+                "work_id": "the-lord-of-the-rings-jrr-tolkien",
+                "title": "The Lord of the Rings",
+                "position": 1.0,
+                "published_year": 1954,
+                "summary": null
+              },
+              {
+                "work_id": "the-fellowship-of-the-ring-jrr-tolkien",
+                "title": "The Fellowship of the Ring",
+                "position": 2.0,
+                "published_year": 1954,
+                "summary": null
+              },
+              {
+                "work_id": "the-two-towers-jrr-tolkien",
+                "title": "The Two Towers",
+                "position": 3.0,
+                "published_year": 1954,
+                "summary": null
+              },
+              {
+                "work_id": "the-return-of-the-king-jrr-tolkien",
+                "title": "The Return of the King",
+                "position": 4.0,
+                "published_year": 1950,
+                "summary": null
+              },
+              {
+                "work_id": "novels-hobbit-lord-of-the-rings-jrr-tolkien",
+                "title": "Novels (Hobbit / Lord of the Rings)",
+                "position": 5.0,
+                "published_year": 1979,
+                "summary": null
+              },
+              {
+                "work_id": "bored-of-the-rings-henry-beard",
+                "title": "Bored of the Rings",
+                "position": 6.0,
+                "published_year": 1969,
+                "summary": null
+              },
+              {
+                "work_id": "the-return-of-the-shadow-jrr-tolkien",
+                "title": "The Return of the Shadow",
+                "position": 7.0,
+                "published_year": 1988,
+                "summary": null
+              },
+              {
+                "work_id": "the-war-of-the-ring-jrr-tolkien",
+                "title": "The War of the Ring",
+                "position": 8.0,
+                "published_year": 1990,
+                "summary": null
+              },
+              {
+                "work_id": "the-treason-of-isengard-jrr-tolkien",
+                "title": "The Treason of Isengard",
+                "position": 9.0,
+                "published_year": 1989,
+                "summary": null
+              },
+              {
+                "work_id": "the-lord-of-the-rings-brian-sibley",
+                "title": "The lord of the rings",
+                "position": 10.0,
+                "published_year": 2001,
+                "summary": null
+              },
+              {
+                "work_id": "the-hobbit-jrr-tolkien",
+                "title": "The Hobbit",
+                "position": 11.0,
+                "published_year": 1937,
+                "summary": null
+              },
+              {
+                "work_id": "the-lord-of-the-rings-jude-fisher",
+                "title": "The lord of the rings",
+                "position": 12.0,
+                "published_year": 2001,
+                "summary": null
+              }
+            ],
+            "total_books": 12,
+            "reading_order": [],
+            "main_themes": [],
+            "image_url": null,
+            "wikipedia_url": null,
+            "rag_document": "Series: The Lord of the Rings\nBy: J.R.R. Tolkien\nTotal Books: 12\n\nDescription:\nA remarkable book series.\n\nBooks in Series:\n• The Lord of the Rings\n• The Fellowship of the Ring\n• The Two Towers\n• The Return of the King\n• Novels (Hobbit / Lord of the Rings)\n• Bored of the Rings\n• The Return of the Shadow\n• The War of the Ring\n• The Treason of Isengard\n• The lord of the rings\n",
+            "last_enriched_at": "2026-05-13T23:44:29.343631",
+            "sources": []
+          }
+        ],
+        "total": 1,
+        "query": "The Lord of the Rings"
+      }
+    },
+    {
+      "test": "Series: أغنية الجليد والنار",
+      "url": "http://127.0.0.1:8001/api/v3/series/search?name=%D8%A3%D8%BA%D9%86%D9%8A%D8%A9%20%D8%A7%D9%84%D8%AC%D9%84%D9%8A%D8%AF%20%D9%88%D8%A7%D9%84%D9%86%D8%A7%D8%B1",
+      "status_code": 200,
+      "duration_seconds": 0.963,
+      "success": true,
+      "items_count": 7,
+      "response": {
+        "results": [
+          {
+            "series_id": "أغنية-الجليد-والنار-unknown",
+            "series_name": "أغنية الجليد والنار",
+            "primary_author": "Unknown",
+            "author_id": "unknown",
+            "description": "The أغنية الجليد والنار series.",
+            "premise": null,
+            "books": [
+              {
+                "work_id": "شاشة-1-أغنية-الجليد-والنار-صدام-الملوك-unknown",
+                "title": "شاشة 1 أغنية الجليد والنار صدام الملوك",
+                "position": 1.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "لعبة-العروش-أغنية-الجليد-والنار-unknown",
+                "title": "لعبة العروش – أغنية الجليد والنار",
+                "position": 2.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "أغنية-الجليد-والنار-5-رقصة-مع-التنانين-مكتبتنا-unknown",
+                "title": "أغنية الجليد والنار 5 رقصة مع التنانين مكتبتنا",
+                "position": 3.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "سلسلة-أغنية-الجليد-والنار-الكتاب-الأول-لعبة-العروش-unknown",
+                "title": "سلسلة أغنية الجليد والنار - الكتاب الأول لعبة العروش",
+                "position": 4.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "أغنية-الجليد-والنار-2-صدام-الملوك-مكتبتنا-unknown",
+                "title": "أغنية الجليد والنار 2 صدام الملوك مكتبتنا",
+                "position": 5.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "أغنية-الجليد-والنار-3-عاصفة-السيوف-1-مكتبتنا-unknown",
+                "title": "أغنية الجليد والنار 3 عاصفة السيوف 1 مكتبتنا",
+                "position": 6.0,
+                "published_year": null,
+                "summary": null
+              },
+              {
+                "work_id": "أغنية-الجليد-والنار-5-رقصة-مع-التنانين-2-مكتبتنا-unknown",
+                "title": "أغنية الجليد والنار 5 رقصة مع التنانين 2 مكتبتنا",
+                "position": 7.0,
+                "published_year": null,
+                "summary": null
+              }
+            ],
+            "total_books": 7,
+            "reading_order": [],
+            "main_themes": [],
+            "image_url": null,
+            "wikipedia_url": null,
+            "rag_document": "Series: أغنية الجليد والنار\nBy: Unknown\nTotal Books: 7\n\nDescription:\nA remarkable book series.\n\nBooks in Series:\n• شاشة 1 أغنية الجليد والنار صدام الملوك\n• لعبة العروش – أغنية الجليد والنار\n• أغنية الجليد والنار 5 رقصة مع التنانين مكتبتنا\n• سلسلة أغنية الجليد والنار - الكتاب الأول لعبة العروش\n• أغنية الجليد والنار 2 صدام الملوك مكتبتنا\n• أغنية الجليد والنار 3 عاصفة السيوف 1 مكتبتنا\n• أغنية الجليد والنار 5 رقصة مع التنانين 2 مكتبتنا\n",
+            "last_enriched_at": "2026-05-13T23:44:30.314805",
+            "sources": []
+          }
+        ],
+        "total": 1,
+        "query": "أغنية الجليد والنار"
+      }
+    },
+    {
+      "test": "Series: Foundation",
+      "url": "http://127.0.0.1:8001/api/v3/series/search?name=Foundation",
+      "status_code": 200,
+      "duration_seconds": 1.321,
+      "success": true,
+      "items_count": 12,
+      "response": {
+        "results": [
+          {
+            "series_id": "foundation-isaac-asimov",
+            "series_name": "Foundation",
+            "primary_author": "Isaac Asimov",
+            "author_id": "isaac-asimov",
+            "description": "The Foundation series.",
+            "premise": null,
+            "books": [
+              {
+                "work_id": "foundation-isaac-asimov",
+                "title": "Foundation",
+                "position": 1.0,
+                "published_year": 1951,
+                "summary": null
+              },
+              {
+                "work_id": "the-foundation-trilogy-isaac-asimov",
+                "title": "The Foundation Trilogy",
+                "position": 2.0,
+                "published_year": 1950,
+                "summary": null
+              },
+              {
+                "work_id": "second-foundation-isaac-asimov",
+                "title": "Second Foundation",
+                "position": 3.0,
+                "published_year": 1953,
+                "summary": null
+              },
+              {
+                "work_id": "foundation-and-empire-isaac-asimov",
+                "title": "Foundation and Empire",
+                "position": 4.0,
+                "published_year": 1945,
+                "summary": null
+              },
+              {
+                "work_id": "forward-the-foundation-isaac-asimov",
+                "title": "Forward the Foundation",
+                "position": 5.0,
+                "published_year": 1993,
+                "summary": null
+              },
+              {
+                "work_id": "foundation-and-earth-isaac-asimov",
+                "title": "Foundation and Earth",
+                "position": 6.0,
+                "published_year": 1986,
+                "summary": null
+              },
+              {
+                "work_id": "foundations-edge-isaac-asimov",
+                "title": "Foundation's Edge",
+                "position": 7.0,
+                "published_year": 1977,
+                "summary": null
+              },
+              {
+                "work_id": "prelude-to-foundation-isaac-asimov",
+                "title": "Prelude to Foundation",
+                "position": 8.0,
+                "published_year": 1988,
+                "summary": null
+              },
+              {
+                "work_id": "foundations-of-behavioral-research-fred-n-kerlinger",
+                "title": "Foundations of behavioral research",
+                "position": 9.0,
+                "published_year": 1964,
+                "summary": null
+              },
+              {
+                "work_id": "introductory-chemistry-steven-s-zumdahl",
+                "title": "Introductory Chemistry",
+                "position": 10.0,
+                "published_year": 1990,
+                "summary": null
+              },
+              {
+                "work_id": "foundation-science-physics-for-class-9-hc-verma",
+                "title": "Foundation Science Physics for Class 9",
+                "position": 11.0,
+                "published_year": 2014,
+                "summary": null
+              },
+              {
+                "work_id": "foundation-summer-box-67-unknown",
+                "title": "Foundation Summer Box 67.",
+                "position": 12.0,
+                "published_year": null,
+                "summary": null
+              }
+            ],
+            "total_books": 12,
+            "reading_order": [],
+            "main_themes": [],
+            "image_url": null,
+            "wikipedia_url": null,
+            "rag_document": "Series: Foundation\nBy: Isaac Asimov\nTotal Books: 12\n\nDescription:\nA remarkable book series.\n\nBooks in Series:\n• Foundation\n• The Foundation Trilogy\n• Second Foundation\n• Foundation and Empire\n• Forward the Foundation\n• Foundation and Earth\n• Foundation's Edge\n• Prelude to Foundation\n• Foundations of behavioral research\n• Introductory Chemistry\n",
+            "last_enriched_at": "2026-05-13T23:44:31.634932",
+            "sources": []
+          }
+        ],
+        "total": 1,
+        "query": "Foundation"
+      }
+    }
+  ]
+}

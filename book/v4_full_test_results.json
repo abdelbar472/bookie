@@ -1,0 +1,2404 @@
+{
+  "test_run_at": "2026-05-13T04:41:11.806472",
+  "service": "Book Service V4",
+  "total_tests": 59,
+  "successful": 43,
+  "results": [
+    {
+      "test": "Health Check",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/health",
+      "status_code": 200,
+      "duration_seconds": 0.003,
+      "timestamp": "2026-05-13T04:38:12.336058",
+      "full_response": {
+        "service": "book-service",
+        "status": "healthy",
+        "database": "connected"
+      },
+      "summary": {
+        "items_count": 1
+      }
+    },
+    {
+      "test": "Author: Naguib Mahfouz",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Naguib%20Mahfouz",
+      "status_code": 200,
+      "duration_seconds": 1.378,
+      "timestamp": "2026-05-13T04:38:13.714326",
+      "full_response": {
+        "author_id": "naguib-mahfouz",
+        "name": "Naguib Mahfouz",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Naguib Mahfouz is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Naguib Mahfouz is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Wisdom of Naguib Mahfouz",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-wisdom-of-naguib-mahfouz-naguib-mahfouz",
+          "morning-and-evening-talk-naguib-mahfouz",
+          "sugar-street-naguib-mahfouz",
+          "the-search-naguib-mahfouz",
+          "the-harafish-naguib-mahfouz",
+          "respected-sir-naguib-mahfouz",
+          "palace-of-desire-naguib-mahfouz",
+          "the-time-and-the-place-naguib-mahfouz",
+          "the-naguib-mahfouz-centennial-library-naguib-mahfouz",
+          "palace-walk-naguib-mahfouz"
+        ],
+        "series": [],
+        "rag_document": "Author: Naguib Mahfouz\nBio: Naguib Mahfouz is a writer and author.\nNotable Works: The Wisdom of Naguib Mahfouz, Morning and Evening Talk, Sugar Street, The Search, The Harafish\n",
+        "last_enriched_at": "2026-05-13T01:38:13.477280",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Alaa Al Aswany",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Alaa%20Al%20Aswany",
+      "status_code": 200,
+      "duration_seconds": 2.974,
+      "timestamp": "2026-05-13T04:38:17.589716",
+      "full_response": {
+        "author_id": "alaa-al-aswany",
+        "name": "Alaa Al Aswany",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Alaa Al Aswany is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Alaa Al Aswany is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Friendly Fire",
+          "years_active": null
+        },
+        "notable_works": [
+          "friendly-fire-alaa-al-aswany",
+          "the-republic-of-false-truths-alaa-al-aswany",
+          "chicago-alaa-al-aswany",
+          "the-automobile-club-of-egypt-alaa-al-aswany",
+          "the-yacoubian-building-alaa-al-aswany",
+          "on-the-state-of-egypt-alaa-al-aswany",
+          "tha-ethelana-emoun-aigyptios-alaa-al-aswany-alaa-al-aswany",
+          "the-dictatorship-syndrome-alaa-al-aswany",
+          "democracy-is-the-answer-alaa-al-aswany",
+          "automobile-club-of-egypt-alaa-al-aswany"
+        ],
+        "series": [],
+        "rag_document": "Author: Alaa Al Aswany\nBio: Alaa Al Aswany is a writer and author.\nNotable Works: Friendly Fire, The Republic of False Truths, Chicago, The Automobile Club of Egypt, The Yacoubian Building\n",
+        "last_enriched_at": "2026-05-13T01:38:17.551074",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Tawfiq al-Hakim",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Tawfiq%20al-Hakim",
+      "status_code": 200,
+      "duration_seconds": 3.708,
+      "timestamp": "2026-05-13T04:38:22.198946",
+      "full_response": {
+        "author_id": "tawfiq-al-hakim",
+        "name": "Tawfiq al-Hakim",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Tawfiq al-Hakim is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Tawfiq al-Hakim is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Essential Tawfiq Al-Hakim",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-essential-tawfiq-al-hakim-tawfiq-al-hakim",
+          "hayatitawfiq-al-hakim-tawfiq-al-hakim",
+          "play-prefaces-and-postscripts-of-tawfiq-al-hakim-tawfiq-al-hakim",
+          "diary-of-a-country-prosecutor-tawfiq-al-hakim",
+          "ʿaṣà-al-ḥakīm-tawfiq-al-hakim",
+          "return-of-the-spirit-tawfiq-al-hakim",
+          "maa-az-zaman-tawfiq-al-hakim",
+          "ašwak-al-salam-tawfiq-al-hakim",
+          "awdat-al-ruh-tawfiq-al-hakim",
+          "biymaliyun-tawfiq-al-hakim"
+        ],
+        "series": [],
+        "rag_document": "Author: Tawfiq al-Hakim\nBio: Tawfiq al-Hakim is a writer and author.\nNotable Works: The Essential Tawfiq Al-Hakim, Hayati/Tawfiq Al-hakim, Play, Prefaces and Postscripts of Tawfiq Al-Hakim, Diary of a Country Prosecutor, ʿAṣà al-ḥakīm\n",
+        "last_enriched_at": "2026-05-13T01:38:22.161892",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Yusuf Idris",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Yusuf%20Idris",
+      "status_code": 200,
+      "duration_seconds": 1.735,
+      "timestamp": "2026-05-13T04:38:24.835242",
+      "full_response": {
+        "author_id": "yusuf-idris",
+        "name": "Yusuf Idris",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Yusuf Idris is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Yusuf Idris is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Essential Yusuf Idris",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-essential-yusuf-idris-yusuf-idris",
+          "city-of-love-and-ashes-yusuf-idris",
+          "yusuf-idris-yusuf-idris",
+          "the-cheapest-nights-yusuf-idris",
+          "the-cheapest-nights-and-other-stories-yusuf-idris",
+          "migration-and-maturation-yusuf-idris",
+          "mistake-of-honour-yusuf-idris",
+          "ajir-dunya-yusuf-idris",
+          "an-amd-isma-tisma-yusuf-idris",
+          "iktisaf-qarra-yusuf-idris"
+        ],
+        "series": [],
+        "rag_document": "Author: Yusuf Idris\nBio: Yusuf Idris is a writer and author.\nNotable Works: The Essential Yusuf Idris, City of Love and Ashes, Yusuf Idris, The Cheapest Nights, The Cheapest Nights and Other Stories\n",
+        "last_enriched_at": "2026-05-13T01:38:24.771138",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Ahlam Mosteghanemi",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ahlam%20Mosteghanemi",
+      "status_code": 200,
+      "duration_seconds": 1.821,
+      "timestamp": "2026-05-13T04:38:27.557285",
+      "full_response": {
+        "author_id": "ahlam-mosteghanemi",
+        "name": "Ahlam Mosteghanemi",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ahlam Mosteghanemi is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ahlam Mosteghanemi is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Chaos of the Senses",
+          "years_active": null
+        },
+        "notable_works": [
+          "chaos-of-the-senses-ahlam-mosteghanemi",
+          "memory-in-the-flesh-ahlam-mosteghanemi",
+          "ذاكرة-الجسد-ahlam-mosteghanemi",
+          "abber-sarir-ahlam-mosteghanemi",
+          "al-jasad-novel-in-arabic-ahlam-mosteghanemi",
+          "thakiratl-jasad-arabic-novel-ahlam-mosteghanemi",
+          "فوضى-الحواس-ahlam-mosteghanemi",
+          "faudha-alhawes-ahlam-mosteghanemi",
+          "abir-sarir-ahlam-mosteghanemi",
+          "fawda-al-hawass-ahlam-mosteghanemi"
+        ],
+        "series": [],
+        "rag_document": "Author: Ahlam Mosteghanemi\nBio: Ahlam Mosteghanemi is a writer and author.\nNotable Works: Chaos of the Senses, Memory in The Flesh, ذاكرة الجسد, A'bber sarir, Al Jasad Novel in Arabic\n",
+        "last_enriched_at": "2026-05-13T01:38:27.502175",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Khalil Gibran",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Khalil%20Gibran",
+      "status_code": 200,
+      "duration_seconds": 1.636,
+      "timestamp": "2026-05-13T04:38:30.095084",
+      "full_response": {
+        "author_id": "khalil-gibran",
+        "name": "Khalil Gibran",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Khalil Gibran is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Khalil Gibran is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Kahlil Gibran",
+          "years_active": null
+        },
+        "notable_works": [
+          "kahlil-gibran-khalil-gibran",
+          "the-garden-of-the-prophet-khalil-gibran",
+          "khalil-gibran-khalil-gibran",
+          "the-prophet-by-khalil-gibran-khalil-gibran",
+          "the-prophet-khalil-gibran",
+          "khalil-gibran-complete-works-wisehouse-classics-khalil-gibran",
+          "the-prophetgibran-khalil-original-edition-khalil-gibran",
+          "thoughts-and-meditations-khalil-gibran",
+          "the-forerunner-his-parables-and-poems-khalil-gibran",
+          "the-madman-khalil-gibran"
+        ],
+        "series": [],
+        "rag_document": "Author: Khalil Gibran\nBio: Khalil Gibran is a writer and author.\nNotable Works: Kahlil Gibran, The Garden of the Prophet, Khalil Gibran, The Prophet by Khalil Gibran, The Prophet\n",
+        "last_enriched_at": "2026-05-13T01:38:29.834252",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Mahmoud Darwish",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Mahmoud%20Darwish",
+      "status_code": 200,
+      "duration_seconds": 1.159,
+      "timestamp": "2026-05-13T04:38:32.154914",
+      "full_response": {
+        "author_id": "mahmoud-darwish",
+        "name": "Mahmoud Darwish",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Mahmoud Darwish is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Mahmoud Darwish is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Unfortunately, It Was Paradise",
+          "years_active": null
+        },
+        "notable_works": [
+          "unfortunately-it-was-paradise-mahmoud-darwish",
+          "darwish-mahmoud-darwish",
+          "a-river-dies-of-thirst-mahmoud-darwish",
+          "the-adam-of-two-edens-mahmoud-darwish",
+          "mural-mahmoud-darwish",
+          "if-i-were-another-mahmoud-darwish",
+          "i-dont-want-this-poem-to-end-mahmoud-darwish",
+          "state-of-siege-mahmoud-darwish",
+          "why-did-you-leave-the-horse-alone-mahmoud-darwish",
+          "almond-blossoms-and-beyond-mahmoud-darwish"
+        ],
+        "series": [],
+        "rag_document": "Author: Mahmoud Darwish\nBio: Mahmoud Darwish is a writer and author.\nNotable Works: Unfortunately, It Was Paradise, Darwish, A River Dies of Thirst, The Adam of Two Edens, Mural\n",
+        "last_enriched_at": "2026-05-13T01:38:32.085718",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Nawal El Saadawi",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Nawal%20El%20Saadawi",
+      "status_code": 200,
+      "duration_seconds": 1.182,
+      "timestamp": "2026-05-13T04:38:34.237536",
+      "full_response": {
+        "author_id": "nawal-el-saadawi",
+        "name": "Nawal El Saadawi",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Nawal El Saadawi is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Nawal El Saadawi is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Walking Through Fire",
+          "years_active": null
+        },
+        "notable_works": [
+          "walking-through-fire-nawal-el-saadawi",
+          "a-daughter-of-isis-nawal-el-saadawi",
+          "the-essential-nawal-el-saadawi-nawal-el-saadawi",
+          "the-hidden-face-of-eve-nawal-el-saadawi",
+          "the-dramatic-literature-of-nawal-el-saadawi-nawal-el-saadawi",
+          "god-dies-by-the-nile-and-other-novels-nawal-el-saadawi",
+          "zeina-nawal-el-saadawi",
+          "woman-at-point-zero-nawal-el-saadawi",
+          "two-women-in-one-nawal-el-saadawi",
+          "searching-nawal-el-saadawi"
+        ],
+        "series": [],
+        "rag_document": "Author: Nawal El Saadawi\nBio: Nawal El Saadawi is a writer and author.\nNotable Works: Walking Through Fire, A Daughter of Isis, The Essential Nawal El Saadawi, The Hidden Face of Eve, The Dramatic Literature of Nawal El Saadawi\n",
+        "last_enriched_at": "2026-05-13T01:38:34.213432",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Ahmed Khaled Tawfik",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ahmed%20Khaled%20Tawfik",
+      "status_code": 200,
+      "duration_seconds": 1.657,
+      "timestamp": "2026-05-13T04:38:36.795402",
+      "full_response": {
+        "author_id": "ahmed-khaled-tawfik",
+        "name": "Ahmed Khaled Tawfik",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ahmed Khaled Tawfik is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ahmed Khaled Tawfik is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 9,
+          "series_count": 0,
+          "most_popular_work": "Utopia",
+          "years_active": null
+        },
+        "notable_works": [
+          "utopia-ahmed-khaled-tawfik",
+          "قصة-تكملها-أنت-ahmed-khaled-tawfik",
+          "ولد-قليل-الأدب-ahmed-khaled-tawfik",
+          "قوس-قزح-ahmed-khaled-tawfik",
+          "al-batal-zo-al-alf-wagh-ahmed-khaled-tawfik",
+          "layal-arabeya-ahmed-khaled-tawfik",
+          "ostora-sheb-mokhifa-ma-waraa-al-tabiea-ahmed-khaled-tawfik",
+          "ostoorat-al-fata-al-zarkaa-ahmed-khaled-tawfik",
+          "al-mausoa-assehiya-ahmed-khaled-tawfik"
+        ],
+        "series": [],
+        "rag_document": "Author: Ahmed Khaled Tawfik\nBio: Ahmed Khaled Tawfik is a writer and author.\nNotable Works: Utopia, قصة تكملها أنت, ولد قليل الأدب, قوس قزح, Al batal zo al alf wagh\n",
+        "last_enriched_at": "2026-05-13T01:38:36.755328",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 9
+      }
+    },
+    {
+      "test": "Author: Sonallah Ibrahim",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Sonallah%20Ibrahim",
+      "status_code": 200,
+      "duration_seconds": 1.77,
+      "timestamp": "2026-05-13T04:38:39.466761",
+      "full_response": {
+        "author_id": "sonallah-ibrahim",
+        "name": "Sonallah Ibrahim",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Sonallah Ibrahim is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Sonallah Ibrahim is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Stealth",
+          "years_active": null
+        },
+        "notable_works": [
+          "stealth-sonallah-ibrahim",
+          "warda-sonallah-ibrahim",
+          "1970-sonallah-ibrahim",
+          "the-star-of-august-sonallah-ibrahim",
+          "zaat-sonallah-ibrahim",
+          "sonallah-ibrahim-sonallah-ibrahim",
+          "dāt-sonallah-ibrahim",
+          "the-committee-sonallah-ibrahim",
+          "beirut-beirut-sonallah-ibrahim",
+          "al-laǧnaẗ-sonallah-ibrahim"
+        ],
+        "series": [],
+        "rag_document": "Author: Sonallah Ibrahim\nBio: Sonallah Ibrahim is a writer and author.\nNotable Works: Stealth, Warda, 1970, The Star of August, zaat\n",
+        "last_enriched_at": "2026-05-13T01:38:39.423643",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Khaled Khalifa",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Khaled%20Khalifa",
+      "status_code": 200,
+      "duration_seconds": 1.326,
+      "timestamp": "2026-05-13T04:38:41.694159",
+      "full_response": {
+        "author_id": "khaled-khalifa",
+        "name": "Khaled Khalifa",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Khaled Khalifa is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Khaled Khalifa is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Death Is Hard Work",
+          "years_active": null
+        },
+        "notable_works": [
+          "death-is-hard-work-khaled-khalifa",
+          "no-one-prayed-over-their-graves-khaled-khalifa",
+          "in-praise-of-hatred-khaled-khalifa",
+          "no-knives-in-the-kitchens-of-this-city-khaled-khalifa",
+          "la-mort-est-une-corvée-khaled-khalifa",
+          "madīḥ-al-karāhiyyaẗ-khaled-khalifa",
+          "pas-de-couteaux-dans-les-cuisines-de-cette-ville-khaled-khalifa",
+          "maranam-dushkaram-khaled-khalifa",
+          "clinical-evaluation-of-the-role-of-parenteral-and-topical-use-of-large-hep-arin-doses-in-the-treatment-of-burns-khaled-khalifa",
+          "elogio-del-odio-khaled-khalifa"
+        ],
+        "series": [],
+        "rag_document": "Author: Khaled Khalifa\nBio: Khaled Khalifa is a writer and author.\nNotable Works: Death Is Hard Work, No One Prayed Over Their Graves, In Praise of Hatred, No Knives in the Kitchens of This City, La mort est une corvée\n",
+        "last_enriched_at": "2026-05-13T01:38:41.525645",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Adania Shibli",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Adania%20Shibli",
+      "status_code": 200,
+      "duration_seconds": 1.215,
+      "timestamp": "2026-05-13T04:38:43.810634",
+      "full_response": {
+        "author_id": "adania-shibli",
+        "name": "Adania Shibli",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Adania Shibli is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Adania Shibli is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Minor Detail",
+          "years_active": null
+        },
+        "notable_works": [
+          "minor-detail-adania-shibli",
+          "we-are-all-equally-far-from-love-adania-shibli",
+          "touch-adania-shibli",
+          "sensi-adania-shibli",
+          "eine-nebensache-adania-shibli",
+          "discourse-power-and-media-coverage-of-the-killing-of-palestinian-children-by-the-israeli-army-adania-shibli",
+          "um-detalhe-menor-adania-shibli",
+          "un-dettaglio-minore-adania-shibli",
+          "bani-abidi-adania-shibli",
+          "detaliu-minor-adania-shibli"
+        ],
+        "series": [],
+        "rag_document": "Author: Adania Shibli\nBio: Adania Shibli is a writer and author.\nNotable Works: Minor Detail, We Are All Equally Far From Love, Touch, Sensi, Eine Nebensache\n",
+        "last_enriched_at": "2026-05-13T01:38:43.746273",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Taha Hussein",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Taha%20Hussein",
+      "status_code": 200,
+      "duration_seconds": 1.209,
+      "timestamp": "2026-05-13T04:38:45.919816",
+      "full_response": {
+        "author_id": "taha-hussein",
+        "name": "Taha Hussein",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Taha Hussein is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Taha Hussein is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "طه حسين في مرآة العصر",
+          "years_active": null
+        },
+        "notable_works": [
+          "طه-حسين-في-مرآة-العصر-taha-hussein",
+          "an-egyptian-childhood-taha-hussein",
+          "the-days-taha-hussein",
+          "east-west-taha-hussein",
+          "the-sufferers-taha-hussein",
+          "al-ayyam-taha-hussein",
+          "a-man-of-letters-taha-hussein",
+          "المعذبون-في-الأرض-taha-hussein",
+          "the-tree-of-misary-taha-hussein",
+          "entre-les-deux-taha-hussein"
+        ],
+        "series": [],
+        "rag_document": "Author: Taha Hussein\nBio: Taha Hussein is a writer and author.\nNotable Works: طه حسين في مرآة العصر, An Egyptian Childhood, The Days, East... West, The Sufferers\n",
+        "last_enriched_at": "2026-05-13T01:38:45.890027",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Ihsan Abdel Quddous",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ihsan%20Abdel%20Quddous",
+      "status_code": 200,
+      "duration_seconds": 2.074,
+      "timestamp": "2026-05-13T04:38:48.930090",
+      "full_response": {
+        "author_id": "ihsan-abdel-quddous",
+        "name": "Ihsan Abdel Quddous",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ihsan Abdel Quddous is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ihsan Abdel Quddous is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 5,
+          "series_count": 0,
+          "most_popular_work": "A Nose and Three Eyes",
+          "years_active": null
+        },
+        "notable_works": [
+          "a-nose-and-three-eyes-ihsan-abdel-quddous",
+          "i-do-not-sleep-ihsan-abdel-quddous",
+          "al-rakisah-wal-ssiassi-ihsan-abdel-quddous",
+          "kânat-ssa-abah-wa-maghrurah-ihsan-abdel-quddous",
+          "your-impossible-voice-17-ihsan-abdel-quddous"
+        ],
+        "series": [],
+        "rag_document": "Author: Ihsan Abdel Quddous\nBio: Ihsan Abdel Quddous is a writer and author.\nNotable Works: A Nose and Three Eyes, I Do Not Sleep, Al-rakisah wal ssiassi, Kânat ssa abah wa maghrurah, Your Impossible Voice #17\n",
+        "last_enriched_at": "2026-05-13T01:38:48.912194",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 5
+      }
+    },
+    {
+      "test": "Author: Gamal El Ghitani",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Gamal%20El%20Ghitani",
+      "status_code": 200,
+      "duration_seconds": 1.18,
+      "timestamp": "2026-05-13T04:38:51.010873",
+      "full_response": {
+        "author_id": "gamal-el-ghitani",
+        "name": "Gamal El Ghitani",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Gamal El Ghitani is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Gamal El Ghitani is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 10,
+          "series_count": 0,
+          "most_popular_work": "Traces",
+          "years_active": null
+        },
+        "notable_works": [
+          "traces-gamal-el-ghitani",
+          "zayni-barakat-gamal-el-ghitani",
+          "the-zafarani-files-gamal-el-ghitani",
+          "the-mahfouz-dialogs-gamal-el-ghitani",
+          "pyramid-texts-gamal-el-ghitani",
+          "shath-al-madinah-gamal-el-ghitani",
+          "mahfouz-dialogs-gamal-el-ghitani",
+          "a-distress-call-gamal-el-ghitani",
+          "the-cairo-of-naguib-mahfouz-gamal-el-ghitani",
+          "sardines-and-oranges-gamal-el-ghitani"
+        ],
+        "series": [],
+        "rag_document": "Author: Gamal El Ghitani\nBio: Gamal El Ghitani is a writer and author.\nNotable Works: Traces, Zayni Barakat, The Zafarani Files, The Mahfouz Dialogs, Pyramid Texts\n",
+        "last_enriched_at": "2026-05-13T01:38:50.967869",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 10
+      }
+    },
+    {
+      "test": "Author: Ghassan Kanafani",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ghassan%20Kanafani",
+      "status_code": 200,
+      "duration_seconds": 1.447,
+      "timestamp": "2026-05-13T04:38:53.358742",
+      "full_response": {
+        "author_id": "ghassan-kanafani",
+        "name": "Ghassan Kanafani",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ghassan Kanafani is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ghassan Kanafani is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Ghassan Kanafani Volume 5 [ARABIC]",
+          "years_active": null
+        },
+        "notable_works": [
+          "ghassan-kanafani-volume-5-arabic-ghassan-kanafani",
+          "ghassan-kanafani-ghassan-kanafani",
+          "ghassan-kanafani-box-set-17-booksarabic-ghassan-kanafani",
+          "aid-ilâ-hayfâ-ghassan-kanafani",
+          "all-thats-left-to-you-ghassan-kanafani",
+          "men-in-the-sun-ghassan-kanafani",
+          "ardh-al-burtuqal-al-hazin-ghassan-kanafani",
+          "rijal-fil-shams-ghassan-kanafani",
+          "a-palestinian-trilogy-ghassan-kanafani",
+          "den-lilla-lyktan-arabisk-svensk-parallelltext-ghassan-kanafani"
+        ],
+        "series": [],
+        "rag_document": "Author: Ghassan Kanafani\nBio: Ghassan Kanafani is a writer and author.\nNotable Works: Ghassan Kanafani Volume 5 [ARABIC], Ghassan Kanafani, Ghassan Kanafani Box Set-17 Books[ARABIC], A'id ilâ Hayfâ, All that's Left to You\n",
+        "last_enriched_at": "2026-05-13T01:38:53.321541",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Emile Habibi",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Emile%20Habibi",
+      "status_code": 200,
+      "duration_seconds": 1.584,
+      "timestamp": "2026-05-13T04:38:55.844394",
+      "full_response": {
+        "author_id": "emile-habibi",
+        "name": "Emile Habibi",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Emile Habibi is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Emile Habibi is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 5,
+          "series_count": 0,
+          "most_popular_work": "Saraya fille de l'ogre",
+          "years_active": null
+        },
+        "notable_works": [
+          "saraya-fille-de-logre-emile-habibi",
+          "the-secret-life-of-saeed-emile-habibi",
+          "ijtiyya-emile-habibi",
+          "said-ki-pur-asrar-zindagi-emile-habibi",
+          "said-peptimisten-emile-habibi"
+        ],
+        "series": [],
+        "rag_document": "Author: Emile Habibi\nBio: Emile Habibi is a writer and author.\nNotable Works: Saraya fille de l'ogre, The Secret Life of Saeed, Ijtiyya, Said ki pur asrar zindagi, Sa'id, peptimisten\n",
+        "last_enriched_at": "2026-05-13T01:38:55.750690",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 5
+      }
+    },
+    {
+      "test": "Author: Hanan al-Shaykh",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Hanan%20al-Shaykh",
+      "status_code": 200,
+      "duration_seconds": 2.72,
+      "timestamp": "2026-05-13T04:38:59.465772",
+      "full_response": {
+        "author_id": "hanan-al-shaykh",
+        "name": "Hanan al-Shaykh",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Hanan al-Shaykh is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Hanan al-Shaykh is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Beirut Blues",
+          "years_active": null
+        },
+        "notable_works": [
+          "beirut-blues-hanan-al-shaykh",
+          "banipal-64-a-rebel-named-hanan-al-shaykh-hanan-al-shaykh",
+          "women-of-sand-and-myrrh-hanan-al-shaykh",
+          "the-locust-and-the-bird-hanan-al-shaykh",
+          "one-thousand-and-one-nights-hanan-al-shaykh",
+          "the-occasional-virgin-hanan-al-shaykh",
+          "i-sweep-the-sun-off-rooftops-hanan-al-shaykh",
+          "a-nose-and-three-eyes-hanan-al-shaykh",
+          "only-in-london-hanan-al-shaykh",
+          "im-bann-der-high-tech-harems-hanan-al-shaykh"
+        ],
+        "series": [],
+        "rag_document": "Author: Hanan al-Shaykh\nBio: Hanan al-Shaykh is a writer and author.\nNotable Works: Beirut Blues, Banipal 64-A Rebel Named Hanan Al-Shaykh, Women of Sand and Myrrh, The Locust and the Bird, One Thousand and One Nights\n",
+        "last_enriched_at": "2026-05-13T01:38:59.415389",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Leila Aboulela",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Leila%20Aboulela",
+      "status_code": 200,
+      "duration_seconds": 3.174,
+      "timestamp": "2026-05-13T04:39:03.540500",
+      "full_response": {
+        "author_id": "leila-aboulela",
+        "name": "Leila Aboulela",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Leila Aboulela is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Leila Aboulela is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 11,
+          "series_count": 0,
+          "most_popular_work": "Elsewhere, Home",
+          "years_active": null
+        },
+        "notable_works": [
+          "elsewhere-home-leila-aboulela",
+          "the-translator-leila-aboulela",
+          "minaret-leila-aboulela",
+          "river-spirit-leila-aboulela",
+          "a-new-year-leila-aboulela",
+          "the-kindness-of-enemies-leila-aboulela",
+          "lyrics-alley-leila-aboulela",
+          "bird-summons-leila-aboulela",
+          "coloured-lights-leila-aboulela",
+          "amulets-and-feathers-a-story-from-the-collection-i-am-heathcliff-leila-aboulela"
+        ],
+        "series": [],
+        "rag_document": "Author: Leila Aboulela\nBio: Leila Aboulela is a writer and author.\nNotable Works: Elsewhere, Home, The Translator, Minaret, River Spirit, A New Year\n",
+        "last_enriched_at": "2026-05-13T01:39:03.512401",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 11
+      }
+    },
+    {
+      "test": "Author: Hoda Barakat",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Hoda%20Barakat",
+      "status_code": 200,
+      "duration_seconds": 2.863,
+      "timestamp": "2026-05-13T04:39:07.305080",
+      "full_response": {
+        "author_id": "hoda-barakat",
+        "name": "Hoda Barakat",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Hoda Barakat is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Hoda Barakat is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Voices of the Lost",
+          "years_active": null
+        },
+        "notable_works": [
+          "voices-of-the-lost-hoda-barakat",
+          "the-tiller-of-waters-hoda-barakat",
+          "hoda-barakats-sayyidi-wa-habibi-hoda-barakat",
+          "رسائل-الغريبة-hoda-barakat",
+          "disciples-of-passion-hoda-barakat",
+          "سييدي-وحبيبي-hoda-barakat",
+          "حجر-الضحك-hoda-barakat",
+          "أهل-الهوى-hoda-barakat",
+          "the-laughing-stone-hoda-barakat",
+          "hind-aw-aǧmal-imraʾaẗ-fī-al-ʻālam-hoda-barakat"
+        ],
+        "series": [],
+        "rag_document": "Author: Hoda Barakat\nBio: Hoda Barakat is a writer and author.\nNotable Works: Voices of the Lost, the tiller of waters, Hoda Barakat's Sayyidi Wa Habibi, رسائل الغريبة, DISCIPLES OF PASSION\n",
+        "last_enriched_at": "2026-05-13T01:39:07.242790",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Bensalem Himmich",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Bensalem%20Himmich",
+      "status_code": 200,
+      "duration_seconds": 1.773,
+      "timestamp": "2026-05-13T04:39:09.979059",
+      "full_response": {
+        "author_id": "bensalem-himmich",
+        "name": "Bensalem Himmich",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Bensalem Himmich is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Bensalem Himmich is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Polymath",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-polymath-bensalem-himmich",
+          "the-theocrat-bensalem-himmich",
+          "a-muslim-suicide-bensalem-himmich",
+          "my-tormentor-bensalem-himmich",
+          "مجنون-الحكم-bensalem-himmich",
+          "le-recueil-des-élans-bensalem-himmich",
+          "fī-l-ġumma-al-maġribīya-bensalem-himmich",
+          "my-torturess-bensalem-himmich",
+          "le-calife-de-lépouvante-bensalem-himmich",
+          "ibn-khaldun-et-le-paradigme-almohade-bensalem-himmich"
+        ],
+        "series": [],
+        "rag_document": "Author: Bensalem Himmich\nBio: Bensalem Himmich is a writer and author.\nNotable Works: The Polymath, The Theocrat, A Muslim Suicide, My tormentor, مجنون الحكم\n",
+        "last_enriched_at": "2026-05-13T01:39:09.941585",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Ibrahim Nasrallah",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ibrahim%20Nasrallah",
+      "status_code": 200,
+      "duration_seconds": 3.005,
+      "timestamp": "2026-05-13T04:39:13.885722",
+      "full_response": {
+        "author_id": "ibrahim-nasrallah",
+        "name": "Ibrahim Nasrallah",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ibrahim Nasrallah is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ibrahim Nasrallah is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Gaza Weddings",
+          "years_active": null
+        },
+        "notable_works": [
+          "gaza-weddings-ibrahim-nasrallah",
+          "ibrāhim-nasrallāh-ibrahim-nasrallah",
+          "the-book-of-ramallah-ibrahim-nasrallah",
+          "time-of-white-horses-ibrahim-nasrallah",
+          "the-lanterns-of-the-king-of-galilee-ibrahim-nasrallah",
+          "arwah-kilimanjaro-ibrahim-nasrallah",
+          "safe-weddings-ibrahim-nasrallah",
+          "under-the-midmorning-sun-ibrahim-nasrallah",
+          "al-amwoaj-al-barria-ibrahim-nasrallah",
+          "balcony-of-abyss-ibrahim-nasrallah"
+        ],
+        "series": [],
+        "rag_document": "Author: Ibrahim Nasrallah\nBio: Ibrahim Nasrallah is a writer and author.\nNotable Works: Gaza Weddings, Ibrāhim Nasrallāh, The Book of Ramallah, Time of White Horses, The Lanterns of the King of Galilee\n",
+        "last_enriched_at": "2026-05-13T01:39:13.854058",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: William Shakespeare",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=William%20Shakespeare",
+      "status_code": 200,
+      "duration_seconds": 3.791,
+      "timestamp": "2026-05-13T04:39:18.577333",
+      "full_response": {
+        "author_id": "william-shakespeare",
+        "name": "William Shakespeare",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "William Shakespeare is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "William Shakespeare is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "HAMLET",
+          "years_active": null
+        },
+        "notable_works": [
+          "hamlet-william-shakespeare",
+          "the-works-of-william-shakespeare-william-shakespeare",
+          "william-shakespeare-the-complete-works-william-shakespeare",
+          "cymbeline-william-shakespeare",
+          "the-complete-works-of-william-shakespeare-william-shakespeare",
+          "the-tempest-william-shakespeare",
+          "the-poems-sonnets-of-william-shakespeare-william-shakespeare",
+          "henry-vi-part-3-william-shakespeare",
+          "romeo-and-juliet-william-shakespeare",
+          "macbeth-william-shakespeare"
+        ],
+        "series": [],
+        "rag_document": "Author: William Shakespeare\nBio: William Shakespeare is a writer and author.\nNotable Works: HAMLET, The Works of William Shakespeare, William Shakespeare: the Complete Works, Cymbeline, The Complete Works of William Shakespeare\n",
+        "last_enriched_at": "2026-05-13T01:39:18.543548",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Jane Austen",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Jane%20Austen",
+      "status_code": 200,
+      "duration_seconds": 2.396,
+      "timestamp": "2026-05-13T04:39:21.874737",
+      "full_response": {
+        "author_id": "jane-austen",
+        "name": "Jane Austen",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Jane Austen is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Jane Austen is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Pride and Prejudice",
+          "years_active": null
+        },
+        "notable_works": [
+          "pride-and-prejudice-jane-austen",
+          "jane-austen-the-complete-novels-the-greatest-novelists-of-all-time-book-6-jane-austen",
+          "best-works-of-jane-austen-jane-austen",
+          "jane-austen-jane-austen",
+          "pride-and-prejudice-by-jane-austen-jane-austen",
+          "letters-of-jane-austen-jane-austen",
+          "collected-works-of-jane-austen-jane-austen",
+          "the-complete-novels-of-jane-austen-jane-austen",
+          "the-novels-of-jane-austen-jane-austen",
+          "jane-austen-the-complete-novels-the-giants-of-literature-book-10-jane-austen"
+        ],
+        "series": [],
+        "rag_document": "Author: Jane Austen\nBio: Jane Austen is a writer and author.\nNotable Works: Pride and Prejudice, Jane Austen: The Complete Novels (The Greatest Novelists of All Time – Book 6), Best Works of Jane Austen, Jane Austen, Pride and Prejudice by Jane Austen\n",
+        "last_enriched_at": "2026-05-13T01:39:21.844739",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: George Orwell",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=George%20Orwell",
+      "status_code": 200,
+      "duration_seconds": 3.3,
+      "timestamp": "2026-05-13T04:39:26.075460",
+      "full_response": {
+        "author_id": "george-orwell",
+        "name": "George Orwell",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "George Orwell is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "George Orwell is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "1984",
+          "years_active": null
+        },
+        "notable_works": [
+          "1984-george-orwell",
+          "essays-george-orwell",
+          "a-life-in-letters-george-orwell",
+          "the-complete-novels-of-george-orwell-george-orwell",
+          "down-and-out-in-paris-and-london-george-orwell",
+          "orwells-england-george-orwell",
+          "the-greatest-works-of-george-orwell-george-orwell",
+          "the-george-orwell-collection-george-orwell",
+          "the-essential-works-of-george-orwell-george-orwell",
+          "george-orwell-a-life-in-letters-george-orwell"
+        ],
+        "series": [],
+        "rag_document": "Author: George Orwell\nBio: George Orwell is a writer and author.\nNotable Works: 1984, Essays, A Life in Letters, The Complete Novels of George Orwell, Down and Out in Paris and London\n",
+        "last_enriched_at": "2026-05-13T01:39:26.041319",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Ernest Hemingway",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Ernest%20Hemingway",
+      "status_code": 200,
+      "duration_seconds": 3.265,
+      "timestamp": "2026-05-13T04:39:30.240728",
+      "full_response": {
+        "author_id": "ernest-hemingway",
+        "name": "Ernest Hemingway",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Ernest Hemingway is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Ernest Hemingway is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Ernest Hemingway Selected Letters 1917-1961",
+          "years_active": null
+        },
+        "notable_works": [
+          "ernest-hemingway-selected-letters-1917-1961-ernest-hemingway",
+          "the-short-stories-of-ernest-hemingway-ernest-hemingway",
+          "men-without-women-ernest-hemingway-ernest-hemingway",
+          "ernest-hemingway-the-last-interview-ernest-hemingway",
+          "ernest-hemingway-articles-by-various-authors-ernest-hemingway",
+          "for-whom-the-bell-tolls-ernest-hemingway",
+          "ernest-hemingway-premium-edition-ernest-hemingway",
+          "the-greatest-works-of-ernest-hemingway-ernest-hemingway",
+          "in-our-time-ernest-hemingway-ernest-hemingway",
+          "the-collected-stories-ernest-hemingway"
+        ],
+        "series": [],
+        "rag_document": "Author: Ernest Hemingway\nBio: Ernest Hemingway is a writer and author.\nNotable Works: Ernest Hemingway Selected Letters 1917-1961, The Short Stories of Ernest Hemingway, MEN WITHOUT WOMEN: Ernest Hemingway, Ernest Hemingway: The Last Interview, Ernest Hemingway. [Articles by Various Authors.].\n",
+        "last_enriched_at": "2026-05-13T01:39:30.212727",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Toni Morrison",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Toni%20Morrison",
+      "status_code": 200,
+      "duration_seconds": 4.377,
+      "timestamp": "2026-05-13T04:39:35.519268",
+      "full_response": {
+        "author_id": "toni-morrison",
+        "name": "Toni Morrison",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Toni Morrison is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Toni Morrison is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Toni Morrison",
+          "years_active": null
+        },
+        "notable_works": [
+          "toni-morrison-toni-morrison",
+          "conversations-with-toni-morrison-toni-morrison",
+          "love-toni-morrison",
+          "the-collected-novels-of-toni-morrisonthe-bluest-eyesulasong-of-solomontar-babybelovedjazz-toni-morrison",
+          "the-writer-before-the-page-toni-morrison",
+          "the-dancing-mind-toni-morrison",
+          "tar-baby-toni-morrison",
+          "mouth-full-of-blood-toni-morrison",
+          "home-toni-morrison",
+          "beloved-toni-morrison"
+        ],
+        "series": [],
+        "rag_document": "Author: Toni Morrison\nBio: Toni Morrison is a writer and author.\nNotable Works: Toni Morrison, Conversations with Toni Morrison, Love, The Collected Novels of Toni Morrison/the Bluest Eye/Sula/Song of Solomon/Tar Baby/Beloved/Jazz, The Writer Before the Page\n",
+        "last_enriched_at": "2026-05-13T01:39:35.480129",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Chimamanda Ngozi Adichie",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Chimamanda%20Ngozi%20Adichie",
+      "status_code": 200,
+      "duration_seconds": 1.949,
+      "timestamp": "2026-05-13T04:39:38.369346",
+      "full_response": {
+        "author_id": "chimamanda-ngozi-adichie",
+        "name": "Chimamanda Ngozi Adichie",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Chimamanda Ngozi Adichie is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Chimamanda Ngozi Adichie is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Thing Around Your Neck",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-thing-around-your-neck-chimamanda-ngozi-adichie",
+          "americanah-chimamanda-ngozi-adichie",
+          "half-of-a-yellow-sun-chimamanda-ngozi-adichie",
+          "purple-hibiscus-chimamanda-ngozi-adichie",
+          "we-should-all-be-feminists-chimamanda-ngozi-adichie",
+          "dream-count-chimamanda-ngozi-adichie",
+          "chimamanda-ngozi-adichie-collection-chimamanda-ngozi-adichie",
+          "the-shivering-chimamanda-ngozi-adichie",
+          "imitation-chimamanda-ngozi-adichie",
+          "dear-ijeawele-or-a-feminist-manifesto-in-fifteen-suggestions-chimamanda-ngozi-adichie"
+        ],
+        "series": [],
+        "rag_document": "Author: Chimamanda Ngozi Adichie\nBio: Chimamanda Ngozi Adichie is a writer and author.\nNotable Works: The Thing Around Your Neck, Americanah, Half of a Yellow Sun, Purple Hibiscus, We Should All Be Feminists\n",
+        "last_enriched_at": "2026-05-13T01:39:38.338582",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: J.K. Rowling",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=J.K.%20Rowling",
+      "status_code": 200,
+      "duration_seconds": 1.102,
+      "timestamp": "2026-05-13T04:39:40.372595",
+      "full_response": {
+        "author_id": "jk-rowling",
+        "name": "J.K. Rowling",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "J.K. Rowling is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "J.K. Rowling is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "J.K.Rowling",
+          "years_active": null
+        },
+        "notable_works": [
+          "jkrowling-jk-rowling",
+          "harry-potter-and-the-chamber-of-secrets-harry-potter-book-2-jk-rowling",
+          "harry-potter-and-the-philosophers-stone-gryffindor-edition-jk-rowling",
+          "the-ickabog-jk-rowling",
+          "harry-potter-and-the-half-blood-prince-jk-rowling",
+          "an-interview-with-jk-rowling-jk-rowling",
+          "harry-potter-and-the-goblet-of-fire-jk-rowling",
+          "harry-a-history-now-updated-with-jk-rowling-interview-new-chapter-photos-jk-rowling",
+          "harry-potter-and-the-sorcerers-stone-by-jk-rowling-jk-rowling",
+          "harry-potter-jk-rowling"
+        ],
+        "series": [],
+        "rag_document": "Author: J.K. Rowling\nBio: J.K. Rowling is a writer and author.\nNotable Works: J.K.Rowling, Harry Potter and the Chamber of Secrets (Harry Potter, Book 2), Harry Potter and the Philosopher's Stone - Gryffindor Edition, The Ickabog, Harry Potter and the Half-Blood Prince\n",
+        "last_enriched_at": "2026-05-13T01:39:40.335454",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Haruki Murakami",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Haruki%20Murakami",
+      "status_code": 200,
+      "duration_seconds": 1.212,
+      "timestamp": "2026-05-13T04:39:42.485691",
+      "full_response": {
+        "author_id": "haruki-murakami",
+        "name": "Haruki Murakami",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Haruki Murakami is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Haruki Murakami is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Haruki Murakami Manga Stories 3",
+          "years_active": null
+        },
+        "notable_works": [
+          "haruki-murakami-manga-stories-3-haruki-murakami",
+          "first-person-singular-haruki-murakami",
+          "haruki-murakami-manga-stories-2-haruki-murakami",
+          "a-wild-sheep-chase-haruki-murakami",
+          "the-city-and-its-uncertain-walls-haruki-murakami",
+          "blind-willow-sleeping-woman-haruki-murakami",
+          "after-dark-haruki-murakami",
+          "norwegian-wood-haruki-murakami",
+          "men-without-women-haruki-murakami",
+          "murakami-t-haruki-murakami"
+        ],
+        "series": [],
+        "rag_document": "Author: Haruki Murakami\nBio: Haruki Murakami is a writer and author.\nNotable Works: Haruki Murakami Manga Stories 3, First Person Singular, Haruki Murakami Manga Stories 2, A Wild Sheep Chase, The City and Its Uncertain Walls\n",
+        "last_enriched_at": "2026-05-13T01:39:42.416242",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Gabriel García Márquez",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Gabriel%20Garc%C3%ADa%20M%C3%A1rquez",
+      "status_code": 200,
+      "duration_seconds": 1.214,
+      "timestamp": "2026-05-13T04:39:44.601124",
+      "full_response": {
+        "author_id": "gabriel-garcía-márquez",
+        "name": "Gabriel García Márquez",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Gabriel García Márquez is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Gabriel García Márquez is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Conversations with Gabriel García Márquez",
+          "years_active": null
+        },
+        "notable_works": [
+          "conversations-with-gabriel-garcía-márquez-gabriel-garcía-márquez",
+          "the-scandal-of-the-century-gabriel-garcía-márquez",
+          "living-to-tell-the-tale-gabriel-garcía-márquez",
+          "strange-pilgrims-gabriel-garcía-márquez",
+          "gabriel-garcia-marquez-the-last-interview-gabriel-garcía-márquez",
+          "one-hundred-years-of-solitude-gabriel-garcía-márquez",
+          "of-love-and-other-demons-gabriel-garcía-márquez",
+          "until-august-gabriel-garcía-márquez",
+          "collected-stories-ri-gabriel-garcía-márquez",
+          "gabriel-garcía-márquez-gabriel-garcía-márquez"
+        ],
+        "series": [],
+        "rag_document": "Author: Gabriel García Márquez\nBio: Gabriel García Márquez is a writer and author.\nNotable Works: Conversations with Gabriel García Márquez, The Scandal of the Century, Living to Tell the Tale, Strange Pilgrims, Gabriel Garcia Marquez: The Last Interview\n",
+        "last_enriched_at": "2026-05-13T01:39:44.566125",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Franz Kafka",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Franz%20Kafka",
+      "status_code": 200,
+      "duration_seconds": 2.302,
+      "timestamp": "2026-05-13T04:39:47.805171",
+      "full_response": {
+        "author_id": "franz-kafka",
+        "name": "Franz Kafka",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Franz Kafka is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Franz Kafka is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "He: Shorter Writings of Franz Kafka (riverrun editions)",
+          "years_active": null
+        },
+        "notable_works": [
+          "he-shorter-writings-of-franz-kafka-riverrun-editions-franz-kafka",
+          "franz-kafka-franz-kafka",
+          "the-zürau-aphorisms-of-franz-kafka-franz-kafka",
+          "franz-kafka-vol-1-franz-kafka",
+          "the-diaries-of-franz-kafka-franz-kafka",
+          "franz-kafka-vol-2-franz-kafka",
+          "essential-novelists-franz-kafka-franz-kafka",
+          "the-trial-franz-kafka-franz-kafka",
+          "collected-stories-of-franz-kafka-franz-kafka",
+          "the-blue-octavo-notebooks-franz-kafka"
+        ],
+        "series": [],
+        "rag_document": "Author: Franz Kafka\nBio: Franz Kafka is a writer and author.\nNotable Works: He: Shorter Writings of Franz Kafka (riverrun editions), Franz Kafka, The Zürau Aphorisms of Franz Kafka, franz kafka vol 1, The Diaries of Franz Kafka\n",
+        "last_enriched_at": "2026-05-13T01:39:47.770707",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Victor Hugo",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Victor%20Hugo",
+      "status_code": 200,
+      "duration_seconds": 1.51,
+      "timestamp": "2026-05-13T04:39:50.215958",
+      "full_response": {
+        "author_id": "victor-hugo",
+        "name": "Victor Hugo",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Victor Hugo is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Victor Hugo is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The poetry of Victor Hugo",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-poetry-of-victor-hugo-victor-hugo",
+          "the-works-of-victor-hugo-victor-hugo",
+          "the-essential-victor-hugo-victor-hugo",
+          "selected-poems-of-victor-hugo-victor-hugo",
+          "the-works-of-victor-hugo-poems-victor-hugo",
+          "morceaux-choisis-de-victor-hugo-victor-hugo",
+          "the-works-of-victor-hugo-toilers-of-the-sea-victor-hugo",
+          "the-love-letters-of-victor-hugo-1820-1822-victor-hugo",
+          "the-letters-of-victor-hugo-from-exile-and-after-the-fall-of-the-empire-victor-hugo",
+          "works-of-victor-hugo-victor-hugo"
+        ],
+        "series": [],
+        "rag_document": "Author: Victor Hugo\nBio: Victor Hugo is a writer and author.\nNotable Works: The poetry of Victor Hugo, The Works of Victor Hugo, The Essential Victor Hugo, Selected Poems of Victor Hugo, The Works of Victor Hugo ...: Poems\n",
+        "last_enriched_at": "2026-05-13T01:39:50.180273",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Leo Tolstoy",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Leo%20Tolstoy",
+      "status_code": 200,
+      "duration_seconds": 1.317,
+      "timestamp": "2026-05-13T04:39:52.434267",
+      "full_response": {
+        "author_id": "leo-tolstoy",
+        "name": "Leo Tolstoy",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Leo Tolstoy is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Leo Tolstoy is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Leo Tolstoy - His Life and Work",
+          "years_active": null
+        },
+        "notable_works": [
+          "leo-tolstoy-his-life-and-work-leo-tolstoy",
+          "leo-tolstoy-the-ultimate-short-stories-collection-leo-tolstoy",
+          "leo-tolstoy-collection-novels-leo-tolstoy",
+          "leo-tolstoy-leo-tolstoy",
+          "leo-tolstoy-six-plays-and-one-novel-leo-tolstoy",
+          "leo-tolstoy-selected-works-leo-tolstoy",
+          "last-steps-the-late-writings-of-leo-tolstoy-leo-tolstoy",
+          "twenty-three-tales-leo-tolstoy",
+          "selected-stories-of-leo-tolstoy-leo-tolstoy",
+          "the-complete-novels-of-leo-tolstoy-leo-tolstoy"
+        ],
+        "series": [],
+        "rag_document": "Author: Leo Tolstoy\nBio: Leo Tolstoy is a writer and author.\nNotable Works: Leo Tolstoy - His Life and Work, LEO TOLSTOY – The Ultimate Short Stories Collection, Leo Tolstoy, Collection Novels, Leo Tolstoy, Leo Tolstoy, Six Plays and One Novel\n",
+        "last_enriched_at": "2026-05-13T01:39:52.400854",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Marcel Proust",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Marcel%20Proust",
+      "status_code": 200,
+      "duration_seconds": 1.818,
+      "timestamp": "2026-05-13T04:39:55.154062",
+      "full_response": {
+        "author_id": "marcel-proust",
+        "name": "Marcel Proust",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Marcel Proust is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Marcel Proust is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Comment Debuta Marcel Proust",
+          "years_active": null
+        },
+        "notable_works": [
+          "comment-debuta-marcel-proust-marcel-proust",
+          "marcel-proust-marcel-proust",
+          "marcel-proust-selected-letters-marcel-proust",
+          "marcel-proust-selected-letters-1910-1917-marcel-proust",
+          "ˆl-or-de-marcel-proust-marcel-proust",
+          "the-complete-short-stories-of-marcel-proust-marcel-proust",
+          "selections-from-marcel-proust-french-text-marcel-proust",
+          "the-maxims-of-marcel-proust-marcel-proust",
+          "marcel-proust-selected-letters-1880-1903-marcel-proust",
+          "marcel-proust-selected-letters-1918-1922-marcel-proust"
+        ],
+        "series": [],
+        "rag_document": "Author: Marcel Proust\nBio: Marcel Proust is a writer and author.\nNotable Works: Comment Debuta Marcel Proust, Marcel Proust, Marcel Proust, Selected Letters, Marcel Proust, Selected Letters: 1910-1917, ˆL'‰ Or de (Marcel) Proust\n",
+        "last_enriched_at": "2026-05-13T01:39:55.114371",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Isabel Allende",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Isabel%20Allende",
+      "status_code": 200,
+      "duration_seconds": 0.767,
+      "timestamp": "2026-05-13T04:39:56.821490",
+      "full_response": {
+        "author_id": "isabel-allende",
+        "name": "Isabel Allende",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Isabel Allende is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Isabel Allende is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Eva Luna",
+          "years_active": null
+        },
+        "notable_works": [
+          "eva-luna-isabel-allende",
+          "island-beneath-the-sea-isabel-allende",
+          "the-sum-of-our-days-isabel-allende",
+          "of-love-and-shadows-isabel-allende",
+          "my-invented-country-isabel-allende",
+          "portrait-in-sepia-isabel-allende",
+          "a-long-petal-of-the-sea-isabel-allende",
+          "daughter-of-fortune-isabel-allende",
+          "paula-isabel-allende",
+          "la-casa-de-los-espíritus-isabel-allende"
+        ],
+        "series": [],
+        "rag_document": "Author: Isabel Allende\nBio: Isabel Allende is a writer and author.\nNotable Works: Eva Luna, Island Beneath the Sea, The Sum of Our Days, Of Love and Shadows, My Invented Country\n",
+        "last_enriched_at": "2026-05-13T01:39:56.760160",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Orhan Pamuk",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Orhan%20Pamuk",
+      "status_code": 200,
+      "duration_seconds": 1.145,
+      "timestamp": "2026-05-13T04:39:58.867436",
+      "full_response": {
+        "author_id": "orhan-pamuk",
+        "name": "Orhan Pamuk",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Orhan Pamuk is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Orhan Pamuk is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Istanbul",
+          "years_active": null
+        },
+        "notable_works": [
+          "istanbul-orhan-pamuk",
+          "other-colors-orhan-pamuk",
+          "snow-orhan-pamuk",
+          "silent-house-signed-orhan-pamuk",
+          "the-new-life-orhan-pamuk",
+          "orhan-pamuk-boxed-set-orhan-pamuk",
+          "the-black-book-orhan-pamuk",
+          "silent-house-orhan-pamuk",
+          "orhan-pamuk-balkon-orhan-pamuk",
+          "a-strangeness-in-my-mind-orhan-pamuk"
+        ],
+        "series": [],
+        "rag_document": "Author: Orhan Pamuk\nBio: Orhan Pamuk is a writer and author.\nNotable Works: Istanbul, Other Colors, Snow, Silent House * Signed *, The New Life\n",
+        "last_enriched_at": "2026-05-13T01:39:58.824955",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Rabindranath Tagore",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Rabindranath%20Tagore",
+      "status_code": 200,
+      "duration_seconds": 1.111,
+      "timestamp": "2026-05-13T04:40:00.878767",
+      "full_response": {
+        "author_id": "rabindranath-tagore",
+        "name": "Rabindranath Tagore",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Rabindranath Tagore is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Rabindranath Tagore is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "The Life Story and Greatest Works of Rabindranath Tagore :The Life and Times of Rabindranath Tagore +Gitanjali +Nationalism +Stories From Tagore",
+          "years_active": null
+        },
+        "notable_works": [
+          "the-life-story-and-greatest-works-of-rabindranath-tagore-the-life-and-times-of-rabindranath-tagore-gitanjali-nationalism-stories-from-tagore-rabindranath-tagore",
+          "stories-from-tagore-rabindranath-tagore",
+          "tagore-final-poems-rabindranath-tagore",
+          "rabindranath-tagore-rabindranath-tagore",
+          "the-greatest-works-of-rabindranath-tagore-rabindranath-tagore",
+          "great-ideas-v-nationalism-rabindranath-tagore",
+          "the-english-writings-of-rabindranath-tagore-a-miscellany-rabindranath-tagore",
+          "the-complete-works-of-rabindranath-tagore-rabindranath-tagore",
+          "rabindranath-tagore-literary-collection-rabindranath-tagore",
+          "গর-rabindranath-tagore"
+        ],
+        "series": [],
+        "rag_document": "Author: Rabindranath Tagore\nBio: Rabindranath Tagore is a writer and author.\nNotable Works: The Life Story and Greatest Works of Rabindranath Tagore :The Life and Times of Rabindranath Tagore +Gitanjali +Nationalism +Stories From Tagore, Stories from Tagore, Tagore Final Poems, Rabindranath Tagore, The Greatest Works of Rabindranath Tagore\n",
+        "last_enriched_at": "2026-05-13T01:40:00.843267",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Author: Pablo Neruda",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/enrich/author?name=Pablo%20Neruda",
+      "status_code": 200,
+      "duration_seconds": 1.368,
+      "timestamp": "2026-05-13T04:40:03.147974",
+      "full_response": {
+        "author_id": "pablo-neruda",
+        "name": "Pablo Neruda",
+        "name_variants": [],
+        "bio": {
+          "short_bio": "Pablo Neruda is a writer and author.",
+          "full_bio": null,
+          "wikipedia_url": null,
+          "wikipedia_title": null,
+          "wikipedia_lang": "en"
+        },
+        "image_url": null,
+        "style_profile": {
+          "description": "Pablo Neruda is a writer author.",
+          "genres": [],
+          "common_themes": [],
+          "tone": []
+        },
+        "stats": {
+          "total_works": 12,
+          "series_count": 0,
+          "most_popular_work": "Selected Poems of Pablo Neruda",
+          "years_active": null
+        },
+        "notable_works": [
+          "selected-poems-of-pablo-neruda-pablo-neruda",
+          "the-yellow-heart-pablo-neruda",
+          "the-poetry-of-pablo-neruda-pablo-neruda",
+          "selected-odes-of-pablo-neruda-pablo-neruda",
+          "pablo-neruda-pablo-neruda",
+          "selected-poems-pablo-neruda",
+          "song-of-protest-pablo-neruda",
+          "sublime-blue-pablo-neruda",
+          "winter-garden-pablo-neruda",
+          "canto-general-pablo-neruda"
+        ],
+        "series": [],
+        "rag_document": "Author: Pablo Neruda\nBio: Pablo Neruda is a writer and author.\nNotable Works: Selected Poems of Pablo Neruda, The Yellow Heart, The Poetry of Pablo Neruda, Selected Odes of Pablo Neruda, Pablo Neruda\n",
+        "last_enriched_at": "2026-05-13T01:40:03.015006",
+        "sources": []
+      },
+      "summary": {
+        "items_count": 12
+      }
+    },
+    {
+      "test": "Book: 1984",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=1984",
+      "status_code": 200,
+      "duration_seconds": 10.283,
+      "timestamp": "2026-05-13T04:40:14.332238",
+      "full_response": {
+        "work_id": "1984-رواية-جورج-أورويل",
+        "title": "1984 (رواية)",
+        "subtitle": null,
+        "primary_author": "   جورج أورويل",
+        "authors": [
+          "   جورج أورويل"
+        ],
+        "description": "يُصدم القارئ لهذه الرواية بما تحويه من تصور مخيف للحياة في ظل البيئة الشمولية ، حيث تدور أحداثها في (المستقبل) بمدينة لندن عام 1984 حيث وينستن سميث موظف لم يتجاوز عمره 39 عاما ، يعمل موظفا في وزارة الحقيقة أي أنه صحفي يراقبه رجال الشرطة ويراقبه جيرانه رغم أنه ليس مجرما وليس ملاحقا ولكن الرقابة نوع من السلوكيات اللاإرادية التي يقوم بها الجيران ضد جيرانهم ، لذلك يصبح سميث تحت عين أوبرين صديقه وعضو الحزب الذي يراقبه عن كثب . تعد هذه الرواية من أعظم الروايات في القرن العشرين، إذ حققت نجاحا كبيرا على المستوى العالمى وتم اختيارها كواحدة من أفضل 100 رواية وترجمت إلى أكثر من 65 لغة بحلول 1989، أكثر من أي رواية إنجليزية أخرى في ذلك الحين .",
+        "description_sources": [],
+        "first_published_year": null,
+        "original_language": "ar",
+        "series_name": null,
+        "series_position": null,
+        "series_id": null,
+        "genres": [],
+        "categories": [],
+        "keywords": [],
+        "content_analysis": {
+          "key_themes": [],
+          "dominant_themes": [],
+          "tone": [],
+          "mood": "neutral",
+          "pacing": "moderate",
+          "target_audience": null,
+          "characters": [],
+          "locations": []
+        },
+        "quality": {
+          "description_quality": 0,
+          "has_cover": false,
+          "has_isbn": false,
+          "has_page_count": false,
+          "source_count": 1,
+          "confidence_score": 0.0
+        },
+        "editions": [],
+        "edition_count": 0,
+        "image_url": null,
+        "wikipedia_url": null,
+        "wikipedia_title": null,
+        "rag_document": "Title: 1984 (رواية)\nAuthor:    جورج أورويل\nDescription: يُصدم القارئ لهذه الرواية بما تحويه من تصور مخيف للحياة في ظل البيئة الشمولية ، حيث تدور أحداثها في (المستقبل) بمدينة لندن عام 1984 حيث وينستن سميث موظف لم يتجاوز عمره 39 عاما ، يعمل موظفا في وزارة الحقيقة أي أنه صحفي يراقبه رجال الشرطة ويراقبه جيرانه رغم أنه ليس مجرما وليس ملاحقا ولكن الرقابة نوع من السلوكيات اللاإرادية التي يقوم بها الجيران ضد جيرانهم ، لذلك يصبح سميث تحت عين أوبرين صديقه وعضو الحزب الذي يراقبه عن كثب . تعد هذه الرواية من أعظم الروايات في القرن العشرين، إذ حققت نجاحا كبيرا على المستوى العالمى وتم اختيارها كواحدة من أفضل 100 رواية وترجمت إلى أكثر من 65 لغة بحلول 1989، أكثر من أي رواية إنجليزية أخرى في ذلك الحين .\n",
+        "sources": [],
+        "last_enriched_at": "2026-05-13T01:40:14.327793",
+        "meta": {}
+      },
+      "summary": {
+        "items_count": 1
+      }
+    },
+    {
+      "test": "Book: Dune",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Dune",
+      "status_code": 500,
+      "duration_seconds": 1.334,
+      "timestamp": "2026-05-13T04:40:16.567306",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: The Alchemist",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=The%20Alchemist",
+      "status_code": 500,
+      "duration_seconds": 1.196,
+      "timestamp": "2026-05-13T04:40:18.663000",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: Pride and Prejudice",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Pride%20and%20Prejudice",
+      "status_code": 500,
+      "duration_seconds": 2.558,
+      "timestamp": "2026-05-13T04:40:22.121341",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: Harry Potter",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Harry%20Potter",
+      "status_code": 500,
+      "duration_seconds": 2.042,
+      "timestamp": "2026-05-13T04:40:25.064052",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: The Great Gatsby",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=The%20Great%20Gatsby",
+      "status_code": 500,
+      "duration_seconds": 2.139,
+      "timestamp": "2026-05-13T04:40:28.103918",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: To Kill a Mockingbird",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=To%20Kill%20a%20Mockingbird",
+      "status_code": 500,
+      "duration_seconds": 1.548,
+      "timestamp": "2026-05-13T04:40:30.553350",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: كتاب الرعب",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D9%83%D8%AA%D8%A7%D8%A8%20%D8%A7%D9%84%D8%B1%D8%B9%D8%A8",
+      "status_code": 200,
+      "duration_seconds": 2.074,
+      "timestamp": "2026-05-13T04:40:33.528414",
+      "full_response": {
+        "work_id": "تاريخ-الرعب-العربي-محمد-عبد-العليم",
+        "title": "تاريخ الرعب العربي",
+        "subtitle": null,
+        "primary_author": "محمد عبد العليم",
+        "authors": [
+          "محمد عبد العليم"
+        ],
+        "description": "ما هو الرعب ؟ وهل هو مرادف للخوف ؟ وماذا يعني الرعب في الأدب؟ الرعب هو شدة الخوف والهلع من شيء ما وهو مرادف للخوف لغويًا وإن كان خوفًا مبالغًا فيه. والخوف عمومًا حالة شعورية تحدث للإنسان لأسباب عديدة ولكنَّها كلَّها تتمحور حول الخوف من أن يتعرَّض صاحبها إلى أذى أيًا كان مصدره سواء كان إنسانًا آخر أو حيوانًا أو حتى الخوف من الأشياء المعنوية كالخوف من المستقبل مثلًا. والأدباء العرب و المصريين بشكل خاص و المتخصصين في كتابة الرعب أو الفانتازيا بشكل أَخص يقتبسون كثيرًا من الأفكار و الثيمات الغربية في أعمالهم – وهذا بالطبع لا خطأ فيه – ولكن قد لا يعلم الكثير منهم أن التراث العربي يمتلئ حتى حافته بثيمات الرعب المخيفة والتي قد تشكل طفرة نوعية في مجال أدب الرعب و الفانتازيا إذا ما أحسن استغلالها وفي الفصول القادمة سوف أُلقي بمشيئة الله بعض الضوء على التراث العربي وما يحتويه من رعب يسيل له لعاب كُتاب الرعب والفانتازيا.",
+        "description_sources": [],
+        "first_published_year": null,
+        "original_language": "ar",
+        "series_name": null,
+        "series_position": null,
+        "series_id": null,
+        "genres": [],
+        "categories": [],
+        "keywords": [],
+        "content_analysis": {
+          "key_themes": [],
+          "dominant_themes": [],
+          "tone": [],
+          "mood": "neutral",
+          "pacing": "moderate",
+          "target_audience": null,
+          "characters": [],
+          "locations": []
+        },
+        "quality": {
+          "description_quality": 0,
+          "has_cover": false,
+          "has_isbn": false,
+          "has_page_count": false,
+          "source_count": 1,
+          "confidence_score": 0.0
+        },
+        "editions": [],
+        "edition_count": 0,
+        "image_url": null,
+        "wikipedia_url": null,
+        "wikipedia_title": null,
+        "rag_document": "Title: تاريخ الرعب العربي\nAuthor: محمد عبد العليم\nDescription: ما هو الرعب ؟ وهل هو مرادف للخوف ؟ وماذا يعني الرعب في الأدب؟ الرعب هو شدة الخوف والهلع من شيء ما وهو مرادف للخوف لغويًا وإن كان خوفًا مبالغًا فيه. والخوف عمومًا حالة شعورية تحدث للإنسان لأسباب عديدة ولكنَّها كلَّها تتمحور حول الخوف من أن يتعرَّض صاحبها إلى أذى أيًا كان مصدره سواء كان إنسانًا آخر أو حيوانًا أو حتى الخوف من الأشياء المعنوية كالخوف من المستقبل مثلًا. والأدباء العرب و المصريين بشكل خاص و المتخصصين في كتابة الرعب أو الفانتازيا بشكل أَخص يقتبسون كثيرًا من الأفكار و الثيمات الغربية في أعمالهم – وهذا بالطبع لا خطأ فيه – ولكن قد لا يعلم الكثير منهم أن التراث العربي يمتلئ حتى حافته بثيمات الرعب المخيفة والتي قد تشكل طفرة نوعية في مجال أدب الرعب و الفانتازيا إذا ما أحسن استغلالها وفي الفصول القادمة سوف أُلقي بمشيئة الله بعض الضوء على التراث العربي وما يحتويه من رعب يسيل له لعاب كُتا\n",
+        "sources": [],
+        "last_enriched_at": "2026-05-13T01:40:33.524639",
+        "meta": {}
+      },
+      "summary": {
+        "items_count": 1
+      }
+    },
+    {
+      "test": "Book: ألف ليلة وليلة",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D8%A3%D9%84%D9%81%20%D9%84%D9%8A%D9%84%D8%A9%20%D9%88%D9%84%D9%8A%D9%84%D8%A9",
+      "status_code": 500,
+      "duration_seconds": 2.392,
+      "timestamp": "2026-05-13T04:40:36.820485",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: عائد إلى حيفا",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D8%B9%D8%A7%D8%A6%D8%AF%20%D8%A5%D9%84%D9%89%20%D8%AD%D9%8A%D9%81%D8%A7",
+      "status_code": 200,
+      "duration_seconds": 2.109,
+      "timestamp": "2026-05-13T04:40:39.831212",
+      "full_response": {
+        "work_id": "عائد-إلى-حيفا-رواية-غسان-كنفاني",
+        "title": "عائد إلى حيفا (رواية)",
+        "subtitle": null,
+        "primary_author": "غسان كنفاني",
+        "authors": [
+          "غسان كنفاني"
+        ],
+        "description": "هذه الرواية تُعدُّ واحدة من أبرز أعمال غسان كنفاني الأدبية وأكثرها تأثيراً، حيث تجسد ببراعة وعمق مأساة الشعب الفلسطيني بعد النكبة. من خلال سرد متقن ومؤثر، ينقل القارئ إلى قلب المعاناة الإنسانية التي تسببت بها النكبة، مصوراً رحلة العودة المحفوفة بالذكريات والألم والأمل. تدور أحداث الرواية حول سعيد وزوجته صفية، اللذان يعودان إلى مدينة حيفا بعد عشرين عاماً من التهجير القسري، بحثاً عن ابنهما خلدون الذي فقداه أثناء الفوضى والدمار الذي رافق سقوط المدينة في يد القوات الإسرائيلية عام 1948. هذه الرحلة ليست مجرد عودة إلى مكان جغرافي، بل هي عودة إلى الماضي بكل ما يحمله من آلام وخيبات وآمال ضائعة. \"عائد إلى حيفا\" ليست مجرد قصة عن عائلة تبحث عن ابنها، بل هي رمز للصراع الفلسطيني بأسره. إنها تُجسد الحنين إلى الأرض والبيت والأحباب، وتعكس معاناة أجيال كاملة عاشت تجربة الاقتلاع والشتات. من خلال هذه الرواية، يُبرز كنفاني قوة الأدب في طرح الأسئلة الصعبة ومواجهة الحقائق المريرة، مقدماً رؤية إنسانية للصراع تجعل من مأساة الشعب الفلسطيني قصة إنسانية عالمية.",
+        "description_sources": [],
+        "first_published_year": null,
+        "original_language": "ar",
+        "series_name": null,
+        "series_position": null,
+        "series_id": null,
+        "genres": [],
+        "categories": [],
+        "keywords": [],
+        "content_analysis": {
+          "key_themes": [],
+          "dominant_themes": [],
+          "tone": [],
+          "mood": "neutral",
+          "pacing": "moderate",
+          "target_audience": null,
+          "characters": [],
+          "locations": []
+        },
+        "quality": {
+          "description_quality": 0,
+          "has_cover": false,
+          "has_isbn": false,
+          "has_page_count": false,
+          "source_count": 1,
+          "confidence_score": 0.0
+        },
+        "editions": [],
+        "edition_count": 0,
+        "image_url": null,
+        "wikipedia_url": null,
+        "wikipedia_title": null,
+        "rag_document": "Title: عائد إلى حيفا (رواية)\nAuthor: غسان كنفاني\nDescription: هذه الرواية تُعدُّ واحدة من أبرز أعمال غسان كنفاني الأدبية وأكثرها تأثيراً، حيث تجسد ببراعة وعمق مأساة الشعب الفلسطيني بعد النكبة. من خلال سرد متقن ومؤثر، ينقل القارئ إلى قلب المعاناة الإنسانية التي تسببت بها النكبة، مصوراً رحلة العودة المحفوفة بالذكريات والألم والأمل. تدور أحداث الرواية حول سعيد وزوجته صفية، اللذان يعودان إلى مدينة حيفا بعد عشرين عاماً من التهجير القسري، بحثاً عن ابنهما خلدون الذي فقداه أثناء الفوضى والدمار الذي رافق سقوط المدينة في يد القوات الإسرائيلية عام 1948. هذه الرحلة ليست مجرد عودة إلى مكان جغرافي، بل هي عودة إلى الماضي بكل ما يحمله من آلام وخيبات وآمال ضائعة. \"عائد إلى حيفا\" ليست مجرد قصة عن عائلة تبحث عن ابنها، بل هي رمز للصراع الفلسطيني بأسره. إنها تُجسد الحنين إلى الأرض والبيت والأحباب، وتعكس معاناة أجيال كاملة عاشت تجربة الاقتلاع والشتات. من خلال هذه الرواية،\n",
+        "sources": [],
+        "last_enriched_at": "2026-05-13T01:40:39.826182",
+        "meta": {}
+      },
+      "summary": {
+        "items_count": 1
+      }
+    },
+    {
+      "test": "Book: الأيام",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D8%A7%D9%84%D8%A3%D9%8A%D8%A7%D9%85",
+      "status_code": 500,
+      "duration_seconds": 1.89,
+      "timestamp": "2026-05-13T04:40:42.622056",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: اللص والكلاب",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D8%A7%D9%84%D9%84%D8%B5%20%D9%88%D8%A7%D9%84%D9%83%D9%84%D8%A7%D8%A8",
+      "status_code": 500,
+      "duration_seconds": 1.477,
+      "timestamp": "2026-05-13T04:40:44.999762",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: زقاق المدق",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=%D8%B2%D9%82%D8%A7%D9%82%20%D8%A7%D9%84%D9%85%D8%AF%D9%82",
+      "status_code": 500,
+      "duration_seconds": 1.321,
+      "timestamp": "2026-05-13T04:40:47.221546",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: El Alquimista",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=El%20Alquimista",
+      "status_code": 500,
+      "duration_seconds": 2.307,
+      "timestamp": "2026-05-13T04:40:50.428825",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: Le Petit Prince",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Le%20Petit%20Prince",
+      "status_code": 500,
+      "duration_seconds": 1.281,
+      "timestamp": "2026-05-13T04:40:52.611185",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: 1Q84",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=1Q84",
+      "status_code": 500,
+      "duration_seconds": 2.682,
+      "timestamp": "2026-05-13T04:40:56.194042",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: One Hundred Years of Solitude",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=One%20Hundred%20Years%20of%20Solitude",
+      "status_code": 500,
+      "duration_seconds": 3.578,
+      "timestamp": "2026-05-13T04:41:00.673794",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: Crime and Punishment",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Crime%20and%20Punishment",
+      "status_code": 500,
+      "duration_seconds": 6.35,
+      "timestamp": "2026-05-13T04:41:07.924655",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    },
+    {
+      "test": "Book: Norwegian Wood",
+      "method": "GET",
+      "url": "http://127.0.0.1:8001/api/v1/search/book?query=Norwegian%20Wood",
+      "status_code": 500,
+      "duration_seconds": 2.08,
+      "timestamp": "2026-05-13T04:41:10.905626",
+      "error": "{\"detail\":\"'list' object has no attribute 'lower'\"}",
+      "summary": {
+        "items_count": 0
+      }
+    }
+  ]
+}

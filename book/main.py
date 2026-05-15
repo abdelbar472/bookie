@@ -1,119 +1,66 @@
 """
-Book Service V3 - Main Application Entry Point
-FastAPI application with MongoDB integration
+Book Service V4 - Fixed Imports
 """
+
 import logging
 import sys
+from pathlib import Path
+
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from config import settings
+from database import db
+from grpc_server import start_grpc_server
 
-from .database import connect_to_mongo, close_mongo_connection, db
-from .grpc_server import grpc_server
-from .routers import router
-from .config import settings
-
-# Configure logging
 logging.basicConfig(
-    level=getattr(logging, settings.LOG_LEVEL.upper()),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Application lifespan manager
-    Handles startup and shutdown events
-    """
-    # Startup
-    logger.info("=" * 50)
-    logger.info(f"Starting {settings.SERVICE_NAME} v3.0.0")
-    logger.info("=" * 50)
-
-    # Connect to MongoDB
-    connected = await connect_to_mongo()
-    if not connected:
-        logger.warning("Running in EXTERNAL-ONLY mode (no caching)")
-
-    await grpc_server.start()
-
+    await db.connect()
+    grpc_server = await start_grpc_server(host=settings.HOST, port=settings.GRPC_PORT)
+    logger.info(f"🚀 Book Service V4 started on port {settings.PORT}")
     yield
-
-    # Shutdown
-    logger.info("Shutting down...")
-    await grpc_server.stop()
-    await close_mongo_connection()
+    await grpc_server.stop(0)
+    await db.close()
+    logger.info("👋 Book Service shutdown")
 
 
-# Create FastAPI app
 app = FastAPI(
-    title="Book Service V3",
-    description="""
-    Book catalog and enrichment service.
-
-    Features:
-    - Multi-source book aggregation (Google Books, OpenLibrary)
-    - Author metadata enrichment for catalog quality
-    - Series detection and reading order metadata
-    - Cached book/author/series search APIs
-    """,
-    version="3.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    title="Bookie Core V4",
+    description="On-demand Book Enrichment Service",
+    version="4.0.0",
     lifespan=lifespan
 )
 
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-        "https://localhost:8080",
-        "http://localhost:3000",   # React dev server
-        "http://127.0.0.1:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers
-app.include_router(router, tags=["v3"])
+# Import router
+from routers.api import router as api_router
+app.include_router(api_router)
 
 
-# Root endpoint
 @app.get("/")
 async def root():
     return {
-        "service": settings.SERVICE_NAME,
-        "version": "3.0.0",
+        "service": "Bookie Core V4",
         "status": "running",
-        "docs": "/docs",
-        "database": "connected" if db.is_connected else "disconnected",
-        "ports": {
-            "http": settings.HTTP_PORT,
-            "grpc": settings.GRPC_PORT,
-        },
+        "port": settings.PORT,
+        "database": settings.MONGODB_DB_NAME
     }
 
 
 if __name__ == "__main__":
-    # Use the correct module path - adjust based on your package structure
-    # If your folder is named "bookie_v3" or "book_service_v3", change accordingly
-    module_path = "book.main:app"  # Change this if your package name is different
-
+    import uvicorn
     uvicorn.run(
-        module_path,
-        host="0.0.0.0",
-        port=settings.HTTP_PORT,
-        reload=settings.DEBUG,
-        log_level=settings.LOG_LEVEL.lower()
+        "main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.DEBUG
     )

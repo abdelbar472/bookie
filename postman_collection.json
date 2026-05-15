@@ -640,37 +640,17 @@
           }
         },
         {
-          "name": "List Books",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{book_base_url}}/api/v3/books?limit=100&skip=0",
-              "query": [
-                { "key": "limit", "value": "100" },
-                { "key": "skip", "value": "0" }
-              ]
-            }
-          }
-        },
-        {
           "name": "Search Books",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{book_base_url}}/api/v3/books/search?q=Dune&limit=10&skip_cache=false",
+              "raw": "{{book_base_url}}/api/v3/books/search?q=Dune&limit=10&force_refresh=false",
               "query": [
                 { "key": "q", "value": "Dune" },
                 { "key": "limit", "value": "10" },
-                { "key": "skip_cache", "value": "false" }
+                { "key": "force_refresh", "value": "false" }
               ]
             }
-          }
-        },
-        {
-          "name": "Get Book by Work ID",
-          "request": {
-            "method": "GET",
-            "url": "{{book_base_url}}/api/v3/books/OL12345W"
           }
         },
         {
@@ -678,18 +658,26 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{book_base_url}}/api/v3/authors/search?name=Agatha%20Christie",
+              "raw": "{{book_base_url}}/api/v3/authors/search?name=Agatha%20Christie&force_refresh=false",
               "query": [
-                { "key": "name", "value": "Agatha Christie" }
+                { "key": "name", "value": "Agatha Christie" },
+                { "key": "force_refresh", "value": "false" }
               ]
             }
           }
         },
         {
-          "name": "Get Author by ID",
+          "name": "Get Author Books",
           "request": {
             "method": "GET",
-            "url": "{{book_base_url}}/api/v3/authors/agatha-christie"
+            "url": {
+              "raw": "{{book_base_url}}/api/v3/authors/agatha-christie/books?limit=50&offset=0&force_refresh=false",
+              "query": [
+                { "key": "limit", "value": "50" },
+                { "key": "offset", "value": "0" },
+                { "key": "force_refresh", "value": "false" }
+              ]
+            }
           }
         },
         {
@@ -697,18 +685,12 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{book_base_url}}/api/v3/series/search?name=Harry%20Potter",
+              "raw": "{{book_base_url}}/api/v3/series/search?name=Harry%20Potter&force_refresh=false",
               "query": [
-                { "key": "name", "value": "Harry Potter" }
+                { "key": "name", "value": "Harry Potter" },
+                { "key": "force_refresh", "value": "false" }
               ]
             }
-          }
-        },
-        {
-          "name": "Get Series by ID",
-          "request": {
-            "method": "GET",
-            "url": "{{book_base_url}}/api/v3/series/harry-potter-jk-rowling"
           }
         },
         {
@@ -719,7 +701,7 @@
             "url": "{{book_base_url}}/api/v3/search",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"Dune\",\n  \"type\": \"book\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+              "raw": "{\n  \"query\": \"Dune\",\n  \"type\": \"book\"\n}"
             }
           }
         },
@@ -731,7 +713,7 @@
             "url": "{{book_base_url}}/api/v3/search",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"Agatha Christie\",\n  \"type\": \"author\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+              "raw": "{\n  \"query\": \"Agatha Christie\",\n  \"type\": \"author\"\n}"
             }
           }
         },
@@ -743,8 +725,15 @@
             "url": "{{book_base_url}}/api/v3/search",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"Harry Potter\",\n  \"type\": \"series\",\n  \"limit\": 10,\n  \"skip_cache\": false\n}"
+              "raw": "{\n  \"query\": \"Harry Potter\",\n  \"type\": \"series\"\n}"
             }
+          }
+        },
+        {
+          "name": "Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{book_base_url}}/docs"
           }
         }
       ]

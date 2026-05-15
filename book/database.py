@@ -1,124 +1,105 @@
-"""
-MongoDB connection management with graceful degradation
-"""
+# database.py
+from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime
 import logging
-from typing import Optional
+from typing import Optional, Dict
 
-import motor.motor_asyncio
-from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
-
-from .config import settings
+from config import settings
+from models.book import BookProfile
+from models.author import AuthorProfile
+from models.series import SeriesProfile
 
 logger = logging.getLogger(__name__)
 
 
-class DatabaseUnavailableError(Exception):
-    """Raised when MongoDB is not reachable or not initialized."""
-    pass
-
-
 class Database:
-    client: Optional[motor.motor_asyncio.AsyncIOMotorClient] = None
-    is_connected: bool = False
+    client: AsyncIOMotorClient = None
+    db = None
 
+    @classmethod
+    async def connect(cls):
+        try:
+            cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
+            cls.db = cls.client[settings.MONGODB_DB_NAME]
+            await cls.client.admin.command('ping')
+            logger.info(f"✅ Connected to MongoDB: {settings.MONGODB_DB_NAME}")
+        except Exception as e:
+            logger.error(f"❌ MongoDB connection failed: {e}")
+            raise
 
-db = Database()
+    @classmethod
+    async def close(cls):
+        if cls.client:
+            cls.client.close()
+            logger.info("✅ MongoDB connection closed.")
 
+    # ====================== BOOKS ======================
+    @classmethod
+    async def save_book(cls, book: BookProfile):
+        collection = cls.db[settings.BOOKS_COLLECTION]
+        data = book.model_dump(by_alias=True, exclude_none=True)
+        data["last_enriched_at"] = datetime.utcnow()
 
-async def connect_to_mongo() -> bool:
-    """
-    Establish connection to MongoDB with timeout
-    Returns True if connected, False otherwise
-    """
-    logger.info("Connecting to MongoDB at %s...", settings.MONGODB_URL)
-
-    try:
-        client = motor.motor_asyncio.AsyncIOMotorClient(
-            settings.MONGODB_URL,
-            serverSelectionTimeoutMS=3000,
-            connectTimeoutMS=3000,
-            socketTimeoutMS=5000,
-            maxPoolSize=10,
-            minPoolSize=1,
+        await collection.update_one(
+            {"_id": book.work_id},
+            {"$set": data},
+            upsert=True
         )
+        logger.info(f"Saved book: {book.title}")
 
-        # Verify connection
-        await client.admin.command("ping")
+    @classmethod
+    async def get_book(cls, work_id: str) -> Optional[Dict]:
+        return await cls.db[settings.BOOKS_COLLECTION].find_one({"_id": work_id})
 
-        db.client = client
-        db.is_connected = True
+    @classmethod
+    async def list_books(cls, skip: int = 0, limit: int = 100) -> list:
+        cursor = cls.db[settings.BOOKS_COLLECTION].find().skip(skip).limit(limit)
+        return await cursor.to_list(length=None)
 
-        # Create indexes
-        await _create_indexes()
+    @classmethod
+    async def search_books(cls, query: str, skip: int = 0, limit: int = 100) -> list:
+        # Use text search if index exists
+        cursor = cls.db[settings.BOOKS_COLLECTION].find(
+            {"$text": {"$search": query}}
+        ).skip(skip).limit(limit)
+        return await cursor.to_list(length=None)
 
-        logger.info("✓ Connected to MongoDB successfully!")
-        return True
+    # ====================== AUTHORS ======================
+    @classmethod
+    async def save_author(cls, author: AuthorProfile):
+        collection = cls.db[settings.AUTHORS_COLLECTION]
+        data = author.model_dump(by_alias=True, exclude_none=True)
+        data["last_enriched_at"] = datetime.utcnow()
 
-    except (PyMongoError, ServerSelectionTimeoutError) as exc:
-        logger.warning("✗ MongoDB unavailable: %s", exc)
-        db.client = None
-        db.is_connected = False
-        return False
+        await collection.update_one(
+            {"_id": author.author_id},
+            {"$set": data},
+            upsert=True
+        )
+        logger.info(f"Saved author: {author.name}")
 
+    @classmethod
+    async def get_author(cls, author_id: str) -> Optional[Dict]:
+        return await cls.db[settings.AUTHORS_COLLECTION].find_one({"_id": author_id})
 
-async def close_mongo_connection() -> None:
-    """Close MongoDB connection"""
-    logger.info("Closing MongoDB connection...")
-    if db.client is not None:
-        db.client.close()
-        db.is_connected = False
-    logger.info("MongoDB connection closed.")
+    # ====================== SERIES ======================
+    @classmethod
+    async def save_series(cls, series: SeriesProfile):
+        collection = cls.db[settings.SERIES_COLLECTION]
+        data = series.model_dump(by_alias=True, exclude_none=True)
+        data["last_enriched_at"] = datetime.utcnow()
 
+        await collection.update_one(
+            {"_id": series.series_id},
+            {"$set": data},
+            upsert=True
+        )
+        logger.info(f"Saved series: {series.series_name}")
 
-async def _create_indexes() -> None:
-    """Create database indexes for performance"""
-    if not db.is_connected:
-        return
-
-    try:
-        book_db = db.client[settings.DATABASE_NAME]
-
-        # Book profiles indexes
-        await book_db.book_profiles.create_index("work_id", unique=True)
-        await book_db.book_profiles.create_index("primary_author")
-        await book_db.book_profiles.create_index("series_name")
-        await book_db.book_profiles.create_index("genres")
-        await book_db.book_profiles.create_index([
-            ("title", "text"),
-            ("description", "text"),
-            ("primary_author", "text"),
-            ("authors", "text"),
-        ])
-
-        # Author profiles indexes
-        await book_db.author_profiles.create_index("author_id", unique=True)
-        await book_db.author_profiles.create_index("name")
-
-        # Series profiles indexes
-        await book_db.series_profiles.create_index("series_id", unique=True)
-        await book_db.series_profiles.create_index("primary_author")
-
-        logger.info("Database indexes created.")
-
-    except Exception as e:
-        logger.error("Failed to create indexes: %s", e)
+    @classmethod
+    async def get_series(cls, series_id: str) -> Optional[Dict]:
+        return await cls.db[settings.SERIES_COLLECTION].find_one({"_id": series_id})
 
 
-def get_db() -> motor.motor_asyncio.AsyncIOMotorDatabase:
-    """Get database instance"""
-    if not db.is_connected or db.client is None:
-        raise DatabaseUnavailableError("MongoDB is not available")
-    return db.client[settings.DATABASE_NAME]
-
-
-def get_collection(collection_name: str) -> motor.motor_asyncio.AsyncIOMotorCollection:
-    """Get specific collection"""
-    return get_db()[collection_name]
-
-
-def check_db_health() -> dict:
-    """Health check for database"""
-    return {
-        "connected": db.is_connected,
-        "database": settings.DATABASE_NAME if db.is_connected else None
-    }
+# Global instance
+db = Database()
