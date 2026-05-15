@@ -1,66 +1,99 @@
 import logging
-
 import grpc
+from typing import Optional
 
-from proto import book_pb2, book_pb2_grpc
+# Generated proto files
+from proto import book_v4_pb2 as book_pb2
+from proto import book_v4_pb2_grpc as book_pb2_grpc
+
 from .config import settings
 
 logger = logging.getLogger(__name__)
 
-_channel: grpc.aio.Channel | None = None
-_stub: book_pb2_grpc.BookServiceStub | None = None
+# Global variables
+book_channel: Optional[grpc.aio.Channel] = None
+book_stub: Optional[book_pb2_grpc.BookServiceStub] = None
 
 
-def _get_book_stub() -> book_pb2_grpc.BookServiceStub:
-    global _channel, _stub
-    if _stub is None:
-        host = settings.BOOK_GRPC_HOST
-        if host in ("localhost", "0.0.0.0"):
-            host = "127.0.0.1"
-        addr = f"{host}:{settings.BOOK_GRPC_PORT}"
-        _channel = grpc.aio.insecure_channel(addr)
-        _stub = book_pb2_grpc.BookServiceStub(_channel)
-        logger.info("Social->Book gRPC channel opened at %s", addr)
-    return _stub
+async def init_book_channel():
+    """Initialize gRPC channel to Book service"""
+    global book_channel, book_stub
+
+    try:
+        address = f"{settings.BOOK_GRPC_HOST}:{settings.BOOK_GRPC_PORT}"
+        book_channel = grpc.aio.insecure_channel(address)
+        book_stub = book_pb2_grpc.BookServiceStub(book_channel)
+        logger.info(f"✅ Connected to Book Service gRPC at {address}")
+    except Exception as e:
+        logger.error(f"❌ Failed to connect to Book Service: {e}")
+        raise
 
 
-async def close_book_channel() -> None:
-    global _channel, _stub
-    if _channel:
-        await _channel.close()
-        _channel = None
-        _stub = None
+async def close_book_channel():
+    """Close gRPC channel"""
+    global book_channel
+    if book_channel:
+        await book_channel.close()
+        book_channel = None
+        logger.info("Book gRPC channel closed")
 
 
 async def assert_book_exists(isbn: str) -> None:
-    stub = _get_book_stub()
-    try:
-        await stub.GetBook(book_pb2.GetBookRequest(isbn=isbn))
-    except grpc.aio.AioRpcError as exc:
-        if exc.code() == grpc.StatusCode.NOT_FOUND:
-            raise ValueError("Book not found")
-        logger.error("Book gRPC check failed: %s", exc)
-        raise ValueError("Book service unavailable")
+    """Check if book exists via gRPC - raises exception if not found"""
+    global book_stub
 
+    if book_stub is None:
+        await init_book_channel()
+
+    try:
+        response = await book_stub.GetBook(
+            book_pb2.GetBookRequest(isbn=isbn)
+        )
+
+        if not response.HasField("book") or not response.book.isbn:
+            raise ValueError(f"Book with ISBN {isbn} not found")
+
+        logger.debug(f"Book verified: {isbn} - {response.book.title}")
+
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            raise ValueError(f"Book with ISBN {isbn} not found")
+        else:
+            logger.error(f"gRPC error checking book {isbn}: {e.details()}")
+            raise
+    except Exception as e:
+        logger.error(f"Unexpected error checking book {isbn}: {e}")
+        raise
 
 async def get_book_details(isbn: str) -> dict:
-    """Fetch a book payload from Book service by ISBN for shelf views."""
-    stub = _get_book_stub()
+    """Get book details via gRPC"""
+    global book_stub
+
+    if book_stub is None:
+        await init_book_channel()
+
     try:
-        resp = await stub.GetBook(book_pb2.GetBookRequest(isbn=isbn))
-    except grpc.aio.AioRpcError as exc:
-        if exc.code() == grpc.StatusCode.NOT_FOUND:
-            raise ValueError("Book not found")
-        logger.error("Book gRPC fetch failed: %s", exc)
-        raise ValueError("Book service unavailable")
+        response = await book_stub.GetBook(
+            book_pb2.GetBookRequest(isbn=isbn)
+        )
 
-    return {
-        "isbn": resp.isbn,
-        "title": resp.title or None,
-        "year": resp.year or None,
-        "author_id": resp.author_id or None,
-        "author_name": resp.author_name or None,
-        "publisher": resp.publisher or None,
-    }
+        if not response.HasField("book") or not response.book.isbn:
+            raise ValueError(f"Book with ISBN {isbn} not found")
 
+        return {
+            "isbn": response.book.isbn,
+            "title": response.book.title,
+            "author": response.book.author,
+            "published_year": response.book.published_year,
+            "genre": response.book.genre,
+        }
 
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            raise ValueError(f"Book with ISBN {isbn} not found")
+        else:
+            logger.error(f"gRPC error getting book {isbn}: {e.details()}")
+            raise
+    except Exception as e:
+        logger.error(f"Unexpected error getting book {isbn}: {e}")
+        raise

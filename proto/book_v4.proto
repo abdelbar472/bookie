@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package bookv4;
+
+service BookService {
+  rpc GetBook(GetBookRequest) returns (GetBookResponse);
+  rpc GetBookByWorkId(GetBookByWorkIdRequest) returns (GetBookResponse);
+}
+
+message GetBookRequest {
+  string isbn = 1;
+}
+
+message GetBookByWorkIdRequest {
+  string work_id = 1;
+}
+
+message GetBookResponse {
+  BookPayload book = 1;
+}
+
+message BookPayload {
+  string isbn = 1;
+  string work_id = 2;
+  string title = 3;
+  string primary_author = 4;
+  repeated string authors = 5;
+  int32 year = 6;
+  string description = 7;
+}

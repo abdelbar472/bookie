@@ -7,3 +7,4 @@ aiohttp==3.10.5
 python-dotenv==1.0.1
 grpcio==1.80.0
 grpcio-tools==1.80.0
+anyio>=4.0.0
